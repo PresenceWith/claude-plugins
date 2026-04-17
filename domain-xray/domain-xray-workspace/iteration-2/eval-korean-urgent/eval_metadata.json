@@ -1,0 +1,42 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-korean-urgent",
+  "prompt": "회사에서 갑자기 물류 SCM 시스템 기획을 맡게 됐는데 이 분야를 전혀 몰라서 전문가랑 대화할 수가 없습니다",
+  "assertions": [
+    {
+      "name": "has-anchor-points",
+      "type": "contains_section",
+      "description": "Output contains 'Anchor Points' section"
+    },
+    {
+      "name": "has-domain-landscape",
+      "type": "contains_section",
+      "description": "Output contains 'Domain Landscape' with 5-7 SCM/logistics areas"
+    },
+    {
+      "name": "has-priority-map",
+      "type": "contains_section",
+      "description": "Output contains 'Learning Priority Map' prioritizing for system planning context"
+    },
+    {
+      "name": "strategic-focus",
+      "type": "qualitative",
+      "description": "Priority reflects strategic oversight need — what to learn for evaluating vendors, defining requirements, talking to specialists"
+    },
+    {
+      "name": "output-in-korean",
+      "type": "language_check",
+      "description": "Orient map is written in Korean"
+    },
+    {
+      "name": "file-saved",
+      "type": "file_exists",
+      "description": "A domain-orient-*.md file is saved"
+    },
+    {
+      "name": "scm-breadth",
+      "type": "qualitative",
+      "description": "Domain landscape covers SCM breadth: demand forecasting, inventory, warehousing, logistics, procurement, technology stack"
+    }
+  ]
+}

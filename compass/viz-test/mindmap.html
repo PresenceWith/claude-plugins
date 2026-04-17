@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Mindmap</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a; color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 32px; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; text-align: center; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 28px; text-align: center; }
+    .container { overflow-x: auto; width: 100%; max-width: 1100px; }
+    svg { width: 100%; height: auto; }
+    .meta { color: #666; font-size: 11px; margin-top: 20px; text-align: right; width: 100%; max-width: 1100px; }
+
+    .branch-group { opacity: 0; transform-origin: center; animation: branchFadeIn 0.5s ease-out forwards; transition: opacity 0.3s; }
+    .branch-group.dimmed { opacity: 0.25; }
+    @keyframes branchFadeIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+    .central-node { animation: centralPulseIn 0.6s ease-out; }
+    @keyframes centralPulseIn { 0% { opacity: 0; transform: scale(0.5); } 70% { transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
+    .node-group { cursor: pointer; transition: transform 0.2s ease, filter 0.2s ease; }
+    .node-group:hover { transform: scale(1.06); }
+    .cross-link { opacity: 0.4; transition: opacity 0.3s; }
+    .cross-link:hover { opacity: 1; }
+
+    .mindmap-tooltip {
+      position: fixed; pointer-events: none; z-index: 100;
+      background: #1a1a2eee; border: 1px solid #4a4a7a; border-radius: 10px;
+      padding: 10px 14px; font-size: 12px; color: #e2e8f0;
+      max-width: 260px; opacity: 0; transition: opacity 0.2s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+    }
+    .mindmap-tooltip.visible { opacity: 1; }
+    .mindmap-tooltip .status-tag {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 10px; font-weight: bold; margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Planning Compass — Mindmap</h1>
+  <p class="subtitle">SaaS 제품 MVP 기획 탐색</p>
+
+  <div class="container">
+    <svg width="100%" viewBox="0 0 1000 680" preserveAspectRatio="xMidYMid meet"
+         style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+      <defs>
+        <filter id="glow-center" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+          <feFlood flood-color="#8b5cf6" flood-opacity="0.35" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-auth" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#6366f1" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-data" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#3b82f6" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-ui" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#06b6d4" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-infra" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#10b981" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-biz" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#f59e0b" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="node-shadow">
+          <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.25"/>
+        </filter>
+        <radialGradient id="center-grad" cx="50%" cy="40%" r="55%">
+          <stop offset="0%" stop-color="#3a2a6a"/>
+          <stop offset="100%" stop-color="#1a1a2e"/>
+        </radialGradient>
+        <marker id="cross-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0,0 8,3 0,6" fill="#94a3b8" fill-opacity="0.6"/>
+        </marker>
+      </defs>
+
+      <!-- Subtle background grid -->
+      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-width="0.3" stroke-opacity="0.02"/>
+      </pattern>
+      <rect width="1000" height="680" fill="#0f0f1a"/>
+      <rect width="1000" height="680" fill="url(#grid)"/>
+
+      <!-- Branch background regions (subtle colored zones) -->
+      <circle cx="280" cy="220" r="120" fill="#6366f1" fill-opacity="0.03"/>
+      <circle cx="720" cy="220" r="110" fill="#3b82f6" fill-opacity="0.03"/>
+      <circle cx="760" cy="430" r="100" fill="#06b6d4" fill-opacity="0.03"/>
+      <circle cx="300" cy="490" r="110" fill="#10b981" fill-opacity="0.03"/>
+      <circle cx="540" cy="540" r="100" fill="#f59e0b" fill-opacity="0.03"/>
+
+      <!-- Central Node -->
+      <g class="central-node" data-tooltip="사용자 인증과 데이터 관리를 중심으로 한 SaaS MVP" data-status="active">
+        <circle cx="500" cy="340" r="56" fill="url(#center-grad)" stroke="#8b5cf6" stroke-width="3" filter="url(#glow-center)"/>
+        <circle cx="500" cy="340" r="64" fill="none" stroke="#8b5cf6" stroke-width="0.8" stroke-opacity="0.25"/>
+        <circle cx="500" cy="340" r="70" fill="none" stroke="#8b5cf6" stroke-width="0.4" stroke-opacity="0.12"/>
+        <text x="500" y="334" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="15" font-weight="bold">SaaS MVP</text>
+        <text x="500" y="354" text-anchor="middle" dominant-baseline="central" fill="#a78bfa" font-size="10">제품 기획</text>
+      </g>
+
+      <!-- Branch 1: 인증 시스템 (Indigo, top-left) -->
+      <g class="branch-group" data-branch="auth" style="animation-delay: 0.1s;">
+        <path d="M 500,340 Q 390,275 280,210" stroke="#6366f1" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <g class="node-group core" data-tooltip="OAuth2, JWT 기반 인증 시스템 설계" data-status="active">
+          <rect x="210" y="191" width="140" height="40" rx="10" fill="#1a1a2e" stroke="#6366f1" stroke-width="2.5" filter="url(#glow-auth)"/>
+          <rect x="210" y="191" width="4" height="40" rx="2" fill="#6366f1"/>
+          <circle cx="340" cy="199" r="5" fill="#facc15" stroke="#facc1540" stroke-width="2"/>
+          <text x="277" y="213" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">인증 시스템</text>
+        </g>
+        <path d="M 280,210 Q 220,165 165,130" stroke="#6366f1" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+        <g class="node-group detail" data-tooltip="Google, GitHub OAuth 연동" data-status="decided">
+          <rect x="95" y="115" width="140" height="32" rx="8" fill="#1a1a2e" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="227" cy="123" r="4" fill="#4ade80" stroke="#4ade8040" stroke-width="2"/>
+          <text x="162" y="132" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">OAuth 연동</text>
+        </g>
+        <path d="M 280,210 Q 195,215 130,225" stroke="#6366f1" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+        <g class="node-group detail" data-tooltip="JWT 토큰 기반 세션 관리" data-status="undecided">
+          <rect x="50" y="210" width="140" height="32" rx="8" fill="#1a1a2e" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="182" cy="218" r="4" fill="#6b7280"/>
+          <text x="117" y="227" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">JWT 세션 관리</text>
+        </g>
+        <path d="M 280,210 Q 230,252 185,285" stroke="#6366f1" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+        <g class="node-group detail" data-tooltip="역할 기반 접근 제어 (RBAC)" data-status="undecided">
+          <rect x="110" y="270" width="150" height="32" rx="8" fill="#1a1a2e" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="252" cy="278" r="4" fill="#6b7280"/>
+          <text x="182" y="287" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">RBAC 권한 관리</text>
+        </g>
+      </g>
+
+      <!-- Branch 2: 데이터 관리 (Blue, top-right) -->
+      <g class="branch-group" data-branch="data" style="animation-delay: 0.2s;">
+        <path d="M 500,340 Q 610,280 720,210" stroke="#3b82f6" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <g class="node-group core" data-tooltip="사용자 데이터 저장, 조회, 분석 파이프라인" data-status="decided">
+          <rect x="650" y="191" width="140" height="40" rx="10" fill="#1a1a2e" stroke="#3b82f6" stroke-width="2.5" filter="url(#glow-data)"/>
+          <rect x="650" y="191" width="4" height="40" rx="2" fill="#3b82f6"/>
+          <circle cx="780" cy="199" r="5" fill="#4ade80" stroke="#4ade8040" stroke-width="2"/>
+          <text x="717" y="213" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">데이터 관리</text>
+        </g>
+        <path d="M 720,210 Q 780,165 835,130" stroke="#3b82f6" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+        <g class="node-group detail" data-tooltip="PostgreSQL + Redis 캐싱" data-status="decided">
+          <rect x="770" y="115" width="130" height="32" rx="8" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="892" cy="123" r="4" fill="#4ade80" stroke="#4ade8040" stroke-width="2"/>
+          <text x="832" y="132" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">PostgreSQL</text>
+        </g>
+        <path d="M 720,210 Q 800,235 860,245" stroke="#3b82f6" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+        <g class="node-group detail" data-tooltip="RESTful API 설계" data-status="active">
+          <rect x="800" y="230" width="120" height="32" rx="8" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="912" cy="238" r="4" fill="#facc15" stroke="#facc1540" stroke-width="2"/>
+          <text x="857" y="247" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">REST API</text>
+        </g>
+      </g>
+
+      <!-- Branch 3: UI/UX (Cyan, right) -->
+      <g class="branch-group" data-branch="ui" style="animation-delay: 0.3s;">
+        <path d="M 500,340 Q 630,395 740,430" stroke="#06b6d4" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <g class="node-group core" data-tooltip="React 기반 대시보드 UI 설계" data-status="active">
+          <rect x="680" y="411" width="120" height="40" rx="10" fill="#1a1a2e" stroke="#06b6d4" stroke-width="2.5" filter="url(#glow-ui)"/>
+          <rect x="680" y="411" width="4" height="40" rx="2" fill="#06b6d4"/>
+          <circle cx="792" cy="419" r="5" fill="#facc15" stroke="#facc1540" stroke-width="2"/>
+          <text x="737" y="433" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">UI/UX</text>
+        </g>
+        <path d="M 740,430 Q 810,465 855,490" stroke="#06b6d4" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+        <g class="node-group detail" data-tooltip="반응형 대시보드 레이아웃" data-status="undecided">
+          <rect x="790" y="478" width="138" height="32" rx="8" fill="#1a1a2e" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="920" cy="486" r="4" fill="#6b7280"/>
+          <text x="856" y="495" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">대시보드 레이아웃</text>
+        </g>
+        <path d="M 740,430 Q 800,415 850,405" stroke="#06b6d4" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+        <g class="node-group detail" data-tooltip="디자인 시스템 구축" data-status="undecided">
+          <rect x="842" y="390" width="130" height="32" rx="8" fill="#1a1a2e" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="964" cy="398" r="4" fill="#6b7280"/>
+          <text x="904" y="407" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">디자인 시스템</text>
+        </g>
+      </g>
+
+      <!-- Branch 4: 인프라 (Emerald, bottom-left) -->
+      <g class="branch-group" data-branch="infra" style="animation-delay: 0.4s;">
+        <path d="M 500,340 Q 400,430 300,490" stroke="#10b981" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <g class="node-group core" data-tooltip="AWS 기반 인프라 설계 및 CI/CD" data-status="decided">
+          <rect x="230" y="471" width="140" height="40" rx="10" fill="#1a1a2e" stroke="#10b981" stroke-width="2.5" filter="url(#glow-infra)"/>
+          <rect x="230" y="471" width="4" height="40" rx="2" fill="#10b981"/>
+          <circle cx="362" cy="479" r="5" fill="#4ade80" stroke="#4ade8040" stroke-width="2"/>
+          <text x="297" y="493" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">인프라</text>
+        </g>
+        <path d="M 300,490 Q 230,525 170,555" stroke="#10b981" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+        <g class="node-group detail" data-tooltip="Docker + Kubernetes 배포" data-status="decided">
+          <rect x="100" y="540" width="130" height="32" rx="8" fill="#1a1a2e" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="222" cy="548" r="4" fill="#4ade80" stroke="#4ade8040" stroke-width="2"/>
+          <text x="162" y="557" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">Docker/K8s</text>
+        </g>
+        <path d="M 300,490 Q 315,540 325,575" stroke="#10b981" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+        <g class="node-group detail" data-tooltip="GitHub Actions CI/CD 파이프라인" data-status="decided">
+          <rect x="260" y="570" width="130" height="32" rx="8" fill="#1a1a2e" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="382" cy="578" r="4" fill="#4ade80" stroke="#4ade8040" stroke-width="2"/>
+          <text x="322" y="587" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">CI/CD</text>
+        </g>
+      </g>
+
+      <!-- Branch 5: 비즈니스 (Amber, bottom) -->
+      <g class="branch-group" data-branch="biz" style="animation-delay: 0.5s;">
+        <path d="M 500,340 Q 520,440 540,520" stroke="#f59e0b" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <g class="node-group core" data-tooltip="수익 모델, 가격 정책, 마케팅 전략" data-status="undecided">
+          <rect x="472" y="511" width="140" height="40" rx="10" fill="#1a1a2e" stroke="#f59e0b" stroke-width="2.5" filter="url(#glow-biz)"/>
+          <rect x="472" y="511" width="4" height="40" rx="2" fill="#f59e0b"/>
+          <circle cx="604" cy="519" r="5" fill="#6b7280"/>
+          <text x="539" y="533" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">비즈니스</text>
+        </g>
+        <path d="M 542,530 Q 480,570 430,595" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+        <g class="node-group detail" data-tooltip="Freemium vs 구독형 모델 비교" data-status="undecided">
+          <rect x="360" y="585" width="140" height="32" rx="8" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="492" cy="593" r="4" fill="#6b7280"/>
+          <text x="427" y="602" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">수익 모델</text>
+        </g>
+        <path d="M 542,530 Q 608,570 660,595" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+        <g class="node-group detail" data-tooltip="초기 타겟 시장 선정" data-status="undecided">
+          <rect x="595" y="585" width="130" height="32" rx="8" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="717" cy="593" r="4" fill="#6b7280"/>
+          <text x="657" y="602" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">타겟 시장</text>
+        </g>
+      </g>
+
+      <!-- Cross-branch links - thicker, more visible -->
+      <g class="cross-link" data-relation="depends-on">
+        <path d="M 280,231 Q 500,460 680,431" stroke="#94a3b8" stroke-opacity="0.45" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#cross-arrow)"/>
+        <rect x="460" y="436" width="70" height="18" rx="5" fill="#1a1a2e" fill-opacity="0.9" stroke="#94a3b8" stroke-width="0.5" stroke-opacity="0.3"/>
+        <text x="495" y="447" text-anchor="middle" dominant-baseline="central" fill="#94a3b8" font-size="10">depends</text>
+      </g>
+      <g class="cross-link" data-relation="depends-on">
+        <path d="M 720,231 Q 510,410 300,491" stroke="#94a3b8" stroke-opacity="0.45" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#cross-arrow)"/>
+        <rect x="478" y="389" width="60" height="18" rx="5" fill="#1a1a2e" fill-opacity="0.9" stroke="#94a3b8" stroke-width="0.5" stroke-opacity="0.3"/>
+        <text x="508" y="400" text-anchor="middle" dominant-baseline="central" fill="#94a3b8" font-size="10">호스팅</text>
+      </g>
+
+      <!-- Legend -->
+      <g transform="translate(815, 555)">
+        <rect x="0" y="0" width="170" height="112" rx="10" fill="#1a1a2eee" stroke="#2a2a4a" stroke-width="1"/>
+        <text x="14" y="20" fill="#888888" font-size="10" font-weight="bold">범례</text>
+        <circle cx="22" cy="38" r="5" fill="#4ade80" stroke="#4ade8040" stroke-width="2"/>
+        <text x="34" y="41" fill="#94a3b8" font-size="10">결정됨</text>
+        <circle cx="90" cy="38" r="5" fill="#facc15" stroke="#facc1540" stroke-width="2"/>
+        <text x="102" y="41" fill="#94a3b8" font-size="10">논의 중</text>
+        <circle cx="22" cy="58" r="5" fill="#6b7280"/>
+        <text x="34" y="61" fill="#94a3b8" font-size="10">미결정</text>
+        <line x1="14" y1="76" x2="52" y2="76" stroke="#6366f1" stroke-width="3" stroke-linecap="round"/>
+        <text x="60" y="79" fill="#94a3b8" font-size="10">핵심 요소</text>
+        <line x1="14" y1="92" x2="52" y2="92" stroke="#6366f1" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round"/>
+        <text x="60" y="95" fill="#94a3b8" font-size="10">세부 요소</text>
+        <line x1="14" y1="105" x2="52" y2="105" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="60" y="108" fill="#94a3b8" font-size="10">교차 연결</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="meta">Last updated: 2026-03-31 · Planning Compass</div>
+
+  <div class="mindmap-tooltip"></div>
+  <script>
+    const tooltip = document.querySelector('.mindmap-tooltip');
+    const allBranches = document.querySelectorAll('.branch-group');
+    document.querySelectorAll('.node-group, .central-node').forEach(node => {
+      node.addEventListener('mouseenter', e => {
+        const desc = node.getAttribute('data-tooltip');
+        const status = node.getAttribute('data-status');
+        const statusLabel = { decided: '결정됨', active: '논의 중', undecided: '미결정' }[status] || '';
+        const statusColor = { decided: '#4ade80', active: '#facc15', undecided: '#6b7280' }[status] || '#6b7280';
+        tooltip.innerHTML = `${desc}${statusLabel ? `<br><span class="status-tag" style="background:${statusColor}18;color:${statusColor}">${statusLabel}</span>` : ''}`;
+        tooltip.classList.add('visible');
+        const parentBranch = node.closest('.branch-group');
+        if (parentBranch) { allBranches.forEach(b => b.classList.toggle('dimmed', b !== parentBranch)); }
+      });
+      node.addEventListener('mousemove', e => { tooltip.style.left = (e.clientX + 14) + 'px'; tooltip.style.top = (e.clientY + 14) + 'px'; });
+      node.addEventListener('mouseleave', () => { tooltip.classList.remove('visible'); allBranches.forEach(b => b.classList.remove('dimmed')); });
+    });
+  </script>
+</body>
+</html>

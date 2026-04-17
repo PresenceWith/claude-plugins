@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Mindmap</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 24px; }
+    .meta { color: #666; font-size: 11px; margin-top: 24px; text-align: right; }
+
+    .decided { color: #4ade80; }
+    .active { color: #facc15; }
+    .undecided { color: #888; }
+
+    .svg-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      background: #1a1a2e;
+      border-radius: 10px;
+      border: 1px solid #2a2a4a;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #e2e8f0;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .legend-line {
+      width: 24px;
+      height: 0;
+      border-top: 1.5px dashed #94a3b8;
+      opacity: 0.7;
+    }
+
+    /* Tooltip */
+    .tooltip-box {
+      position: fixed;
+      background: #1a1a2e;
+      border: 1px solid #4a4a7a;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #e2e8f0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 100;
+      max-width: 260px;
+    }
+
+    /* Node hover */
+    .node-group { cursor: pointer; transition: transform 0.2s; }
+    .node-group:hover { transform: scale(1.05); }
+
+    /* Undecided items panel */
+    .undecided-panel {
+      margin-top: 20px;
+      padding: 14px 18px;
+      background: #1a1a2e;
+      border-radius: 10px;
+      border: 1px solid #2a2a4a;
+    }
+    .undecided-panel h3 {
+      font-size: 14px;
+      color: #facc15;
+      margin-bottom: 10px;
+    }
+    .undecided-panel ul {
+      list-style: none;
+      padding: 0;
+    }
+    .undecided-panel li {
+      font-size: 12px;
+      color: #888;
+      padding: 4px 0;
+      border-bottom: 1px solid #2a2a4a;
+    }
+    .undecided-panel li:last-child { border-bottom: none; }
+    .undecided-panel .option { color: #e2e8f0; }
+  </style>
+</head>
+<body>
+  <h1>Planning Compass — Mindmap</h1>
+  <p class="subtitle">피트니스 트래킹 앱 기능 구조 탐색</p>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div>핵심 트래킹</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>식단</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#06b6d4"></div>소셜</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>챌린지</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>코칭 AI</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>웨어러블</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>결제</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div>인프라</div>
+    <div class="legend-item"><div class="legend-line"></div>브랜치 간 관계</div>
+  </div>
+
+  <div class="svg-container">
+    <svg id="mindmap" width="100%" viewBox="0 160 1200 880" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <filter id="glow-indigo" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#6366f1" flood-opacity="0.25"/>
+        </filter>
+        <filter id="glow-blue" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#3b82f6" flood-opacity="0.25"/>
+        </filter>
+        <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#06b6d4" flood-opacity="0.25"/>
+        </filter>
+        <filter id="glow-emerald" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#10b981" flood-opacity="0.25"/>
+        </filter>
+        <filter id="glow-amber" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#f59e0b" flood-opacity="0.25"/>
+        </filter>
+        <filter id="glow-red" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ef4444" flood-opacity="0.25"/>
+        </filter>
+        <filter id="glow-violet" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#8b5cf6" flood-opacity="0.25"/>
+        </filter>
+        <filter id="glow-pink" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ec4899" flood-opacity="0.25"/>
+        </filter>
+        <filter id="glow-center" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#6366f1" flood-opacity="0.35"/>
+        </filter>
+      </defs>
+
+      <!-- All content will be generated by JS -->
+    </svg>
+  </div>
+
+  <div class="undecided-panel">
+    <h3>미결정 사항 4건</h3>
+    <ul>
+      <li><span class="option">기술 스택:</span> React Native | Flutter | Swift+Kotlin</li>
+      <li><span class="option">수익 모델:</span> 프리미엄 | 구독 | 하이브리드</li>
+      <li><span class="option">AI 모델:</span> 온디바이스 | 클라우드 | 하이브리드</li>
+      <li><span class="option">MVP 범위:</span> 핵심 3기능 | 전체 기능</li>
+    </ul>
+  </div>
+
+  <div class="meta">
+    Last updated: 2026-03-30 12:00 · Planning Compass
+  </div>
+
+  <div class="tooltip-box" id="tooltip"></div>
+
+  <script>
+  (function() {
+    const svg = document.getElementById('mindmap');
+    const tooltip = document.getElementById('tooltip');
+    const CX = 600, CY = 600;
+
+    // --- Data ---
+    const branches = [
+      {
+        label: '운동 기록', color: '#6366f1', glow: 'glow-indigo',
+        tooltip: '운동 데이터 수집 및 기록 기능',
+        children: [
+          { label: '운동종류 관리', tooltip: '운동 카테고리 및 커스텀 운동 관리' },
+          { label: 'GPS 트래킹', tooltip: '달리기/자전거 등 야외 운동 경로 추적' },
+          { label: '세트/반복 기록', tooltip: '웨이트 트레이닝 세트·횟수·무게 기록' }
+        ]
+      },
+      {
+        label: '식단 관리', color: '#3b82f6', glow: 'glow-blue',
+        tooltip: '영양 섭취 기록 및 분석',
+        children: [
+          { label: '칼로리 계산', tooltip: '일일 섭취 칼로리 자동 계산' },
+          { label: '식단 DB', tooltip: '음식 영양 정보 데이터베이스' },
+          { label: '바코드 스캔', tooltip: '제품 바코드로 영양 정보 자동 입력' }
+        ]
+      },
+      {
+        label: '소셜 기능', color: '#06b6d4', glow: 'glow-cyan',
+        tooltip: '사용자 간 소통 및 공유',
+        children: [
+          { label: '피드/타임라인', tooltip: '운동 활동 피드 및 댓글' },
+          { label: '친구 추가', tooltip: '사용자 검색 및 팔로우' },
+          { label: '운동 공유', tooltip: '운동 기록을 SNS로 공유' }
+        ]
+      },
+      {
+        label: '챌린지', color: '#10b981', glow: 'glow-emerald',
+        tooltip: '목표 달성 동기부여 시스템',
+        children: [
+          { label: '주간 챌린지', tooltip: '주 단위 운동 목표 챌린지' },
+          { label: '리더보드', tooltip: '챌린지 참여자 순위표' },
+          { label: '배지 시스템', tooltip: '성취 배지 및 보상' }
+        ]
+      },
+      {
+        label: '코칭 AI', color: '#f59e0b', glow: 'glow-amber',
+        tooltip: 'AI 기반 개인 맞춤 코칭',
+        children: [
+          { label: '운동 추천', tooltip: '사용자 이력 기반 운동 추천' },
+          { label: '자세 피드백', tooltip: '카메라 기반 자세 교정' },
+          { label: '목표 설정', tooltip: 'AI 기반 현실적 목표 설정 가이드' }
+        ]
+      },
+      {
+        label: '웨어러블 연동', color: '#ef4444', glow: 'glow-red',
+        tooltip: '외부 디바이스 데이터 연동',
+        children: [
+          { label: '심박수 데이터', tooltip: '실시간 심박수 모니터링' },
+          { label: 'HealthKit/GoogleFit', tooltip: 'OS 헬스 플랫폼 통합' },
+          { label: '블루투스 연결', tooltip: 'BLE 디바이스 직접 연동' }
+        ]
+      },
+      {
+        label: '결제 시스템', color: '#8b5cf6', glow: 'glow-violet',
+        tooltip: '수익화 및 결제 처리',
+        children: [
+          { label: '구독 모델', tooltip: '월간/연간 구독 플랜' },
+          { label: '인앱 결제', tooltip: 'App Store / Play Store 결제 통합' }
+        ]
+      },
+      {
+        label: '인프라', color: '#ec4899', glow: 'glow-pink',
+        tooltip: '오프라인 모드 + 다국어 지원',
+        children: [
+          { label: '오프라인 모드', tooltip: '로컬 DB 동기화 및 캐시 전략' },
+          { label: '다국어 지원', tooltip: 'i18n 프레임워크 및 RTL 지원' }
+        ]
+      }
+    ];
+
+    // Cross-branch relationships
+    const crossLinks = [
+      { from: '운동 기록', to: '웨어러블 연동', label: '데이터 연동' },
+      { from: '운동 기록', to: '코칭 AI', label: '데이터 제공' },
+      { from: '식단 관리', to: '코칭 AI', label: '데이터 제공' },
+      { from: '챌린지', to: '소셜 기능', label: '소셜 연계' },
+      { from: '결제 시스템', to: '코칭 AI', label: '프리미엄 게이팅' },
+      { from: '인프라', to: '운동 기록', label: '오프라인 지원' }
+    ];
+
+    // --- Layout calculations ---
+    const branchCount = branches.length; // 8
+    const angleStep = 360 / branchCount; // 45 degrees
+    const baseRadius = 220;
+    const childRadius = baseRadius + 140;
+    const spreadAngle = 18; // reduced for 8 branches
+
+    // Calculate text width for Korean text
+    function textWidth(str, fontSize) {
+      let w = 0;
+      for (let ch of str) {
+        if (ch.charCodeAt(0) > 0x2E80) {
+          w += fontSize * 0.65;
+        } else {
+          w += fontSize * 0.42;
+        }
+      }
+      return w + 40;
+    }
+
+    // Store node positions for cross-links
+    const nodePositions = {};
+
+    // --- Build SVG content ---
+    let svgContent = '';
+
+    // 1. Connector lines (drawn first, behind nodes)
+    // Core connectors
+    branches.forEach((branch, i) => {
+      const angle = (i * angleStep) - 90;
+      const rad = angle * Math.PI / 180;
+      const bx = CX + baseRadius * Math.cos(rad);
+      const by = CY + baseRadius * Math.sin(rad);
+
+      // Control point offset perpendicular to avoid overlap at center
+      const perpAngle = rad + Math.PI / 2;
+      const offsetMag = 30;
+      const ctrlX = (CX + bx) / 2 + offsetMag * Math.cos(perpAngle);
+      const ctrlY = (CY + by) / 2 + offsetMag * Math.sin(perpAngle);
+
+      svgContent += `<path d="M ${CX},${CY} Q ${ctrlX.toFixed(1)},${ctrlY.toFixed(1)} ${bx.toFixed(1)},${by.toFixed(1)}"
+        stroke="${branch.color}aa" stroke-width="2.5" fill="none"/>`;
+
+      // Detail connectors
+      const childCount = branch.children.length;
+      branch.children.forEach((child, j) => {
+        const childAngle = angle + (j - (childCount - 1) / 2) * spreadAngle;
+        const crad = childAngle * Math.PI / 180;
+        const cx2 = CX + childRadius * Math.cos(crad);
+        const cy2 = CY + childRadius * Math.sin(crad);
+
+        const cPerp = crad + Math.PI / 2;
+        const cCtrlX = (bx + cx2) / 2 + 15 * Math.cos(cPerp);
+        const cCtrlY = (by + cy2) / 2 + 15 * Math.sin(cPerp);
+
+        svgContent += `<path d="M ${bx.toFixed(1)},${by.toFixed(1)} Q ${cCtrlX.toFixed(1)},${cCtrlY.toFixed(1)} ${cx2.toFixed(1)},${cy2.toFixed(1)}"
+          stroke="${branch.color}88" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>`;
+      });
+    });
+
+    // 2. Calculate all node positions and store them
+    branches.forEach((branch, i) => {
+      const angle = (i * angleStep) - 90;
+      const rad = angle * Math.PI / 180;
+      const bx = CX + baseRadius * Math.cos(rad);
+      const by = CY + baseRadius * Math.sin(rad);
+      nodePositions[branch.label] = { x: bx, y: by };
+
+      const childCount = branch.children.length;
+      branch.children.forEach((child, j) => {
+        const childAngle = angle + (j - (childCount - 1) / 2) * spreadAngle;
+        const crad = childAngle * Math.PI / 180;
+        const cx2 = CX + childRadius * Math.cos(crad);
+        const cy2 = CY + childRadius * Math.sin(crad);
+        nodePositions[child.label] = { x: cx2, y: cy2 };
+      });
+    });
+
+    // 3. Cross-branch relationship lines (behind nodes but above branch connectors)
+    crossLinks.forEach(link => {
+      const from = nodePositions[link.from];
+      const to = nodePositions[link.to];
+      if (!from || !to) return;
+
+      // Control point: offset toward center to create a nice curve
+      const midX = (from.x + to.x) / 2;
+      const midY = (from.y + to.y) / 2;
+      // Pull control point toward center for a visible arc
+      const ctrlX = midX + (CX - midX) * 0.35;
+      const ctrlY = midY + (CY - midY) * 0.35;
+
+      // Label position
+      const labelX = ctrlX * 0.5 + midX * 0.5;
+      const labelY = ctrlY * 0.5 + midY * 0.5;
+
+      svgContent += `<g class="cross-link">
+        <path d="M ${from.x.toFixed(1)},${from.y.toFixed(1)} Q ${ctrlX.toFixed(1)},${ctrlY.toFixed(1)} ${to.x.toFixed(1)},${to.y.toFixed(1)}"
+          stroke="#94a3b8" stroke-opacity="0.55" stroke-width="1.2" stroke-dasharray="5 4" fill="none"/>
+        <text x="${labelX.toFixed(1)}" y="${(labelY - 6).toFixed(1)}" text-anchor="middle"
+          fill="#94a3b8" font-size="9" opacity="0.75">${link.label}</text>
+      </g>`;
+    });
+
+    // 4. Core branch nodes
+    branches.forEach((branch, i) => {
+      const angle = (i * angleStep) - 90;
+      const rad = angle * Math.PI / 180;
+      const bx = CX + baseRadius * Math.cos(rad);
+      const by = CY + baseRadius * Math.sin(rad);
+
+      const w = textWidth(branch.label, 13);
+      const h = 36;
+
+      svgContent += `<g class="node-group core" data-tooltip="${branch.tooltip}">
+        <rect x="${(bx - w / 2).toFixed(1)}" y="${(by - h / 2).toFixed(1)}" width="${w.toFixed(1)}" height="${h}" rx="8"
+          fill="#1a1a2e" stroke="${branch.color}" stroke-width="2.5" filter="url(#${branch.glow})"/>
+        <text x="${bx.toFixed(1)}" y="${(by + 1).toFixed(1)}" text-anchor="middle" dominant-baseline="central"
+          fill="#e2e8f0" font-size="13" font-weight="bold">${branch.label}</text>
+      </g>`;
+
+      // 5. Detail child nodes
+      const childCount = branch.children.length;
+      branch.children.forEach((child, j) => {
+        const childAngle = angle + (j - (childCount - 1) / 2) * spreadAngle;
+        const crad = childAngle * Math.PI / 180;
+        const cx2 = CX + childRadius * Math.cos(crad);
+        const cy2 = CY + childRadius * Math.sin(crad);
+
+        const cw = textWidth(child.label, 11);
+        const ch = 30;
+
+        svgContent += `<g class="node-group detail" data-tooltip="${child.tooltip}">
+          <rect x="${(cx2 - cw / 2).toFixed(1)}" y="${(cy2 - ch / 2).toFixed(1)}" width="${cw.toFixed(1)}" height="${ch}" rx="6"
+            fill="#1a1a2e" stroke="${branch.color}" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.85"/>
+          <text x="${cx2.toFixed(1)}" y="${(cy2 + 1).toFixed(1)}" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="11">${child.label}</text>
+        </g>`;
+      });
+    });
+
+    // 6. Central goal node
+    svgContent += `<g class="central-node" data-tooltip="피트니스 트래킹 모바일 앱 — 운동, 식단, 소셜, AI 코칭, 결제, 오프라인, 다국어">
+      <circle cx="${CX}" cy="${CY}" r="52"
+        fill="#1a1a2e" stroke="#6366f1" stroke-width="3" filter="url(#glow-center)"/>
+      <text x="${CX}" y="${CY - 8}" text-anchor="middle" dominant-baseline="central"
+        fill="#e2e8f0" font-size="13" font-weight="bold">피트니스</text>
+      <text x="${CX}" y="${CY + 12}" text-anchor="middle" dominant-baseline="central"
+        fill="#e2e8f0" font-size="13" font-weight="bold">트래킹 앱</text>
+    </g>`;
+
+    svg.innerHTML = svg.innerHTML + svgContent;
+
+    // --- Tooltip behavior ---
+    document.querySelectorAll('[data-tooltip]').forEach(el => {
+      el.addEventListener('mouseenter', e => {
+        const text = el.getAttribute('data-tooltip');
+        tooltip.textContent = text;
+        tooltip.style.opacity = '1';
+      });
+      el.addEventListener('mousemove', e => {
+        tooltip.style.left = (e.clientX + 14) + 'px';
+        tooltip.style.top = (e.clientY + 14) + 'px';
+      });
+      el.addEventListener('mouseleave', () => {
+        tooltip.style.opacity = '0';
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

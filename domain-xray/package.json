@@ -1,0 +1,6 @@
+{
+  "name": "domain-xray",
+  "version": "0.3.0",
+  "description": "A cognitive-science-informed learning pipeline that helps you deeply understand any new domain — from orientation map through metacognitive priming and tacit knowledge generation to active verification",
+  "claude_plugin": true
+}

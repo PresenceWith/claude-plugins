@@ -1,0 +1,37 @@
+{
+  "eval_id": 0,
+  "eval_name": "eval-korean-simple",
+  "configuration": "without_skill",
+  "expectations": [
+    {
+      "text": "template-structure-intact",
+      "passed": false,
+      "evidence": "Baseline does not use the standardized template. Instead creates a custom 8-section prompt with its own structure (The Real Workflow, Data Quality, Statistical Thinking, Tool Mastery, Communication, Career, Failure Museum, Advanced Topics)."
+    },
+    {
+      "text": "output-in-english",
+      "passed": true,
+      "evidence": "Output is in English."
+    },
+    {
+      "text": "domain-enriched",
+      "passed": true,
+      "evidence": "The baseline prompt covers data analysis broadly across multiple dimensions, though not in the synthesized DOMAIN format."
+    },
+    {
+      "text": "goal-enriched",
+      "passed": false,
+      "evidence": "No explicit GOAL synthesis. The prompt addresses general learning without tailoring to a specific situation or role."
+    },
+    {
+      "text": "file-saved",
+      "passed": true,
+      "evidence": "File exists at outputs/learning-prompt.md"
+    },
+    {
+      "text": "no-template-mutation",
+      "passed": false,
+      "evidence": "N/A — baseline does not use the template at all."
+    }
+  ]
+}

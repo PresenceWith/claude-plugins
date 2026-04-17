@@ -1,0 +1,38 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-extract-with-orient",
+  "prompt": "데이터 분석 분야의 암묵지를 추출해주세요 (orient file present)",
+  "assertions": [
+    {
+      "name": "template-structure-intact",
+      "type": "contains_all",
+      "description": "Output contains all fixed template sections: [Context], [Task], [Output Constraint], and 4 axes",
+      "targets": ["[Context]", "[Task]", "[Output Constraint]", "Practical Terminology and Jargon", "Hidden Preconditions", "Beginner's Traps", "Rules of Thumb"]
+    },
+    {
+      "name": "orient-context-used",
+      "type": "qualitative",
+      "description": "DOMAIN and GOAL descriptions are enriched using information from the orient file (sub-areas, priority areas) rather than being generic"
+    },
+    {
+      "name": "has-scope-section",
+      "type": "contains_section",
+      "description": "If orient has priority areas, a [Scope] section should be present focusing extraction on priority areas"
+    },
+    {
+      "name": "depth-over-volume",
+      "type": "qualitative",
+      "description": "Output Constraint says 'Depth Over Volume' NOT 'Absolute Maximum' — key improvement from v0.1"
+    },
+    {
+      "name": "output-in-english",
+      "type": "language_check",
+      "description": "Final prompt file is in English regardless of conversation language"
+    },
+    {
+      "name": "file-saved",
+      "type": "file_exists",
+      "description": "A domain-extract-*.md file is saved"
+    }
+  ]
+}

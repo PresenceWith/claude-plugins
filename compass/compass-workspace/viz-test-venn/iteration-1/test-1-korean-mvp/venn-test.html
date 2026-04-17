@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Venn Diagram - MVP vs Full Version</title>
+<style>
+  body { margin: 0; padding: 20px; background: #0a0a14; display: flex; justify-content: center; }
+</style>
+</head>
+<body>
+<div style="overflow-x: auto;">
+  <svg width="100%" viewBox="0 0 960 680"
+       preserveAspectRatio="xMidYMid meet"
+       style="background: #0f0f1a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+    <defs>
+      <radialGradient id="grad-mvp" cx="40%" cy="45%" r="55%">
+        <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.22"/>
+        <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.12"/>
+        <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.04"/>
+      </radialGradient>
+      <radialGradient id="grad-full" cx="60%" cy="45%" r="55%">
+        <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.22"/>
+        <stop offset="60%" stop-color="#a78bfa" stop-opacity="0.12"/>
+        <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.04"/>
+      </radialGradient>
+      <radialGradient id="grad-overlap" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#67e8f9" stop-opacity="0.18"/>
+        <stop offset="100%" stop-color="#67e8f9" stop-opacity="0.06"/>
+      </radialGradient>
+
+      <filter id="glow-mvp" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="blur"/>
+        <feFlood flood-color="#38bdf8" flood-opacity="0.15" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-full" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="blur"/>
+        <feFlood flood-color="#a78bfa" flood-opacity="0.15" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-shared" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feFlood flood-color="#67e8f9" flood-opacity="0.2" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="card-shadow">
+        <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+      </filter>
+
+      <!-- Clip path for overlap zone -->
+      <clipPath id="clip-overlap">
+        <circle cx="310" cy="290" r="200"/>
+      </clipPath>
+
+      <style>
+        .venn-set { cursor: pointer; transition: opacity 0.3s; }
+        .venn-item {
+          cursor: pointer; transition: transform 0.2s ease, filter 0.2s;
+          opacity: 0; animation: vennItemIn 0.4s ease-out forwards;
+        }
+        .venn-item:hover { transform: scale(1.06); filter: brightness(1.2) drop-shadow(0 3px 8px rgba(0,0,0,0.4)); }
+        @keyframes vennCircleIn {
+          from { opacity: 0; r: 180; }
+          to { opacity: 1; r: 200; }
+        }
+        .venn-circle-anim { opacity: 0; animation: vennCircleIn 0.6s ease-out forwards; }
+        @keyframes vennItemIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scopePulse {
+          0%, 100% { stroke-opacity: 0.6; stroke-dashoffset: 0; }
+          50%      { stroke-opacity: 0.25; stroke-dashoffset: 12; }
+        }
+        @keyframes countFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .region-count {
+          font-size: 36px; font-weight: bold; fill-opacity: 0.18;
+          pointer-events: none;
+          animation: countFadeIn 0.8s ease-out 0.3s forwards; opacity: 0;
+        }
+        .venn-tooltip {
+          position: fixed; pointer-events: none; z-index: 100;
+          background: #1a1a2eee; border: 1px solid #4a4a7a; border-radius: 10px;
+          padding: 12px 16px; font-size: 12px; color: #e2e8f0;
+          max-width: 280px; opacity: 0; transition: opacity 0.2s;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+        }
+        .venn-tooltip.visible { opacity: 1; }
+        .venn-tooltip .tt-region { font-size: 10px; color: #888; margin-top: 6px; display: block; }
+        .venn-tooltip .tt-status {
+          display: inline-block; padding: 2px 8px; border-radius: 4px;
+          font-size: 9px; font-weight: bold; margin-top: 4px;
+        }
+      </style>
+    </defs>
+
+    <!--
+      Layout:
+      - viewBox: 960 x 680
+      - centerX = 410, centerY = 290  (shifted left slightly to make room for legend)
+      - radius = 200
+      - overlapRatio = 0.30 → offset = 200 * 0.70 = 140
+      - circle1 (MVP): cx = 410 - 140 = 270, cy = 290
+      - circle2 (Full): cx = 410 + 140 = 550, cy = 290
+      - Left-only center: (270 - 200*0.4, 290) = (190, 290)
+      - Overlap center: (410, 290)
+      - Right-only center: (550 + 200*0.4, 290) = (630, 290)
+    -->
+
+    <!-- Circles -->
+    <g class="venn-set" data-set="mvp">
+      <circle class="venn-circle-anim" cx="270" cy="290" r="200"
+              fill="url(#grad-mvp)" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.6"
+              filter="url(#glow-mvp)" style="animation-delay: 0s;"/>
+      <circle cx="270" cy="290" r="190" fill="none"
+              stroke="#38bdf8" stroke-width="0.5" stroke-opacity="0.15"/>
+    </g>
+    <g class="venn-set" data-set="full">
+      <circle class="venn-circle-anim" cx="550" cy="290" r="200"
+              fill="url(#grad-full)" stroke="#a78bfa" stroke-width="2" stroke-opacity="0.6"
+              filter="url(#glow-full)" style="animation-delay: 0.15s;"/>
+      <circle cx="550" cy="290" r="190" fill="none"
+              stroke="#a78bfa" stroke-width="0.5" stroke-opacity="0.15"/>
+    </g>
+
+    <!-- Overlap zone highlight -->
+    <clipPath id="clip-overlap2">
+      <circle cx="270" cy="290" r="200"/>
+    </clipPath>
+    <circle cx="550" cy="290" r="200"
+            fill="url(#grad-overlap)" clip-path="url(#clip-overlap2)"/>
+
+    <!-- Set labels at outer top edge -->
+    <g class="set-label">
+      <rect x="178" y="76" width="84" height="28"
+            rx="8" fill="#38bdf8" fill-opacity="0.12"
+            stroke="#38bdf8" stroke-opacity="0.3" stroke-width="1"/>
+      <text x="220" y="94" text-anchor="middle" dominant-baseline="central"
+            fill="#38bdf8" font-size="15" font-weight="bold">MVP</text>
+      <text x="220" y="114" text-anchor="middle"
+            fill="#38bdf8" fill-opacity="0.5" font-size="11">7개 기능</text>
+    </g>
+    <g class="set-label">
+      <rect x="540" y="76" width="120" height="28"
+            rx="8" fill="#a78bfa" fill-opacity="0.12"
+            stroke="#a78bfa" stroke-opacity="0.3" stroke-width="1"/>
+      <text x="600" y="94" text-anchor="middle" dominant-baseline="central"
+            fill="#a78bfa" font-size="15" font-weight="bold">정식 버전</text>
+      <text x="600" y="114" text-anchor="middle"
+            fill="#a78bfa" fill-opacity="0.5" font-size="11">11개 기능</text>
+    </g>
+
+    <!-- Region count badges -->
+    <text class="region-count" x="175" y="250"
+          text-anchor="middle" dominant-baseline="central" fill="#38bdf8">3</text>
+    <text x="175" y="277" text-anchor="middle"
+          fill="#38bdf8" fill-opacity="0.35" font-size="11" font-weight="500">MVP만</text>
+
+    <text class="region-count" x="410" y="250"
+          text-anchor="middle" dominant-baseline="central" fill="#67e8f9">4</text>
+    <text x="410" y="277" text-anchor="middle"
+          fill="#67e8f9" fill-opacity="0.35" font-size="11" font-weight="500">공통</text>
+
+    <text class="region-count" x="645" y="250"
+          text-anchor="middle" dominant-baseline="central" fill="#a78bfa">7</text>
+    <text x="645" y="277" text-anchor="middle"
+          fill="#a78bfa" fill-opacity="0.35" font-size="11" font-weight="500">정식만</text>
+
+    <!-- Items: MVP only (3 items, single column, centered at x=175) -->
+    <g class="venn-item" data-tooltip="이메일 기반 로그인 기능" data-region="MVP만"
+       data-status="decided" style="animation-delay: 0.3s;">
+      <rect x="120" y="298" width="110" height="30" rx="7"
+            fill="#1a1a2e" stroke="#38bdf8" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="222" cy="306" r="4" fill="#4ade80"/>
+      <text x="175" y="314" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11">이메일 로그인</text>
+    </g>
+    <g class="venn-item" data-tooltip="기본 검색 기능" data-region="MVP만"
+       data-status="decided" style="animation-delay: 0.4s;">
+      <rect x="120" y="334" width="110" height="30" rx="7"
+            fill="#1a1a2e" stroke="#38bdf8" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="222" cy="342" r="4" fill="#4ade80"/>
+      <text x="175" y="350" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11">기본 검색</text>
+    </g>
+    <g class="venn-item" data-tooltip="단일 결제수단 지원" data-region="MVP만"
+       data-status="decided" style="animation-delay: 0.5s;">
+      <rect x="120" y="370" width="110" height="30" rx="7"
+            fill="#1a1a2e" stroke="#38bdf8" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="222" cy="378" r="4" fill="#4ade80"/>
+      <text x="175" y="386" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11">단일 결제수단</text>
+    </g>
+
+    <!-- Items: Shared (4 items, single column, centered at x=410) -->
+    <g class="venn-item shared" data-tooltip="상품 목록 표시 기능" data-region="공통"
+       data-status="decided" style="animation-delay: 0.5s;">
+      <rect x="355" y="298" width="110" height="30" rx="7"
+            fill="#1e1a30" stroke="#67e8f9" stroke-width="2" filter="url(#glow-shared)"/>
+      <circle cx="457" cy="306" r="4" fill="#4ade80"/>
+      <text x="410" y="314" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11" font-weight="bold">상품 목록</text>
+    </g>
+    <g class="venn-item shared" data-tooltip="장바구니 기능" data-region="공통"
+       data-status="decided" style="animation-delay: 0.6s;">
+      <rect x="355" y="334" width="110" height="30" rx="7"
+            fill="#1e1a30" stroke="#67e8f9" stroke-width="2" filter="url(#glow-shared)"/>
+      <circle cx="457" cy="342" r="4" fill="#4ade80"/>
+      <text x="410" y="350" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11" font-weight="bold">장바구니</text>
+    </g>
+    <g class="venn-item shared" data-tooltip="주문 내역 조회" data-region="공통"
+       data-status="decided" style="animation-delay: 0.7s;">
+      <rect x="355" y="370" width="110" height="30" rx="7"
+            fill="#1e1a30" stroke="#67e8f9" stroke-width="2" filter="url(#glow-shared)"/>
+      <circle cx="457" cy="378" r="4" fill="#4ade80"/>
+      <text x="410" y="386" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11" font-weight="bold">주문 내역</text>
+    </g>
+    <g class="venn-item shared" data-tooltip="푸시/이메일 알림" data-region="공통"
+       data-status="decided" style="animation-delay: 0.8s;">
+      <rect x="355" y="406" width="110" height="30" rx="7"
+            fill="#1e1a30" stroke="#67e8f9" stroke-width="2" filter="url(#glow-shared)"/>
+      <circle cx="457" cy="414" r="4" fill="#4ade80"/>
+      <text x="410" y="422" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11" font-weight="bold">알림</text>
+    </g>
+
+    <!-- Items: Full only (7 items, 2 columns to fit within circle) -->
+    <!-- Column 1 (left): 4 items -->
+    <g class="venn-item" data-tooltip="소셜 로그인 (카카오, 구글 등)" data-region="정식만"
+       data-status="active" style="animation-delay: 0.5s;">
+      <rect x="590" y="210" width="106" height="28" rx="7"
+            fill="#1a1a2e" stroke="#a78bfa" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="688" cy="217" r="4" fill="#facc15"/>
+      <text x="643" y="225" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="10">소셜 로그인</text>
+    </g>
+    <g class="venn-item" data-tooltip="고급 필터 (가격, 카테고리, 브랜드)" data-region="정식만"
+       data-status="active" style="animation-delay: 0.6s;">
+      <rect x="590" y="244" width="106" height="28" rx="7"
+            fill="#1a1a2e" stroke="#a78bfa" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="688" cy="251" r="4" fill="#facc15"/>
+      <text x="643" y="259" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="10">고급 필터</text>
+    </g>
+    <g class="venn-item" data-tooltip="위시리스트 기능" data-region="정식만"
+       data-status="active" style="animation-delay: 0.7s;">
+      <rect x="590" y="278" width="106" height="28" rx="7"
+            fill="#1a1a2e" stroke="#a78bfa" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="688" cy="285" r="4" fill="#facc15"/>
+      <text x="643" y="293" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="10">위시리스트</text>
+    </g>
+    <g class="venn-item" data-tooltip="리뷰 및 평점 시스템" data-region="정식만"
+       data-status="active" style="animation-delay: 0.8s;">
+      <rect x="590" y="312" width="106" height="28" rx="7"
+            fill="#1a1a2e" stroke="#a78bfa" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="688" cy="319" r="4" fill="#facc15"/>
+      <text x="643" y="327" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="10">리뷰 시스템</text>
+    </g>
+    <!-- Column 2 (right): 3 items -->
+    <g class="venn-item" data-tooltip="다중 결제수단 (카드, 계좌이체, 간편결제)" data-region="정식만"
+       data-status="active" style="animation-delay: 0.9s;">
+      <rect x="590" y="346" width="106" height="28" rx="7"
+            fill="#1a1a2e" stroke="#a78bfa" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="688" cy="353" r="4" fill="#facc15"/>
+      <text x="643" y="361" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="10">다중 결제수단</text>
+    </g>
+    <g class="venn-item" data-tooltip="할인 쿠폰 및 프로모션" data-region="정식만"
+       data-status="active" style="animation-delay: 1.0s;">
+      <rect x="590" y="380" width="106" height="28" rx="7"
+            fill="#1a1a2e" stroke="#a78bfa" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="688" cy="387" r="4" fill="#facc15"/>
+      <text x="643" y="395" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="10">쿠폰</text>
+    </g>
+    <g class="venn-item" data-tooltip="AI 기반 상품 추천 알고리즘" data-region="정식만"
+       data-status="active" style="animation-delay: 1.1s;">
+      <rect x="590" y="414" width="106" height="28" rx="7"
+            fill="#1a1a2e" stroke="#a78bfa" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <circle cx="688" cy="421" r="4" fill="#facc15"/>
+      <text x="643" y="429" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="10">추천 알고리즘</text>
+    </g>
+
+    <!-- Scope annotation: MVP 범위 -->
+    <!-- Covers MVP circle + overlap. Center between MVP center (270) and overlap center (410) = 340 -->
+    <!-- Radius needs to cover from leftmost MVP items (~120) to right edge of overlap (~465): span ~345, so r ~185 -->
+    <g class="scope-annotation">
+      <circle cx="340" cy="300" r="220"
+              fill="none" stroke="#facc15" stroke-width="2" stroke-dasharray="10,5"
+              style="animation: scopePulse 3s ease-in-out infinite;"/>
+      <!-- Label pill in empty space above, top-right, outside circles -->
+      <line x1="500" y1="120" x2="520" y2="48" stroke="#facc15" stroke-width="1" stroke-opacity="0.5"/>
+      <rect x="522" y="34" width="96" height="24"
+            rx="6" fill="#facc15" fill-opacity="0.12" stroke="#facc15" stroke-opacity="0.4" stroke-width="1"/>
+      <text x="570" y="46" text-anchor="middle" dominant-baseline="central"
+            fill="#facc15" font-size="12" font-weight="bold">MVP 범위</text>
+    </g>
+
+    <!-- Summary stats bar -->
+    <g class="venn-summary" transform="translate(100, 530)">
+      <rect x="0" y="0" width="580" height="52" rx="10"
+            fill="#1a1a2e" stroke="#2a2a4a" stroke-width="1"/>
+      <rect x="16" y="12" width="150" height="28" rx="6" fill="#38bdf8" fill-opacity="0.08"/>
+      <text x="30" y="29" fill="#38bdf8" font-size="16" font-weight="bold">3</text>
+      <text x="48" y="29" fill="#38bdf8" fill-opacity="0.6" font-size="11">MVP만</text>
+
+      <rect x="182" y="12" width="170" height="28" rx="6" fill="#67e8f9" fill-opacity="0.1"/>
+      <text x="196" y="29" fill="#67e8f9" font-size="16" font-weight="bold">4</text>
+      <text x="214" y="29" fill="#67e8f9" fill-opacity="0.6" font-size="11">공통</text>
+      <text x="258" y="29" fill="#67e8f9" fill-opacity="0.35" font-size="10">(28.6%)</text>
+
+      <rect x="368" y="12" width="150" height="28" rx="6" fill="#a78bfa" fill-opacity="0.08"/>
+      <text x="382" y="29" fill="#a78bfa" font-size="16" font-weight="bold">7</text>
+      <text x="400" y="29" fill="#a78bfa" fill-opacity="0.6" font-size="11">정식만</text>
+
+      <text x="540" y="29" fill="#666666" font-size="10">전체 14개</text>
+    </g>
+
+    <!-- Legend panel - bottom right -->
+    <g class="legend" transform="translate(770, 530)">
+      <rect x="0" y="0" width="160" height="120" rx="10"
+            fill="#1a1a2eee" stroke="#2a2a4a" stroke-width="1"/>
+      <text x="14" y="20" fill="#888888" font-size="10" font-weight="bold">범례</text>
+      <circle cx="22" cy="38" r="7" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1.5"/>
+      <text x="36" y="41" fill="#94a3b8" font-size="10">MVP</text>
+      <circle cx="22" cy="58" r="7" fill="#a78bfa" fill-opacity="0.15" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="36" y="61" fill="#94a3b8" font-size="10">정식 버전</text>
+      <circle cx="22" cy="82" r="4" fill="#4ade80"/>
+      <text x="32" y="85" fill="#94a3b8" font-size="10">결정됨</text>
+      <circle cx="90" cy="82" r="4" fill="#facc15"/>
+      <text x="100" y="85" fill="#94a3b8" font-size="10">논의 중</text>
+      <line x1="14" y1="102" x2="32" y2="102" stroke="#facc15" stroke-width="2" stroke-dasharray="5,3"/>
+      <text x="38" y="105" fill="#94a3b8" font-size="10">범위 표시</text>
+    </g>
+  </svg>
+</div>
+
+<div class="venn-tooltip"></div>
+
+<script>
+const tooltip = document.querySelector('.venn-tooltip');
+document.querySelectorAll('.venn-item').forEach(item => {
+  item.addEventListener('mouseenter', e => {
+    const desc = item.getAttribute('data-tooltip');
+    const region = item.getAttribute('data-region');
+    const status = item.getAttribute('data-status');
+    const statusLabel = { decided: '결정됨', active: '논의 중', undecided: '미결정' }[status] || '';
+    const statusColor = { decided: '#4ade80', active: '#facc15', undecided: '#6b7280' }[status] || '#6b7280';
+    tooltip.innerHTML = `${desc}<span class="tt-region">${region}</span>${statusLabel ? `<span class="tt-status" style="background:${statusColor}18;color:${statusColor}">${statusLabel}</span>` : ''}`;
+    tooltip.classList.add('visible');
+  });
+  item.addEventListener('mousemove', e => {
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY + 14) + 'px';
+  });
+  item.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+});
+document.querySelectorAll('.venn-set').forEach(set => {
+  set.addEventListener('mouseenter', () => {
+    document.querySelectorAll('.venn-set').forEach(s => {
+      if (s !== set) s.style.opacity = '0.3';
+    });
+  });
+  set.addEventListener('mouseleave', () => {
+    document.querySelectorAll('.venn-set').forEach(s => s.style.opacity = '');
+  });
+});
+</script>
+</body>
+</html>

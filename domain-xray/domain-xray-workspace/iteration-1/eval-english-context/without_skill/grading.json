@@ -1,0 +1,32 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-english-context",
+  "configuration": "without_skill",
+  "expectations": [
+    {
+      "text": "template-structure-intact",
+      "passed": false,
+      "evidence": "Creates custom 8-part structure (Hidden Mental Models, First 90 Days, Engineer-to-PM Gaps, Real PM Toolkit, Political Survival, Failure Modes, Learning Plan, Unknown Unknowns). Does not use standardized template."
+    },
+    {
+      "text": "context-aware-domain",
+      "passed": true,
+      "evidence": "Covers PM topics broadly across 8 sections, mentions PRDs, sprint planning, user research, prioritization, OKRs, stakeholder management."
+    },
+    {
+      "text": "context-aware-goal",
+      "passed": true,
+      "evidence": "Explicitly addresses engineer-to-PM transition, includes 4-week accelerated plan, acknowledges the 'one month' urgency."
+    },
+    {
+      "text": "file-saved",
+      "passed": true,
+      "evidence": "File exists at outputs/learning-prompt.md"
+    },
+    {
+      "text": "no-template-mutation",
+      "passed": false,
+      "evidence": "N/A — baseline does not use the template."
+    }
+  ]
+}

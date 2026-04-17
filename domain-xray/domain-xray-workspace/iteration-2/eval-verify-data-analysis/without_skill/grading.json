@@ -1,0 +1,14 @@
+{
+  "eval_id": 5,
+  "eval_name": "eval-verify-data-analysis",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "scenario-based-challenges", "passed": false, "evidence": "전통적 교과서 퀴즈 형태: '중심경향 통계량 3가지 고르기', '히스토그램 vs 막대그래프 차이'. 실무 시나리오가 아닌 정의 암기 테스트"},
+    {"text": "mixed-challenge-types", "passed": false, "evidence": "전부 개념 정의/용어 구분 문제. 숨겨진 전제조건 탐지, 함정 인식, 경험 법칙 적용, 영역 간 연결 문제 없음"},
+    {"text": "correct-feedback-deepens", "passed": false, "evidence": "정답에 추가 설명은 있으나 심화 질문이나 엣지 케이스 제시 없음. '정확합니다' + 부연으로 끝남"},
+    {"text": "incorrect-feedback-diagnoses", "passed": false, "evidence": "정답을 알려주고 왜 틀렸는지 설명하지��, 학습자의 사고 패턴 진단이나 지��� 축(terminology/precondition 등) 매핑 없음"},
+    {"text": "gap-analysis-present", "passed": false, "evidence": "점수 요약(3/5, 60%)과 강점/약점 목록은 있으나 ���조화된 갭 분석(지식 축 매핑, 공통 패턴, 구체적 다음 단계) 없음"},
+    {"text": "references-extract-content", "passed": false, "evidence": "이전 학습 자료(orient/extract) 참조 없음. 일반적인 데이터 분석 지식으로만 문제 생성"},
+    {"text": "file-saved", "passed": true, "evidence": "데이터분석_이해도_검증_퀴즈.md 존재"}
+  ]
+}

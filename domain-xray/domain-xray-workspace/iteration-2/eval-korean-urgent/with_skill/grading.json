@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-korean-urgent",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "has-anchor-points", "passed": true, "evidence": "'당신의 앵커 포인트' 4개: 온라인 쇼핑(주문→배송=SCM 축소판), 마트 진열대(재고관리), 음식점 주방(소규모 공급망), 프로젝트 관리(S&OP 사고방식)"},
+    {"text": "has-domain-landscape", "passed": true, "evidence": "7개 영역: 수요계획, 조달, 재고관리, 창고운영, 운송/배송, S&OP, SCM 시스템. 각 영역에 What/Why/핵심용어/연결"},
+    {"text": "has-priority-map", "passed": true, "evidence": "'시작: S&OP+수요계획 → 다음: 시스템+재고+조달 → 나중: 창고+운송'. 전략적 감독자 역할에 맞춰 프로세스 이해를 시스템 앞에 배치"},
+    {"text": "strategic-focus", "passed": true, "evidence": "'전략적 감독자 역할에 맞게, 실무 디테일보다 영역 간 관계와 의사결정 포인트를 중심으로 구성'. 시스템기획 맥락 반영"},
+    {"text": "output-in-korean", "passed": true, "evidence": "전체 한국어, SCM 전문용어는 영문 병기(적절)"},
+    {"text": "file-saved", "passed": true, "evidence": "domain-orient-supply-chain-management.md 존재"},
+    {"text": "scm-breadth", "passed": true, "evidence": "수요예측, 조달, 재고, 창고(WMS), 운송(TMS), S&OP, ERP/EDI/Control Tower 포함"}
+  ]
+}

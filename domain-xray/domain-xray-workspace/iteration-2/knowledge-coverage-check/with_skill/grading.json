@@ -1,0 +1,37 @@
+{
+  "eval_id": 2,
+  "eval_name": "knowledge-coverage-check",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "extract-auto-detected",
+      "passed": true,
+      "evidence": "extract 프롬프트 자동 감지 및 읽기 성공."
+    },
+    {
+      "text": "expert-role-adopted",
+      "passed": true,
+      "evidence": "20년 전문가 역할로 깊이 있는 지식 생성."
+    },
+    {
+      "text": "four-axes-substantive",
+      "passed": true,
+      "evidence": "4개 우선순위 stage 모두 4축 최소 기준 충족 (축당 1개 이상 구체적 시나리오). 3개 비우선순위 stage도 2축 이상 충족."
+    },
+    {
+      "text": "coverage-table-present",
+      "passed": true,
+      "evidence": "Coverage 테이블 포함, 4축 모두 Covered, 보충 불필요."
+    },
+    {
+      "text": "depth-over-volume",
+      "passed": true,
+      "evidence": "구체적 시나리오와 엣지케이스 포함."
+    },
+    {
+      "text": "highlights-presented",
+      "passed": true,
+      "evidence": "delivery_message.md에 핵심 하이라이트 제시."
+    }
+  ]
+}

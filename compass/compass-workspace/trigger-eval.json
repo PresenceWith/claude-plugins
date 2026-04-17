@@ -1,0 +1,22 @@
+[
+  {"query": "우리 팀이 신규 B2B SaaS를 기획하고 있어. 타겟은 중소 물류업체들이고, 배차 관리 + 실시간 추적 + 정산 자동화를 한 플랫폼에 넣고 싶어. 근데 팀원 4명이 각자 다른 우선순위를 주장해서 정리가 안 돼. MVP 범위부터 잡아줘.", "should_trigger": true},
+  {"query": "지금까지 회의에서 나온 내용이 너무 많아서 뭐가 결정된 건지 모르겠어. 인증은 Cognito로 확정, 프론트는 Next.js 확정인데 백엔드 언어(Go vs Rust), 메시지 큐(Kafka vs RabbitMQ), 캐시(Redis vs Memcached)가 다 미정이야. 한번 정리해주고 뭐부터 결정해야 하는지 알려줘.", "should_trigger": true},
+  {"query": "에듀테크 앱을 만들건데 기능이 너무 많아. 강의 영상, 퀴즈, 진도 추적, 토론 게시판, 과제 제출, AI 튜터, 학부모 대시보드, 출석 관리, 성적 분석, 수강 결제... 솔직히 뭐부터 해야 할지 감이 안 잡혀.", "should_trigger": true},
+  {"query": "우리 서비스의 사용자 여정을 시각화하고 싶어. 가입 → 온보딩 → 첫 프로젝트 생성 → 팀원 초대 → 유료 전환까지의 흐름에서 각 단계별 이탈 포인트랑 개선 아이디어를 정리하고 싶거든.", "should_trigger": true},
+  {"query": "우리 조직개편 논의가 3주째야. CTO가 원하는 구조, VP Eng이 원하는 구조, 현재 TL들 의견이 다 달라. 지금까지 합의된 건 프론트/백 분리 정도고 나머지는 다 열려있어. 이거 구조화 좀 해줘.", "should_trigger": true},
+  {"query": "이커머스 플랫폼 리뉴얼 프로젝트에서 기술 선택지가 너무 많아. 검색엔진(Elasticsearch vs Algolia vs Typesense), 결제(Stripe vs Toss Payments), 이미지 처리(Cloudinary vs imgproxy), CDN(CloudFront vs Fastly)... 각각 장단점 비교하고 우선순위 정해줘.", "should_trigger": true},
+  {"query": "지금 진행 중인 프로젝트 상황을 한눈에 볼 수 있게 대시보드로 만들어줘. 뭐가 끝났고 뭐가 진행 중이고 뭐가 아직 시작도 안 했는지 보고 싶어.", "should_trigger": true},
+  {"query": "우리 팀에서 분기 OKR을 설정하려고 하는데, 후보 목표가 12개나 있어. 매출 성장, 사용자 리텐션, 기술 부채 해소, 신규 채널 런칭, 팀 채용, 보안 인증... 다 중요한데 3개만 골라야 해. 기준을 세우고 정리하는 걸 도와줘.", "should_trigger": true},
+  {"query": "마이크로서비스 전환을 기획하고 있어. 현재 모놀리스에서 어떤 서비스를 먼저 분리할지, 서비스 간 통신 방식(gRPC vs REST vs 이벤트), 데이터 분리 전략, 배포 파이프라인까지 동시에 논의가 진행 중인데 토픽이 계속 점프해서 혼란스러워.", "should_trigger": true},
+  {"query": "우리 앱의 핵심 도메인 간 관계를 컨셉트맵으로 그려줘. 사용자, 주문, 상품, 결제, 배송, 리뷰가 어떻게 연결되는지 의존성이랑 데이터 흐름을 같이 보고 싶어.", "should_trigger": true},
+  {"query": "React 컴포넌트에서 useEffect 안에 async 함수를 쓰면 cleanup이 제대로 안 되는 문제가 있는데, AbortController로 해결하는 패턴 좀 보여줘.", "should_trigger": false},
+  {"query": "이 Python 스크립트에서 CSV 파일을 읽어서 중복 행을 제거하고 다시 저장하는 코드를 짜줘. 파일 경로는 data/sales_2024.csv이고 email 컬럼 기준으로 중복 체크하면 돼.", "should_trigger": false},
+  {"query": "Docker Compose로 PostgreSQL + Redis + 우리 Node.js 앱을 로컬에서 돌리는 docker-compose.yml 작성해줘. 포트는 5432, 6379, 3000으로.", "should_trigger": false},
+  {"query": "Git에서 실수로 main에 직접 커밋했어. 마지막 3개 커밋을 새 브랜치로 옮기고 main을 원래 상태로 되돌리는 방법 알려줘.", "should_trigger": false},
+  {"query": "TypeScript에서 Zod 스키마를 정의하고 그걸로 API 응답을 검증하는 유틸리티 함수를 만들어줘. 에러 시 커스텀 에러 타입을 throw하도록.", "should_trigger": false},
+  {"query": "src/components/UserProfile.tsx 파일에서 프로필 이미지 업로드 기능 추가해줘. S3 presigned URL 방식으로, 이미지 리사이즈는 sharp로 서버사이드에서 처리.", "should_trigger": false},
+  {"query": "Nginx 설정에서 /api/* 요청은 백엔드(localhost:8080)로, 나머지는 프론트(localhost:3000)로 리버스 프록시 설정해줘. SSL 인증서는 Let's Encrypt certbot으로.", "should_trigger": false},
+  {"query": "우리 모노레포에서 CI가 느려서 turborepo 캐싱을 적용하려고 해. turbo.json 설정이랑 GitHub Actions 워크플로우 수정 좀 도와줘. 현재 packages/web, packages/api, packages/shared 구조야.", "should_trigger": false},
+  {"query": "이 SQL 쿼리가 너무 느려. EXPLAIN ANALYZE 결과 보면 users 테이블에서 full scan 하고 있는데, 적절한 인덱스 추가하고 쿼리 최적화해줘. 테이블 스키마는 이거야: CREATE TABLE users (id uuid, email varchar, created_at timestamp, plan_type varchar)...", "should_trigger": false},
+  {"query": "Jest로 이 React hook(useAuth)에 대한 테스트를 작성해줘. 로그인 성공, 실패, 토큰 만료 케이스를 커버해야 하고 MSW로 API 모킹할 거야.", "should_trigger": false}
+]

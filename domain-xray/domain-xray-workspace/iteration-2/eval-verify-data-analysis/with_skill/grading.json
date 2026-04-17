@@ -1,0 +1,14 @@
+{
+  "eval_id": 5,
+  "eval_name": "eval-verify-data-analysis",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "scenario-based-challenges", "passed": true, "evidence": "5개 모두 현실적 실무 시나리오: ETL 장애 대응, 이탈률 분석 계획, EDA 상관관계 해석, 이상치 처리 판단, 스키마 변경 하류 영향. 단순 암기가 아닌 적용력 테스트"},
+    {"text": "mixed-challenge-types", "passed": true, "evidence": "5가지 타입 전부 사용: 1)용어맥락 2)숨겨진전제조건 3)함정인식 4)경험법칙 5)영역간연결"},
+    {"text": "correct-feedback-deepens", "passed": true, "evidence": "챌린지1: '스키마는 같지만 데이터 계약이 깨진 상황' 심화. 챌린지3: 역인과/교란변수/생존편향 대안 설명 + A/B테스트 설계 방법. 챌린지5: 데이터 거버넌스/카탈로그 연결"},
+    {"text": "incorrect-feedback-diagnoses", "passed": true, "evidence": "챌린지2: '기술적 단계에 집중하느라 비즈니스 정의 간과' → Hidden Precondition 축. 챌린지4: '도구 중심 사고의 전형' → Rule of Thumb 축. 각각 사고 패턴 진단 + 전문가 모델 대비"},
+    {"text": "gap-analysis-present", "passed": true, "evidence": "강한 영역(3개), 격차 영역(2개), 공통 패턴('기술먼저 맥락나중' 사고순서), 추천 다음 단계(3개, extract 파일 재독 + 실습 + /domain-extract 재실행 제안)"},
+    {"text": "references-extract-content", "passed": true, "evidence": "오리엔테이션 맵의 '질문 설계가 분석보다 어렵다' 직접 인용, extract의 우선순위 영역(SQL, 정제, EDA, 시각화)에서 시나리오 생성, '숨겨진 전제조건' 섹션 재독 권고"},
+    {"text": "file-saved", "passed": true, "evidence": "domain-verify-data-analysis.md 존재"}
+  ]
+}

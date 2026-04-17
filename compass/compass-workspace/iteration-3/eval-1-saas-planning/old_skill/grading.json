@@ -1,0 +1,10 @@
+{
+  "expectations": [
+    {"text": "정보 제한: 3-5개 핵심 항목만 먼저 제시하고, 나머지는 확장 가능하다고 안내", "passed": true, "evidence": "3개 핵심 기둥 + 1개 핵심 질문만 제시. '나머지 아이디어들(세부 기능, 기술 스택, 수익 모델 등)도 정리할 준비가 되어 있는데' 로 확장 가능성 안내"},
+    {"text": "위치 명시: 새로운 개념을 기존 맥락에 연결하여 설명", "passed": true, "evidence": "'프로젝트'를 연결고리로 제시하여 세 영역의 관계를 설명"},
+    {"text": "must-have vs nice-to-have 구분이 존재", "passed": true, "evidence": "'통합이 핵심 vs 한 영역이 핵심' 프레임으로 MVP 범위 결정 기준 제시, Behance/Bonsai 예시로 구체화"},
+    {"text": "상태 파일(.compass/state.md)이 생성됨", "passed": true, "evidence": "state.md 파일이 outputs/에 존재"},
+    {"text": "응답이 구조적이고 소화 가능한 분량", "passed": true, "evidence": "약 40줄이지만 섹션으로 잘 나뉘어 구조적이고 읽기 편함"}
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

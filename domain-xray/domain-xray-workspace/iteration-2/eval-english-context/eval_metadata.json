@@ -1,0 +1,37 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-english-context",
+  "prompt": "I'm transitioning into product management from engineering and need to understand the domain deeply before my first PM role starts next month",
+  "assertions": [
+    {
+      "name": "has-anchor-points",
+      "type": "contains_section",
+      "description": "Output contains 'Anchor Points' mapping engineering background to PM concepts"
+    },
+    {
+      "name": "engineering-bridge",
+      "type": "qualitative",
+      "description": "Anchor points explicitly reference engineering concepts as bridges (e.g., 'sprints → roadmapping', 'code review → stakeholder review')"
+    },
+    {
+      "name": "has-domain-landscape",
+      "type": "contains_section",
+      "description": "Output contains 'Domain Landscape' with 5-7 PM areas"
+    },
+    {
+      "name": "urgency-reflected",
+      "type": "qualitative",
+      "description": "Priority map reflects the 'next month' urgency — prioritizes what to learn first for Day 1"
+    },
+    {
+      "name": "has-priority-map",
+      "type": "contains_section",
+      "description": "Output contains 'Learning Priority Map' personalized to career transition"
+    },
+    {
+      "name": "file-saved",
+      "type": "file_exists",
+      "description": "A domain-orient-*.md file is saved to the outputs directory"
+    }
+  ]
+}

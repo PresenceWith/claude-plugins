@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-korean-urgent",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "has-anchor-points", "passed": false, "evidence": "앵커 포인트 섹션 없음. 학습자의 기존 경험과 SCM을 연결하지 않음"},
+    {"text": "has-domain-landscape", "passed": false, "evidence": "8개 핵심 모듈은 나열했으나 영역 간 관계/의존성 설명이 부족. 구조맵이 아닌 목록"},
+    {"text": "has-priority-map", "passed": false, "evidence": "학습 우선순위가 아닌 일반적 모듈 나열. 전략적 감독자 상황에 맞춘 시작/다음/나중 없음"},
+    {"text": "strategic-focus", "passed": false, "evidence": "전략적 감독자 맥락 반영 없음. 시스템 기획자로서의 특수한 니즈 미반영"},
+    {"text": "output-in-korean", "passed": true, "evidence": "전체 한국어 작성"},
+    {"text": "file-saved", "passed": true, "evidence": "scm-logistics-guide.md 존재"},
+    {"text": "scm-breadth", "passed": true, "evidence": "30개 핵심 용어, 8개 모듈로 SCM 넓이 커버"}
+  ]
+}

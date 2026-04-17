@@ -1,0 +1,178 @@
+{
+  "metadata": {
+    "skill_name": "compass",
+    "skill_path": "/Users/presence/dev/tools/claude-plugins/planning-compass/skills/compass",
+    "executor_model": "claude-opus-4-6",
+    "analyzer_model": "claude-opus-4-6",
+    "timestamp": "2026-03-30T07:30:00Z",
+    "evals_run": [1, 2, 3],
+    "runs_per_configuration": 3,
+    "notes": "Iteration 5: Visualization-focused evals (dashboard, mindmap, conceptmap). Tests template-based rendering pipeline after major refactoring (Templates+Rules, color-palette, CJK sizing, layout algorithms). Both with_skill (new) and old_skill (pre-iter-3 baseline) compared."
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "viz-dashboard",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 86.7,
+        "tokens": 26540,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "HTML file generated: dashboard.html exists in outputs", "passed": true, "evidence": "File exists at 8159 bytes"},
+        {"text": "Three-column layout: Decided, In Discussion, Undecided columns are present", "passed": true, "evidence": "CSS grid 1fr 1fr 1fr with three column divs"},
+        {"text": "Content fits viewport: No horizontal scrolling needed, max-width 960px", "passed": true, "evidence": "max-width: 960px with overflow-x: auto safety net"},
+        {"text": "Progress indicator: Shows decided count vs total (e.g., 3/7)", "passed": true, "evidence": "7개 항목 중 3개 결정 with segmented progress bar"},
+        {"text": "Correct classification: OAuth, PostgreSQL, React in Decided; API structure in In Discussion/Undecided", "passed": true, "evidence": "All classifications correct"},
+        {"text": "Dark theme applied: #0f0f1a background with status colors (green/yellow/gray)", "passed": true, "evidence": "#0f0f1a background, #4ade80/#facc15/#888 status colors"}
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "viz-dashboard",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 94.6,
+        "tokens": 22557,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "HTML file generated: dashboard.html exists in outputs", "passed": true, "evidence": "File exists at 10478 bytes"},
+        {"text": "Three-column layout: Decided, In Discussion, Undecided columns are present", "passed": true, "evidence": "CSS grid 1fr 1fr 1fr with three column divs"},
+        {"text": "Content fits viewport: No horizontal scrolling needed, max-width 960px", "passed": true, "evidence": "max-width: 960px with responsive breakpoint"},
+        {"text": "Progress indicator: Shows decided count vs total (e.g., 3/7)", "passed": true, "evidence": "7개 항목 중 3개 결정 with progress bar"},
+        {"text": "Correct classification: OAuth, PostgreSQL, React in Decided; API structure in In Discussion/Undecided", "passed": true, "evidence": "All classifications correct"},
+        {"text": "Dark theme applied: #0f0f1a background with status colors (green/yellow/gray)", "passed": true, "evidence": "#0f0f1a background with proper status colors"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "viz-mindmap",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 347.5,
+        "tokens": 53896,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "HTML file generated: mindmap.html exists in outputs", "passed": true, "evidence": "File exists at 17484 bytes"},
+        {"text": "Connector visibility: Lines connecting nodes to center are clearly visible against dark background", "passed": true, "evidence": "Category colors at ~67% alpha, stroke-width 2.5"},
+        {"text": "Cross-branch relationships: Inter-node dependencies shown as visual lines on the map", "passed": true, "evidence": "6 crossLinks rendered as SVG Bezier paths with labels"},
+        {"text": "Category color coding: Different branches use distinct colors with a legend", "passed": true, "evidence": "8 distinct colors with HTML legend div"},
+        {"text": "Central node present: Goal/project name at center with radial branch layout", "passed": true, "evidence": "Central circle at (600,600) with radial branches at 45-degree spacing"},
+        {"text": "CJK text rendering: Korean text fits within node boundaries without clipping", "passed": true, "evidence": "textWidth() function with CJK-aware glyph sizing (0.65em per CJK char + 40px padding)"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "viz-mindmap",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 141.6,
+        "tokens": 25998,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "HTML file generated: mindmap.html exists in outputs", "passed": true, "evidence": "File exists at 16952 bytes"},
+        {"text": "Connector visibility: Lines connecting nodes to center are clearly visible against dark background", "passed": true, "evidence": "Category colors at ~73% alpha (bb suffix), stroke-width 2.5"},
+        {"text": "Cross-branch relationships: Inter-node dependencies shown as visual lines on the map", "passed": true, "evidence": "6 crossLinks rendered as SVG Bezier paths"},
+        {"text": "Category color coding: Different branches use distinct colors with a legend", "passed": true, "evidence": "9 distinct colors with legend"},
+        {"text": "Central node present: Goal/project name at center with radial branch layout", "passed": true, "evidence": "Central circle at (480,480) with radial distribution"},
+        {"text": "CJK text rendering: Korean text fits within node boundaries without clipping", "passed": true, "evidence": "Fixed widths 110px core/95px detail adequate for Korean text lengths"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "viz-conceptmap",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 393.9,
+        "tokens": 59984,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "HTML file generated: conceptmap.html exists in outputs", "passed": true, "evidence": "File exists at 24228 bytes"},
+        {"text": "No content clipping: All nodes and labels fully visible without horizontal scroll", "passed": true, "evidence": "SVG viewBox 1060x780, all nodes within bounds"},
+        {"text": "Edge label deduplication: Same relation type not individually labeled on every edge", "passed": true, "evidence": "Relation types via legend, only unique flow labels on individual edges"},
+        {"text": "No node overlap: Sub-nodes within groups do not visually overlap each other", "passed": true, "evidence": "16px gaps between nodes, positions verified sequentially"},
+        {"text": "Domain grouping: Related concepts grouped inside visual regions with labels", "passed": true, "evidence": "4 labeled regions (포트폴리오, 소통, 견적서, 통합 플랫폼 코어)"},
+        {"text": "SVG viewBox: Uses dynamic viewBox with preserveAspectRatio, not hardcoded dimensions", "passed": true, "evidence": "width='100%' viewBox='0 0 1060 780' preserveAspectRatio='xMidYMid meet'"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "viz-conceptmap",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 166.5,
+        "tokens": 28017,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "HTML file generated: conceptmap.html exists in outputs", "passed": true, "evidence": "File exists at 450 lines"},
+        {"text": "No content clipping: All nodes and labels fully visible without horizontal scroll", "passed": true, "evidence": "SVG viewBox 960x720, all nodes within bounds"},
+        {"text": "Edge label deduplication: Same relation type not individually labeled on every edge", "passed": true, "evidence": "Dependency/containment types via legend only, unique flow labels on workflow edges"},
+        {"text": "No node overlap: Sub-nodes within groups do not visually overlap each other", "passed": true, "evidence": "Vertical gaps 19px between nodes, horizontal gaps 50px for infrastructure"},
+        {"text": "Domain grouping: Related concepts grouped inside visual regions with labels", "passed": true, "evidence": "4 labeled regions (포트폴리오, 소통, 견적서, 공유 인프라)"},
+        {"text": "SVG viewBox: Uses dynamic viewBox with preserveAspectRatio, not hardcoded dimensions", "passed": true, "evidence": "width='100%' viewBox='0 0 960 720' preserveAspectRatio='xMidYMid meet'"}
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0},
+      "time_seconds": {"mean": 276.0, "stddev": 164.6, "min": 86.7, "max": 393.9},
+      "tokens": {"mean": 46807, "stddev": 17842, "min": 26540, "max": 59984}
+    },
+    "old_skill": {
+      "pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0},
+      "time_seconds": {"mean": 134.2, "stddev": 37.3, "min": 94.6, "max": 166.5},
+      "tokens": {"mean": 25524, "stddev": 2741, "min": 22557, "max": 28017}
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "+141.8",
+      "tokens": "+21283"
+    }
+  },
+  "notes": [
+    "시각화 파이프라인 검증: 양 버전 모두 100% pass rate — 템플릿 기반 렌더링이 안정적으로 작동",
+    "Dashboard: 두 버전 모두 3-column layout, progress bar, dark theme, 정확한 분류. with_skill이 8KB vs old_skill 10KB — 비슷한 품질",
+    "Mindmap: 두 버전 모두 radial layout, visible connectors, cross-branch SVG lines, CJK-aware sizing. with_skill이 CJK textWidth() 함수로 더 명시적인 한글 처리",
+    "Conceptmap: 두 버전 모두 domain grouping, edge deduplication, no overlap, responsive SVG. with_skill이 24KB vs old_skill ~15KB — with_skill이 더 상세한 state.md 생성",
+    "CJK 처리 차이: with_skill의 mindmap은 charCode 기반 CJK 감지 + 가변 폭 계산. old_skill은 고정 폭(110px/95px) 사용 — 둘 다 현재 테스트에서는 충분",
+    "토큰/시간 비용: with_skill이 평균 2배 이상의 토큰(46.8K vs 25.5K)과 시간(276s vs 134s)을 소비. 원인: with_skill의 mindmap/conceptmap 에이전트가 render-validate 루프를 실행하며 Chrome 검증 시도 (43 tool calls vs old_skill의 10-11 tool calls). render-validate는 품질 보장에 기여하지만 비용이 큼",
+    "Dashboard는 비용 차이가 적음 (87s vs 95s) — HTML-based 시각화는 SVG 기반보다 생성이 단순"
+  ]
+}

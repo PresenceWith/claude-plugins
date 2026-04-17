@@ -1,0 +1,75 @@
+{
+  "expectations": [
+    {
+      "text": "HTML file generated: dashboard.html exists in outputs",
+      "passed": true,
+      "evidence": "dashboard.html exists in outputs directory, is 10,478 bytes, and contains a complete, valid HTML document with DOCTYPE, head, and body sections."
+    },
+    {
+      "text": "Three-column layout: Decided, In Discussion, Undecided columns are present",
+      "passed": true,
+      "evidence": "CSS uses grid-template-columns: 1fr 1fr 1fr. Three <div class=\"column\"> elements with headings: 'Decided' (h2 line 278), 'In Discussion' (h2 line 311), 'Undecided' (h2 line 329). Each column contains the appropriate cards."
+    },
+    {
+      "text": "Content fits viewport: No horizontal scrolling needed, max-width 960px",
+      "passed": true,
+      "evidence": ".container has max-width: 960px and margin: 0 auto. Responsive breakpoint at 700px collapses grid to single column (grid-template-columns: 1fr). No fixed widths that would cause overflow."
+    },
+    {
+      "text": "Progress indicator: Shows decided count vs total (e.g., 3/7)",
+      "passed": true,
+      "evidence": "progress-summary div contains '7개 항목 중 3개 결정' (Korean for '3 decided out of 7 items'). Also includes a segmented progress bar (42.86% decided, 14.28% active, 42.86% undecided) and legend labels showing '3 결정됨, 1 논의 중, 3 미결정'."
+    },
+    {
+      "text": "Correct classification: OAuth, PostgreSQL, React in Decided; API structure in In Discussion/Undecided",
+      "passed": true,
+      "evidence": "Decided column contains three cards: '사용자 인증' with decision 'OAuth', '데이터베이스' with decision 'PostgreSQL', '프론트엔드' with decision 'React'. In Discussion column contains 'API 구조' (API Structure) with options REST and GraphQL. All classifications match expectations."
+    },
+    {
+      "text": "Dark theme applied: #0f0f1a background with status colors (green/yellow/gray)",
+      "passed": true,
+      "evidence": "body background: #0f0f1a. Status colors: .decided uses #4ade80 (green), .active uses #facc15 (yellow), .undecided uses #888 (gray). These colors are consistently applied to headings, tags, progress bar segments, and card highlights."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "claims": [
+    {
+      "claim": "Dashboard shows 7 items total with 3 decided, 1 in discussion, 3 undecided",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Counted cards: Decided column has 3 cards (OAuth, PostgreSQL, React), In Discussion has 1 card (API Structure), Undecided has 3 cards (Deploy Strategy, Monitoring, CI/CD). Total = 7. Matches progress summary and state.md."
+    },
+    {
+      "claim": "Recommended decision order is provided",
+      "type": "factual",
+      "verified": true,
+      "evidence": "order-section at bottom shows: API 구조 -> 배포 전략 -> CI/CD -> 모니터링. This follows the dependency chain in state.md."
+    },
+    {
+      "claim": "Dashboard is responsive",
+      "type": "quality",
+      "verified": true,
+      "evidence": "CSS media query at max-width: 700px collapses grid to single column. Container uses max-width: 960px with auto margins."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Progress indicator: Shows decided count vs total (e.g., 3/7)",
+        "reason": "The assertion says 'e.g., 3/7' but the actual output uses Korean text '7개 항목 중 3개 결정'. Consider whether the eval should require a specific format (like '3/7') or accept any representation of the ratio. The current assertion is ambiguous about locale."
+      },
+      {
+        "reason": "No assertion checks that the HTML is well-formed or renderable (e.g., no unclosed tags, valid CSS). A broken HTML file could pass the file-existence check."
+      },
+      {
+        "reason": "No assertion checks the relationship/dependency information shown on cards. The dashboard includes dependency data ('API 구조와 연결', 'Frontend, Database에서 의존') which is a valuable feature worth verifying against the state model."
+      }
+    ],
+    "overall": "Assertions cover the key visual and structural requirements well. The main gap is locale sensitivity -- several assertions could be tripped by the Korean-language output if they were checked more literally. Consider adding an assertion for dependency/relation accuracy."
+  }
+}

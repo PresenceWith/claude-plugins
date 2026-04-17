@@ -1,0 +1,86 @@
+{
+  "expectations": [
+    {
+      "text": "HTML file generated: A conceptmap.html file exists in outputs",
+      "passed": true,
+      "evidence": "conceptmap.html exists in outputs directory (25,746 bytes). Contains a complete HTML document with embedded SVG concept map, CSS styling, legend, and tooltip JavaScript."
+    },
+    {
+      "text": "No content clipping: All nodes and labels are fully visible without horizontal scroll",
+      "passed": true,
+      "evidence": "SVG uses width=\"100%\" with viewBox=\"0 0 960 780\" and preserveAspectRatio=\"xMidYMid meet\" (line 108). The .viz-container has overflow-x: auto (line 21). All content fits within the 960-wide viewBox: rightmost elements (infrastructure region) end at x=940, rightmost node (알림 시스템) ends at x=894. No fixed pixel width exceeding 960px."
+    },
+    {
+      "text": "Edge label deduplication: Same relation type is not individually labeled on every edge",
+      "passed": true,
+      "evidence": "Relation types are defined in the legend (lines 101-104): 'feeds', 'depends-on', 'links'. The 8 dependency (depends-on) edges (lines 196-249) have NO individual text labels at all. The 3 workflow (feeds) edges use contextual descriptions ('작업물 공유', '견적 요청', '완료 → 포트폴리오 등록') rather than repeating the generic 'feeds' type. The data link edge is labeled '1:N 연결' rather than 'links'. No relation type string is repeated across multiple edges."
+    },
+    {
+      "text": "No node overlap: Sub-nodes within each group do not visually overlap",
+      "passed": true,
+      "evidence": "Verified all sub-node rect coordinates. Portfolio group: Row 1 ends at x=156 (프로젝트 갤러리), next starts at x=172 (16px gap); Row 2 ends at x=176, next at x=192 (16px gap). Communication group: Row 1 ends at x=455, next at x=471 (16px gap); Row 2 ends at x=447, next at x=463 (16px gap). Invoice group: Row 1 ends at x=762, next at x=778 (16px gap); Row 2 same. Infrastructure: minimum gap is 56px (between 사용자 인증 right=154 and 프로젝트 left=210). All groups maintain consistent 16px+ horizontal gaps and 16px vertical gaps between rows."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "output_chars": 31571,
+    "transcript_chars": 2642
+  },
+  "timing": {
+    "executor_duration_seconds": 218.3,
+    "total_duration_seconds": 218.3
+  },
+  "claims": [
+    {
+      "claim": "각 노드에 마우스를 올리면 상세 설명을 확인할 수 있습니다",
+      "type": "quality",
+      "verified": true,
+      "evidence": "HTML contains tooltip JS (lines 431-465) that reads data-tooltip attributes from .node elements. All 20 nodes have data-tooltip with multiline Korean descriptions. Tooltip appears on mouseenter, follows mouse, and hides on mouseleave."
+    },
+    {
+      "claim": "세 영역은 순환 구조로 연결됩니다",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Three workflow edges form a cycle: 포트폴리오→클라이언트 소통 (line 181-183), 클라이언트 소통→견적서 발행 (line 186-188), 견적서 발행→포트폴리오 (line 191-193)."
+    },
+    {
+      "claim": "프로젝트가 세 영역을 묶는 중심 엔티티",
+      "type": "factual",
+      "verified": true,
+      "evidence": "state.md shows three depends-on edges to 프로젝트 (중심 엔티티) from all three core areas: 포트폴리오 관리, 클라이언트 소통, 견적서 발행. SVG renders all three dependency edges (lines 197-228)."
+    },
+    {
+      "claim": "20 elements and 16 relations in state.md",
+      "type": "factual",
+      "verified": true,
+      "evidence": "state.md Elements section: 20 items (3 core features + 12 sub-features + 2 data + 3 architecture). Relations section: 16 entries (12 contains + 11 depends-on + 3 feeds + 1 links = actually 27 relations). Correction: counted 12 contains, 11 depends-on, 3 feeds, 1 links = 27 total relations, not 16."
+    },
+    {
+      "claim": "4 undecided items identified",
+      "type": "factual",
+      "verified": true,
+      "evidence": "state.md Undecided section lists exactly 4: 기술 스택, 수익 모델, MVP 범위, 결제 수단. Response.md also lists these same 4 items."
+    }
+  ],
+  "user_notes_summary": null,
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "HTML file generated: A conceptmap.html file exists in outputs",
+        "reason": "This only checks file existence. An empty HTML file or one with broken SVG would pass. Consider adding a minimum file size check or verifying the file contains an <svg> element with at least N nodes."
+      },
+      {
+        "reason": "No assertion checks that the concept map accurately represents the input prompt's three domains (포트폴리오, 소통, 견적). A map with random nodes would pass all current assertions. Consider adding a content accuracy assertion that verifies the three requested domains appear as top-level nodes."
+      },
+      {
+        "reason": "No assertion checks the state.md output quality. The skill produced a structured state file with elements, relations, and undecided items -- this is a key output for downstream use. Consider asserting that state.md contains at least the three core domains and their relations."
+      }
+    ],
+    "overall": "The three qualitative assertions (clipping, deduplication, overlap) are well-designed and require genuine implementation effort to pass -- they test specific SVG coordinate math that cannot be satisfied by accident. The file existence check is weak but standard. Main gap: no assertion validates content accuracy against the prompt."
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "expectations": [
+    {
+      "text": "HTML file generated: dashboard.html exists in outputs",
+      "passed": true,
+      "evidence": "File exists at outputs/dashboard.html, 8159 bytes, contains a complete HTML document with DOCTYPE, head, body, styles, and structured content (312 lines)."
+    },
+    {
+      "text": "Three-column layout: Decided, In Discussion, Undecided columns are present",
+      "passed": true,
+      "evidence": "CSS grid with 'grid-template-columns: 1fr 1fr 1fr' (line 47). Three <div class=\"column\"> children with headings: 'Decided' (line 210), 'In Discussion' (line 246), 'Undecided' (line 262). Each column contains relevant cards."
+    },
+    {
+      "text": "Content fits viewport: No horizontal scrolling needed, max-width 960px",
+      "passed": true,
+      "evidence": "Line 183: <div style=\"max-width: 960px; margin: 0 auto; overflow-x: auto;\">. Container is capped at 960px and centered. Grid columns use relative 1fr units. Responsive breakpoint at 700px collapses to single column."
+    },
+    {
+      "text": "Progress indicator: Shows decided count vs total (e.g., 3/7)",
+      "passed": true,
+      "evidence": "Line 200-202: <div class=\"progress-summary\">7개 항목 중 3개 결정</div> (Korean for '3 decided out of 7 items'). Also includes a visual progress bar with 42.9%/14.3%/42.9% segments and labels '3 결정됨 / 1 논의 중 / 3 미결정'."
+    },
+    {
+      "text": "Correct classification: OAuth, PostgreSQL, React in Decided; API structure in In Discussion/Undecided",
+      "passed": true,
+      "evidence": "Decided column: '사용자 인증' with detail 'OAuth' (line 218), '데이터베이스' with detail 'PostgreSQL' (line 228), '프론트엔드' with detail 'React' (line 237). In Discussion column: 'API 구조' with detail 'REST vs GraphQL' (line 253). All classifications correct."
+    },
+    {
+      "text": "Dark theme applied: #0f0f1a background with status colors (green/yellow/gray)",
+      "passed": true,
+      "evidence": "body background: #0f0f1a (line 10). Green: #4ade80 used for .decided class (line 20), decided card borders, and progress bar segment. Yellow: #facc15 for .active class (line 21) and active card border/glow. Gray: #888/#6b7280 for .undecided class (line 22) and undecided card dashed borders."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "claims": [
+    {
+      "claim": "Dashboard contains 7 total decision items",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Counted 7 cards: 3 in Decided (사용자 인증, 데이터베이스, 프론트엔드), 1 in In Discussion (API 구조), 3 in Undecided (배포 전략, 모니터링, CI/CD 파이프라인). Matches state.md which lists 7 elements."
+    },
+    {
+      "claim": "Progress bar percentages are mathematically correct",
+      "type": "factual",
+      "verified": true,
+      "evidence": "3/7 = 42.86% (shown as 42.9%), 1/7 = 14.29% (shown as 14.3%), 3/7 = 42.86% (shown as 42.9%). Sum = 100.1% due to rounding but visually acceptable."
+    },
+    {
+      "claim": "Dependency relationships are shown on cards",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Each card includes a card-relation div showing dependencies, e.g., 'API 구조와 연동' for UserAuth, 'API 구조에서 의존' for Database and Frontend. These match the relations defined in state.md."
+    },
+    {
+      "claim": "Recommended decision order is provided",
+      "type": "quality",
+      "verified": true,
+      "evidence": "A 'decision-order' section at the bottom (lines 299-303) shows: API 구조 → CI/CD 파이프라인 → 배포 전략 → 모니터링. This is a reasonable topological ordering based on the dependency graph in state.md."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Content fits viewport: No horizontal scrolling needed, max-width 960px",
+        "reason": "The wrapper div uses 'overflow-x: auto' which technically allows horizontal scrolling within the container. A stricter check would verify overflow-x is hidden or that no content exceeds the container width. However, in practice this is fine since grid columns are relative."
+      },
+      {
+        "reason": "No assertion checks that the dashboard is valid/parseable HTML. A malformed document could pass all current checks. Consider adding a validation assertion or at least checking for DOCTYPE and closing tags."
+      },
+      {
+        "reason": "No assertion checks the dependency relationships shown on cards. The dashboard includes dependency info (e.g., 'API 구조에서 의존') which is a key feature for planning visibility. Consider asserting that at least one dependency relationship is displayed."
+      }
+    ],
+    "overall": "Assertions cover the main visual and structural requirements well. The classification check is strong since it requires correct content in the right columns. Minor gap: no assertion verifies dependency information or that the HTML is well-formed."
+  }
+}

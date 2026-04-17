@@ -1,0 +1,10 @@
+{
+  "name": "planning-compass",
+  "version": "0.1.0",
+  "description": "Reduce cognitive overload during complex planning conversations with adaptive visualization and structured process interventions.",
+  "author": {
+    "name": "presence",
+    "email": "sleet0328@gmail.com"
+  },
+  "keywords": ["planning", "cognitive-load", "visualization", "compass"]
+}

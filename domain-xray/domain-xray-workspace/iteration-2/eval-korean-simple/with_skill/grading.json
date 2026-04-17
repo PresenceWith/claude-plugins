@@ -1,0 +1,14 @@
+{
+  "eval_id": 0,
+  "eval_name": "eval-korean-simple",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "has-anchor-points", "passed": true, "evidence": "'당신의 출발점 (앵커 포인트)' 섹션에 4개 구체적 앵커(가계부, 비교 쇼핑, 날씨 예보, 요리 레시피)를 사전지식 제로 학습자에게 맞춰 제시"},
+    {"text": "has-domain-landscape", "passed": true, "evidence": "'도메인 전체 지형' 섹션에 7개 영역: 데이터 수집/저장, 정제/전처리, EDA, 통계분석, 시각화, BI 리포팅, 커뮤니케이션. 각 영역에 What/Why/핵심용어/연결 구조"},
+    {"text": "has-priority-map", "passed": true, "evidence": "'학습 우선순위 맵'에 시작/다음/나중 3단계로 상황 맞춤 순서 제시. SQL→정제→EDA→시각화→통계→BI→커뮤니케이션"},
+    {"text": "has-knowledge-gaps", "passed": true, "evidence": "'전문가는 알지만 초보자는 모르는 것' 5개 항목: 정답 없음, 질문 설계, 상관≠인과, 없는 데이터, 사고방식>도구"},
+    {"text": "output-in-korean", "passed": true, "evidence": "전체 문서가 한국어로 작성됨"},
+    {"text": "file-saved", "passed": true, "evidence": "domain-orient-data-analysis.md 파일 존재"},
+    {"text": "concise-not-encyclopedic", "passed": true, "evidence": "각 영역 4-6줄 수준. 전체 약 110줄, 지도형 구조 유지"}
+  ]
+}

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Status Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 24px; }
+    .meta { color: #666; font-size: 11px; margin-top: 24px; text-align: right; }
+
+    .decided { color: #4ade80; }
+    .active { color: #facc15; }
+    .undecided { color: #888; }
+
+    .card {
+      background: #1a1a2e;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 8px 0;
+      border: 1px solid #2a2a4a;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    /* Dashboard layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .column-header {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .column-header .count {
+      font-size: 12px;
+      font-weight: 400;
+      opacity: 0.6;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .status-indicator.green { background: #4ade80; }
+    .status-indicator.yellow { background: #facc15; animation: pulse 2s ease-in-out infinite; }
+    .status-indicator.gray { background: #555; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .card-detail {
+      font-size: 12px;
+      color: #999;
+      line-height: 1.5;
+    }
+
+    .card-options {
+      font-size: 12px;
+      color: #bbb;
+      margin-top: 6px;
+    }
+
+    .card-options .option {
+      display: inline-block;
+      background: #252545;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin: 2px 4px 2px 0;
+      font-size: 11px;
+    }
+
+    .card.highlight {
+      border-color: #facc15;
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.1);
+    }
+
+    .card .tag.decided-tag {
+      background: rgba(74, 222, 128, 0.15);
+      color: #4ade80;
+    }
+    .card .tag.active-tag {
+      background: rgba(250, 204, 21, 0.15);
+      color: #facc15;
+    }
+    .card .tag.undecided-tag {
+      background: rgba(136, 136, 136, 0.15);
+      color: #888;
+    }
+
+    .card .tag.new-tag {
+      background: rgba(99, 102, 241, 0.2);
+      color: #818cf8;
+      margin-left: 6px;
+    }
+
+    /* Progress bar */
+    .progress-section {
+      margin-bottom: 24px;
+    }
+    .progress-bar-container {
+      background: #1a1a2e;
+      border-radius: 8px;
+      height: 8px;
+      overflow: hidden;
+      display: flex;
+      margin-top: 8px;
+    }
+    .progress-bar-decided {
+      background: #4ade80;
+      height: 100%;
+      transition: width 0.5s ease;
+    }
+    .progress-bar-active {
+      background: #facc15;
+      height: 100%;
+      transition: width 0.5s ease;
+    }
+    .progress-bar-undecided {
+      background: #333;
+      height: 100%;
+      transition: width 0.5s ease;
+    }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 11px;
+      color: #888;
+    }
+
+    /* Relation hint */
+    .relation-hint {
+      font-size: 11px;
+      color: #666;
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px solid #2a2a4a;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Planning Compass — Status Dashboard</h1>
+  <p class="subtitle">내부 도구 프로젝트 의사결정 현황</p>
+
+  <!-- Progress overview -->
+  <div class="progress-section">
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <span style="font-size: 13px; color: #bbb;">전체 진행률</span>
+      <span style="font-size: 13px; color: #bbb;">7개 항목 중 <span class="decided">3개 결정</span></span>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar-decided" style="width: 42.8%;"></div>
+      <div class="progress-bar-active" style="width: 14.3%;"></div>
+      <div class="progress-bar-undecided" style="width: 42.8%;"></div>
+    </div>
+    <div class="progress-labels">
+      <span><span class="decided">3 결정됨</span></span>
+      <span><span class="active">1 논의 중</span></span>
+      <span><span class="undecided">3 미결정</span></span>
+    </div>
+  </div>
+
+  <!-- Three-column dashboard -->
+  <div class="dashboard-grid">
+    <!-- Decided column -->
+    <div>
+      <div class="column-header">
+        <span class="status-indicator green"></span>
+        <span class="decided">결정됨</span>
+        <span class="count">3</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          Authentication
+          <span class="tag decided-tag">결정</span>
+        </div>
+        <div class="card-detail">
+          OAuth
+        </div>
+        <div class="relation-hint">Frontend에서 의존</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          Frontend
+          <span class="tag decided-tag">결정</span>
+        </div>
+        <div class="card-detail">
+          React
+        </div>
+        <div class="relation-hint">API Structure와 통신</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          Database
+          <span class="tag decided-tag">결정</span>
+          <span class="tag new-tag">NEW</span>
+        </div>
+        <div class="card-detail">
+          PostgreSQL
+        </div>
+        <div class="relation-hint">API Structure가 의존</div>
+      </div>
+    </div>
+
+    <!-- In Discussion column -->
+    <div>
+      <div class="column-header">
+        <span class="status-indicator yellow"></span>
+        <span class="active">논의 중</span>
+        <span class="count">1</span>
+      </div>
+
+      <div class="card highlight">
+        <div class="card-title">
+          API Structure
+          <span class="tag active-tag">논의 중</span>
+        </div>
+        <div class="card-detail">현재 활발히 논의 중인 주제</div>
+        <div class="card-options">
+          <span class="option">REST</span>
+          <span class="option">GraphQL</span>
+        </div>
+        <div class="relation-hint">Frontend, Database와 연결됨</div>
+      </div>
+    </div>
+
+    <!-- Undecided column -->
+    <div>
+      <div class="column-header">
+        <span class="status-indicator gray"></span>
+        <span class="undecided">미결정</span>
+        <span class="count">3</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          Monitoring
+          <span class="tag undecided-tag">미결정</span>
+        </div>
+        <div class="card-detail">아직 논의되지 않음</div>
+        <div class="relation-hint">Deployment Strategy에 의존</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          CI/CD Pipeline
+          <span class="tag undecided-tag">미결정</span>
+        </div>
+        <div class="card-detail">아직 결정되지 않음</div>
+        <div class="relation-hint">Deployment Strategy 이전에 결정 필요</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          Deployment Strategy
+          <span class="tag undecided-tag">미결정</span>
+        </div>
+        <div class="card-detail">아직 논의되지 않음</div>
+        <div class="relation-hint">CI/CD, Monitoring과 연결됨</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="meta">
+    Last updated: 2026-03-29 · Planning Compass
+  </div>
+</body>
+</html>

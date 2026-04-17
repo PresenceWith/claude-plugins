@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-english-context",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "has-anchor-points", "passed": false, "evidence": "Mentions 'engineering background is an advantage' briefly but no structured anchor points section mapping specific eng concepts to PM equivalents"},
+    {"text": "engineering-bridge", "passed": false, "evidence": "Some implicit bridges (mentions mindset shifts from builder to enabler) but not explicit concept-to-concept mapping"},
+    {"text": "has-domain-landscape", "passed": false, "evidence": "Lists PM responsibilities but not a structured domain landscape with areas, relationships, and vocabulary per area"},
+    {"text": "urgency-reflected", "passed": true, "evidence": "'First 30 days plan' broken into weekly goals — addresses the urgency well"},
+    {"text": "has-priority-map", "passed": false, "evidence": "Has a 30-day plan but not a domain-area priority map (start/next/later by domain area)"},
+    {"text": "file-saved", "passed": true, "evidence": "product-management-guide.md exists"}
+  ]
+}

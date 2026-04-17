@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Flowchart</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 32px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; text-align: center; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 28px; text-align: center; }
+    .container { overflow-x: auto; width: 100%; max-width: 960px; }
+    svg { width: 100%; height: auto; }
+    .legend {
+      display: flex;
+      gap: 24px;
+      margin-top: 24px;
+      padding: 12px 20px;
+      background: #1a1a2e;
+      border-radius: 10px;
+      border: 1px solid #2a2a4a;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: #a0a0b0;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .meta { color: #666; font-size: 11px; margin-top: 20px; text-align: right; width: 100%; max-width: 960px; }
+  </style>
+</head>
+<body>
+  <h1>Planning Compass — Flowchart</h1>
+  <p class="subtitle">사용자 온보딩 프로세스 — 가입부터 활성 사용자까지</p>
+
+  <div class="container">
+    <svg viewBox="0 0 900 960" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <marker id="arr-main" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto-start-reverse">
+          <polygon points="0,1 10,4 0,7" fill="#6366f1"/>
+        </marker>
+        <marker id="arr-done" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto-start-reverse">
+          <polygon points="0,1 10,4 0,7" fill="#4ade80"/>
+        </marker>
+        <marker id="arr-alt" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto-start-reverse">
+          <polygon points="0,1 10,4 0,7" fill="#f87171"/>
+        </marker>
+        <marker id="arr-skip" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto-start-reverse">
+          <polygon points="0,1 10,4 0,7" fill="#888"/>
+        </marker>
+
+        <filter id="glow-start" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="6" result="blur"/>
+          <feFlood flood-color="#6366f1" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="glow"/>
+          <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-end" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="6" result="blur"/>
+          <feFlood flood-color="#4ade80" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="glow"/>
+          <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-active" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="6" result="blur"/>
+          <feFlood flood-color="#facc15" flood-opacity="0.25" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="glow"/>
+          <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+
+        <linearGradient id="grad-active" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#1a1a2e"/>
+          <stop offset="100%" style="stop-color:#1e1b3a"/>
+        </linearGradient>
+
+        <!-- Progress rail gradient (completed portion) -->
+        <linearGradient id="rail-done" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#4ade80" stop-opacity="0.12"/>
+          <stop offset="100%" stop-color="#4ade80" stop-opacity="0.03"/>
+        </linearGradient>
+      </defs>
+
+      <!-- ========== PROGRESS RAIL (background track) ========== -->
+      <!-- Completed section background -->
+      <rect x="300" y="30" width="300" height="360" rx="12" fill="url(#rail-done)" stroke="none"/>
+
+      <!-- Vertical guide rail -->
+      <line x1="450" y1="50" x2="450" y2="920" stroke="#1e1e36" stroke-width="1" stroke-dasharray="4,8"/>
+
+      <!-- ========== ARROWS ========== -->
+
+      <!-- Start → Step 1 -->
+      <line x1="450" y1="70" x2="450" y2="102" stroke="#4ade80" stroke-width="2" marker-end="url(#arr-done)"/>
+      <!-- Step 1 → Step 2 -->
+      <line x1="450" y1="168" x2="450" y2="200" stroke="#4ade80" stroke-width="2" marker-end="url(#arr-done)"/>
+      <!-- Step 2 → Decision: Valid? -->
+      <line x1="450" y1="262" x2="450" y2="284" stroke="#4ade80" stroke-width="2" marker-end="url(#arr-done)"/>
+      <!-- Decision Yes → Step 3 -->
+      <line x1="450" y1="360" x2="450" y2="400" stroke="#6366f1" stroke-width="2" marker-end="url(#arr-main)"/>
+      <!-- Branch label pill -->
+      <rect x="457" y="370" width="36" height="17" rx="8" fill="#4ade8018" stroke="#4ade8030" stroke-width="0.5"/>
+      <text x="475" y="382" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="700">유효</text>
+
+      <!-- Decision No → Error -->
+      <path d="M 410,322 L 270,322" stroke="#f87171" stroke-width="2" stroke-dasharray="6,3" fill="none" marker-end="url(#arr-alt)"/>
+      <rect x="300" y="305" width="36" height="17" rx="8" fill="#f8717118" stroke="#f8717130" stroke-width="0.5"/>
+      <text x="318" y="317" text-anchor="middle" fill="#f87171" font-size="10" font-weight="700">무효</text>
+
+      <!-- Error → back to Step 1 -->
+      <path d="M 200,300 C 160,300 140,280 140,220 C 140,160 160,130 350,130"
+            stroke="#f87171" stroke-width="1.5" stroke-dasharray="6,3" fill="none" marker-end="url(#arr-alt)"/>
+      <rect x="110" y="210" width="70" height="17" rx="8" fill="#0f0f1a" stroke="#f8717130" stroke-width="0.5"/>
+      <text x="145" y="222" text-anchor="middle" fill="#f87171" font-size="9" font-weight="600">재입력 요청</text>
+
+      <!-- Step 3 → Decision: Auth Method -->
+      <line x1="450" y1="466" x2="450" y2="492" stroke="#6366f1" stroke-width="2" marker-end="url(#arr-main)"/>
+
+      <!-- Auth Diamond: Social → Social Auth -->
+      <line x1="492" y1="538" x2="630" y2="538" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr-main)"/>
+      <rect x="535" y="523" width="36" height="17" rx="8" fill="#38bdf818" stroke="#38bdf830" stroke-width="0.5"/>
+      <text x="553" y="535" text-anchor="middle" fill="#38bdf8" font-size="10" font-weight="700">소셜</text>
+
+      <!-- Auth Diamond: Email → Step 4 -->
+      <line x1="450" y1="580" x2="450" y2="618" stroke="#6366f1" stroke-width="2" marker-end="url(#arr-main)"/>
+      <rect x="457" y="590" width="44" height="17" rx="8" fill="#6366f118" stroke="#6366f130" stroke-width="0.5"/>
+      <text x="479" y="602" text-anchor="middle" fill="#6366f1" font-size="10" font-weight="700">이메일</text>
+
+      <!-- Social Auth merge → Step 4 -->
+      <path d="M 720,568 L 720,660 L 555,660"
+            stroke="#38bdf8" stroke-width="1.5" fill="none" marker-end="url(#arr-main)"/>
+
+      <!-- Step 4 → Step 5 -->
+      <line x1="450" y1="690" x2="450" y2="728" stroke="#6366f1" stroke-width="2" marker-end="url(#arr-main)"/>
+      <!-- Step 5 → Decision: Complete? -->
+      <line x1="450" y1="792" x2="450" y2="814" stroke="#6366f1" stroke-width="2" marker-end="url(#arr-main)"/>
+      <!-- Complete → End -->
+      <line x1="450" y1="882" x2="450" y2="905" stroke="#4ade80" stroke-width="2" marker-end="url(#arr-done)"/>
+      <rect x="457" y="888" width="36" height="17" rx="8" fill="#4ade8018" stroke="#4ade8030" stroke-width="0.5"/>
+      <text x="475" y="900" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="700">완료</text>
+
+      <!-- Skip → End -->
+      <path d="M 492,848 L 570,848 L 570,935 L 540,935"
+            stroke="#888" stroke-width="1.5" stroke-dasharray="6,3" fill="none" marker-end="url(#arr-skip)"/>
+      <rect x="575" y="882" width="56" height="17" rx="8" fill="#0f0f1a" stroke="#88888830" stroke-width="0.5"/>
+      <text x="603" y="894" text-anchor="middle" fill="#888" font-size="9" font-weight="600">건너뛰기</text>
+
+      <!-- ========== STEP NUMBER BADGES ========== -->
+      <!-- Step numbers as prominent colored circles -->
+      <circle cx="330" cy="135" r="13" fill="#4ade8015" stroke="#4ade8060" stroke-width="1.5"/>
+      <text x="330" y="139" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="bold">1</text>
+
+      <circle cx="330" cy="232" r="13" fill="#4ade8015" stroke="#4ade8060" stroke-width="1.5"/>
+      <text x="330" y="236" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="bold">2</text>
+
+      <circle cx="330" cy="433" r="13" fill="#facc1515" stroke="#facc1560" stroke-width="1.5"/>
+      <text x="330" y="437" text-anchor="middle" fill="#facc15" font-size="11" font-weight="bold">3</text>
+
+      <circle cx="330" cy="655" r="13" fill="#6366f110" stroke="#6366f140" stroke-width="1.5"/>
+      <text x="330" y="659" text-anchor="middle" fill="#6366f1" font-size="11" font-weight="bold">4</text>
+
+      <circle cx="330" cy="760" r="13" fill="#6366f110" stroke="#6366f140" stroke-width="1.5"/>
+      <text x="330" y="764" text-anchor="middle" fill="#6366f1" font-size="11" font-weight="bold">5</text>
+
+      <!-- ========== NODES ========== -->
+
+      <!-- START -->
+      <g filter="url(#glow-start)">
+        <rect x="370" y="30" width="160" height="40" rx="20"
+              fill="#1a1a2e" stroke="#6366f1" stroke-width="2.5"/>
+        <text x="450" y="52" text-anchor="middle" dominant-baseline="central"
+              fill="#e2e8f0" font-size="13" font-weight="bold">회원가입 시작</text>
+      </g>
+
+      <!-- Step 1: Email Input (completed) -->
+      <rect x="345" y="102" width="210" height="66" rx="10"
+            fill="#1a1a2e" stroke="#4ade80" stroke-width="2"/>
+      <rect x="345" y="102" width="210" height="5" rx="2.5" fill="#4ade80" opacity="0.5"/>
+      <circle cx="368" cy="122" r="9" fill="#4ade8020" stroke="#4ade80" stroke-width="1"/>
+      <text x="368" y="125" text-anchor="middle" dominant-baseline="central" fill="#4ade80" font-size="9" font-weight="bold">✓</text>
+      <text x="450" y="132" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="bold">이메일 입력</text>
+      <text x="450" y="154" text-anchor="middle" fill="#94a3b8" font-size="10">이메일 주소 수집 및 중복 확인</text>
+
+      <!-- Step 2: Validation (completed) -->
+      <rect x="345" y="200" width="210" height="62" rx="10"
+            fill="#1a1a2e" stroke="#4ade80" stroke-width="2"/>
+      <rect x="345" y="200" width="210" height="5" rx="2.5" fill="#4ade80" opacity="0.5"/>
+      <circle cx="368" cy="220" r="9" fill="#4ade8020" stroke="#4ade80" stroke-width="1"/>
+      <text x="368" y="223" text-anchor="middle" dominant-baseline="central" fill="#4ade80" font-size="9" font-weight="bold">✓</text>
+      <text x="450" y="228" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="bold">이메일 검증</text>
+      <text x="450" y="249" text-anchor="middle" fill="#94a3b8" font-size="10">인증 코드 발송 및 확인</text>
+
+      <!-- Error node -->
+      <rect x="200" y="297" width="70" height="50" rx="8"
+            fill="#1a1a2e" stroke="#f87171" stroke-width="2"/>
+      <rect x="200" y="297" width="70" height="4" rx="2" fill="#f87171" opacity="0.4"/>
+      <text x="235" y="319" text-anchor="middle" fill="#f87171" font-size="12" font-weight="700">오류</text>
+      <text x="235" y="336" text-anchor="middle" fill="#94a3b8" font-size="9">형식 오류</text>
+
+      <!-- Decision: Valid? -->
+      <g>
+        <rect x="413" y="287" width="74" height="74" rx="4"
+              transform="rotate(45, 450, 324)"
+              fill="#1a1a2e" stroke="#facc15" stroke-width="2.5"/>
+        <text x="450" y="327" text-anchor="middle" dominant-baseline="central"
+              fill="#facc15" font-size="13" font-weight="bold">유효?</text>
+      </g>
+
+      <!-- Step 3: Password (active) -->
+      <g filter="url(#glow-active)">
+        <rect x="345" y="400" width="210" height="66" rx="10"
+              fill="url(#grad-active)" stroke="#facc15" stroke-width="2.5"/>
+        <rect x="345" y="400" width="210" height="5" rx="2.5" fill="#facc15" opacity="0.6"/>
+      </g>
+      <circle cx="368" cy="420" r="6" fill="#facc15">
+        <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <text x="450" y="430" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="bold">비밀번호 설정</text>
+      <text x="450" y="452" text-anchor="middle" fill="#facc15" font-size="10">현재 단계 · 강도 검증 포함</text>
+
+      <!-- Decision: Auth Method? -->
+      <g>
+        <rect x="409" y="497" width="82" height="82" rx="4"
+              transform="rotate(45, 450, 538)"
+              fill="#1a1a2e" stroke="#facc15" stroke-width="2"/>
+        <text x="450" y="532" text-anchor="middle" dominant-baseline="central"
+              fill="#e2e8f0" font-size="12" font-weight="bold">인증</text>
+        <text x="450" y="549" text-anchor="middle" dominant-baseline="central"
+              fill="#e2e8f0" font-size="12" font-weight="bold">방식?</text>
+      </g>
+
+      <!-- Social Auth (right branch) -->
+      <rect x="630" y="510" width="180" height="58" rx="10"
+            fill="#1a1a2e" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="720" y="534" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="600">소셜 인증</text>
+      <text x="720" y="555" text-anchor="middle" fill="#94a3b8" font-size="10">Google · GitHub · Apple</text>
+
+      <!-- Step 4: Profile Setup -->
+      <rect x="345" y="618" width="210" height="72" rx="10"
+            fill="#1a1a2e" stroke="#4a4a7a" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="450" y="648" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="600">프로필 설정</text>
+      <text x="450" y="672" text-anchor="middle" fill="#94a3b8" font-size="10">이름, 역할, 프로필 사진 (선택)</text>
+
+      <!-- Step 5: Onboarding Tour -->
+      <rect x="345" y="728" width="210" height="64" rx="10"
+            fill="#1a1a2e" stroke="#4a4a7a" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="450" y="754" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="600">온보딩 투어</text>
+      <text x="450" y="776" text-anchor="middle" fill="#94a3b8" font-size="10">핵심 기능 안내 (3단계)</text>
+
+      <!-- Decision: Complete? -->
+      <g>
+        <rect x="416" y="818" width="68" height="68" rx="4"
+              transform="rotate(45, 450, 852)"
+              fill="#1a1a2e" stroke="#4a4a7a" stroke-width="1.5" stroke-dasharray="6,3"/>
+        <text x="450" y="855" text-anchor="middle" dominant-baseline="central"
+              fill="#94a3b8" font-size="12" font-weight="600">완료?</text>
+      </g>
+
+      <!-- END -->
+      <g filter="url(#glow-end)">
+        <rect x="370" y="905" width="160" height="40" rx="20"
+              fill="#1a1a2e" stroke="#4ade80" stroke-width="2.5"/>
+        <text x="450" y="927" text-anchor="middle" dominant-baseline="central"
+              fill="#4ade80" font-size="13" font-weight="bold">활성 사용자</text>
+      </g>
+
+    </svg>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:#4ade80"></span> 완료</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#facc15"></span> 현재 단계</span>
+    <span class="legend-item"><span class="legend-dot" style="border: 1.5px dashed #888; background:transparent"></span> 대기 중</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#facc15; transform: rotate(45deg); border-radius: 2px"></span> 분기점</span>
+    <span class="legend-item"><span style="width:20px;height:0;border-top:2px dashed #f87171;display:inline-block;flex-shrink:0"></span> 에러 경로</span>
+  </div>
+
+  <div class="meta">
+    User Onboarding Process · Planning Compass · 2026-03-31
+  </div>
+</body>
+</html>

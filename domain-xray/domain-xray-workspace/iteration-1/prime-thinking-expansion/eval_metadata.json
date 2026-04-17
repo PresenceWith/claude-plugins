@@ -1,0 +1,47 @@
+{
+  "eval_id": 3,
+  "eval_name": "prime-thinking-expansion",
+  "prompt": "/domain-prime",
+  "assertions": [
+    {
+      "name": "three-distinct-question-types",
+      "type": "qualitative",
+      "description": "3가지 다른 타입: Q1 예측(도메인 구조 가설), Q2 연결(앵커↔도메인), Q3 관계(영역간 인과)"
+    },
+    {
+      "name": "layer1-reasoning-surfaced",
+      "type": "qualitative",
+      "description": "각 답변 후 ① 추론 표면화 — 선택에 내포된 전제를 명시화"
+    },
+    {
+      "name": "layer2-perspective-shifted",
+      "type": "qualitative",
+      "description": "각 답변 후 ② 관점 전환 — 전문가 프레임을 암시 (정답 미공개)"
+    },
+    {
+      "name": "layer3-open-question-posed",
+      "type": "qualitative",
+      "description": "각 답변 후 ③ 열린 질문 — 답 없는 후속 사고 방향 제시"
+    },
+    {
+      "name": "no-answer-judgment",
+      "type": "qualitative",
+      "description": "정답/오답 판정 없음"
+    },
+    {
+      "name": "orient-terms-only",
+      "type": "qualitative",
+      "description": "orient 맵에 있는 용어/영역명만 사용, 새 개념 도입 없음"
+    },
+    {
+      "name": "wrap-up-three-questions",
+      "type": "qualitative",
+      "description": "마무리에 열린 질문 3개 모아서 '생각해볼 질문들' 제시"
+    },
+    {
+      "name": "no-file-artifact",
+      "type": "qualitative",
+      "description": "별도 파일 생성 없음 (세션 기록은 평가용 예외)"
+    }
+  ]
+}

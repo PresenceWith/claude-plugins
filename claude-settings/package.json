@@ -1,0 +1,6 @@
+{
+  "name": "claude-settings",
+  "version": "0.1.0",
+  "description": "",
+  "claude_plugin": true
+}

@@ -1,0 +1,10 @@
+{
+  "expectations": [
+    {"text": "정보 제한: 3-5개 핵심 항목만 먼저 제시하고, 나머지는 확장 가능하다고 안내", "passed": true, "evidence": "3개 축 테이블 + 1개 핵심 질문 + 3개 MVP 방향. '지금은 보류해도 괜찮은 것들' 섹션으로 나머지 연기"},
+    {"text": "위치 명시: 새로운 개념을 기존 맥락에 연결하여 설명", "passed": true, "evidence": "'이 세 축이 따로 노는 게 아니라 연결된다' — 포트폴리오→소통→견적 흐름 설명"},
+    {"text": "must-have vs nice-to-have 구분이 존재", "passed": true, "evidence": "'MVP에서 반드시 필요한 것과 나중에 해도 되는 것을 나누는 게 지금 단계에서 가장 중요' + 보류 항목 3개 명시"},
+    {"text": "상태 파일(.compass/state.md)이 생성됨", "passed": true, "evidence": "state.md 파일이 outputs/에 존재"},
+    {"text": "응답이 구조적이고 소화 가능한 분량", "passed": true, "evidence": "~45줄, 테이블+섹션으로 잘 구조화, 시각화 제안 포함"}
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

@@ -1,0 +1,6 @@
+{
+  "name": "planning-compass",
+  "version": "0.1.0",
+  "description": "Reduce cognitive overload during complex planning conversations with adaptive visualization and structured process interventions",
+  "claude_plugin": true
+}

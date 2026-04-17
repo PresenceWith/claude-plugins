@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-english-context",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "has-anchor-points", "passed": true, "evidence": "'Your Anchor Points' section with 5 explicit engineering→PM bridges: sprint planning→roadmap, system architecture→feasibility, data/metrics→product analytics, cross-functional teams→orchestrating"},
+    {"text": "engineering-bridge", "passed": true, "evidence": "Each anchor explicitly names the engineering concept and its PM equivalent. 'Your experience with sprint planning maps to roadmap planning', 'system architecture gives you a rare PM superpower'"},
+    {"text": "has-domain-landscape", "passed": true, "evidence": "7 areas: Discovery, Strategy, Prioritization, Execution, Analytics, Stakeholder Mgmt, Go-to-Market. Each with What/Why/Vocabulary/Connections"},
+    {"text": "urgency-reflected", "passed": true, "evidence": "'highest leverage for your first 30 days' — priority map explicitly frames around next month deadline. Start with Discovery+Prioritization+Stakeholders"},
+    {"text": "has-priority-map", "passed": true, "evidence": "Start here/Learn next/Learn later structure. Notably says 'Execution is closest to your comfort zone... Don't over-invest here' — smart personalization"},
+    {"text": "file-saved", "passed": true, "evidence": "domain-orient-product-management.md exists"}
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "eval_id": 0,
+  "eval_name": "eval-korean-simple",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "has-anchor-points", "passed": false, "evidence": "앵커 포인트 섹션 없음. 학습자의 기존 경험과 도메인을 연결하는 구조 부재"},
+    {"text": "has-domain-landscape", "passed": false, "evidence": "5단계 학습 로드맵은 있으나 도메인 구조맵(영역 간 관계, 전체 지형)이 아닌 순차적 커리큘럼 형태"},
+    {"text": "has-priority-map", "passed": false, "evidence": "월별 로드맵은 있으나 학습자 상황에 맞춘 우선순위(시작/다음/나중)가 아닌 일반적 순서"},
+    {"text": "has-knowledge-gaps", "passed": false, "evidence": "전문가 vs 초보 갭을 명시적으로 식별하는 섹션 없음"},
+    {"text": "output-in-korean", "passed": true, "evidence": "전체 한국어 작성"},
+    {"text": "file-saved", "passed": true, "evidence": "data-analysis-learning-guide.md 파일 존재"},
+    {"text": "concise-not-encyclopedic", "passed": false, "evidence": "178줄, 코드 예시/리소스 목록까지 포함. 지도가 아닌 튜토리얼 가이드"}
+  ]
+}

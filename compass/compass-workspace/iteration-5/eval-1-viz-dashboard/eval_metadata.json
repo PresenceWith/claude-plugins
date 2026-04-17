@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "viz-dashboard",
+  "prompt": "우리 팀에서 내부 도구를 만들고 있는데, 요구사항이 계속 바뀌고 있어서 뭐가 결정된 건지 뭐가 아직 논의 중인지 모르겠어. 지금까지 나온 내용 좀 정리해줘. 대충 말하면: 사용자 인증은 OAuth로 가기로 했고, DB는 PostgreSQL 확정했고(방금 결정), 프론트는 React 확정이고, 배포 전략은 아직 논의도 안 했어. API 구조도 REST vs GraphQL 사이에서 결정 못했고, 모니터링도 봐야 하고, CI/CD 파이프라인도 정해야 해. 상태 대시보드로 보여줘.",
+  "assertions": [
+    {"text": "HTML file generated: dashboard.html exists in outputs", "type": "file_check"},
+    {"text": "Three-column layout: Decided, In Discussion, Undecided columns are present", "type": "qualitative"},
+    {"text": "Content fits viewport: No horizontal scrolling needed, max-width 960px", "type": "qualitative"},
+    {"text": "Progress indicator: Shows decided count vs total (e.g., 3/7)", "type": "qualitative"},
+    {"text": "Correct classification: OAuth, PostgreSQL, React in Decided; API structure in In Discussion/Undecided", "type": "qualitative"},
+    {"text": "Dark theme applied: #0f0f1a background with status colors (green/yellow/gray)", "type": "qualitative"}
+  ]
+}

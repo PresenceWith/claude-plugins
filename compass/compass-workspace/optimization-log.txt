@@ -1,0 +1,83 @@
+Split: 12 train, 8 test (holdout=0.4)
+
+============================================================
+Iteration 1/5
+Description: Reduce cognitive overload in complex planning conversations via adaptive visualizations (mindmap, dashboard, concept map, flowchart, timeline, etc.) and process interventions (information limiting, decision cleanup, focus narrowing). Trigger when: multiple open decisions accumulate, MVP scoping, technology selection with alternatives, architecture discussions, OKR/priority setting, feature planning with many moving parts, or any multi-decision conversation where topics branch and the user loses track. Also trigger on "정리해줘", "organize", "뭐가 결정된 거야", "where are we", "show me a mindmap/dashboard/concept map", "뭐부터 해야 해", or /compass. NOT for single-step coding, bug fixes, config files, or one-shot answers — only multi-decision planning.
+============================================================
+Train: 18/36 correct, precision=100% recall=0% accuracy=50% (77.1s)
+  [FAIL] rate=0/3 expected=True: where are we on this project? I feel like we've discussed a 
+  [FAIL] rate=0/3 expected=True: 이 프로젝트 진행 상황을 타임라인으로 보여줄 수 있어? 지금 Phase 1은 거의 끝났고, Phase 2에서
+  [FAIL] rate=0/3 expected=True: I'm building a course platform and right now we're stuck on 
+  [FAIL] rate=0/3 expected=True: 우리 팀 Q3 OKR을 세워야 하는데, 목표가 너무 많아. 사용자 성장, 수익화, 기술 부채 해소, 신규 기
+  [FAIL] rate=0/3 expected=True: 우리 회사에서 사내 피트니스 앱을 만들려고 하는데, 기능이 너무 많아서 뭐부터 해야할지 모르겠어. 운동 기록
+  [FAIL] rate=0/3 expected=True: I'm planning a new e-commerce platform and I need to decide 
+  [PASS] rate=0/3 expected=False: Can you add a dark mode toggle to my React component? Here's
+  [PASS] rate=0/3 expected=False: 이 CSV 파일 읽어서 매출 데이터 그래프로 그려줘. matplotlib 써서 월별 매출 추이 라인 차트 하
+  [PASS] rate=0/3 expected=False: 이 Python 함수에서 TypeError가 나는데 고쳐줘. def calculate_total(items)
+  [PASS] rate=0/3 expected=False: I need to set up CI/CD for my project using GitHub Actions. 
+  [PASS] rate=0/3 expected=False: can you review this PR? it's just a small refactor of the au
+  [PASS] rate=0/3 expected=False: 우리 API 응답 시간이 느린데, /api/users 엔드포인트가 2초나 걸려. N+1 쿼리 문제인 것 같은
+Test : 12/24 correct, precision=100% recall=0% accuracy=50% (0.0s)
+  [FAIL] rate=0/3 expected=True: we've got like 8 different feature ideas floating around fro
+  [FAIL] rate=0/3 expected=True: ok so we've been going back and forth on this for a while no
+  [FAIL] rate=0/3 expected=True: 지금까지 논의한 거 정리해줘. 뭐가 결정된 거고 뭐가 아직 안 된 건지 한눈에 보고 싶어
+  [FAIL] rate=0/3 expected=True: React vs Vue vs Svelte, 우리 상황에서 뭐가 맞을지 비교 좀 해줘. 팀 경험, 커뮤니티, 
+  [PASS] rate=0/3 expected=False: explain how async/await works in JavaScript. I keep getting 
+  [PASS] rate=0/3 expected=False: write me a Dockerfile for a Node.js 20 app that uses pnpm, r
+  [PASS] rate=0/3 expected=False: 내 .env 파일에 DATABASE_URL 설정하는 법 알려줘. PostgreSQL이고 로컬에서 돌리고 있어
+  [PASS] rate=0/3 expected=False: git에서 실수로 main에 직접 커밋했는데 되돌리고 싶어. 마지막 3개 커밋을 새 브랜치로 옮기고 main
+
+Improving description...
+/Users/presence/.claude/plugins/marketplaces/claude-plugins-official/plugins/skill-creator/skills/skill-creator/scripts/improve_description.py:114: UserWarning: Using Claude with claude-opus-4-6 and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking
+  response = client.messages.create(
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/presence/.claude/plugins/marketplaces/claude-plugins-official/plugins/skill-creator/skills/skill-creator/scripts/run_loop.py", line 332, in <module>
+    main()
+    ~~~~^^
+  File "/Users/presence/.claude/plugins/marketplaces/claude-plugins-official/plugins/skill-creator/skills/skill-creator/scripts/run_loop.py", line 297, in main
+    output = run_loop(
+        eval_set=eval_set,
+    ...<11 lines>...
+        log_dir=log_dir,
+    )
+  File "/Users/presence/.claude/plugins/marketplaces/claude-plugins-official/plugins/skill-creator/skills/skill-creator/scripts/run_loop.py", line 202, in run_loop
+    new_description = improve_description(
+        client=client,
+    ...<7 lines>...
+        iteration=iteration,
+    )
+  File "/Users/presence/.claude/plugins/marketplaces/claude-plugins-official/plugins/skill-creator/skills/skill-creator/scripts/improve_description.py", line 114, in improve_description
+    response = client.messages.create(
+        model=model,
+    ...<5 lines>...
+        messages=[{"role": "user", "content": prompt}],
+    )
+  File "/Users/presence/dev/tools/claude-plugins/planning-compass/compass-workspace/.venv/lib/python3.14/site-packages/anthropic/_utils/_utils.py", line 282, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/presence/dev/tools/claude-plugins/planning-compass/compass-workspace/.venv/lib/python3.14/site-packages/anthropic/resources/messages/messages.py", line 996, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/v1/messages",
+        ^^^^^^^^^^^^^^^
+    ...<30 lines>...
+        stream_cls=Stream[RawMessageStreamEvent],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/presence/dev/tools/claude-plugins/planning-compass/compass-workspace/.venv/lib/python3.14/site-packages/anthropic/_base_client.py", line 1364, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/presence/dev/tools/claude-plugins/planning-compass/compass-workspace/.venv/lib/python3.14/site-packages/anthropic/_base_client.py", line 1058, in request
+    request = self._build_request(options, retries_taken=retries_taken)
+  File "/Users/presence/dev/tools/claude-plugins/planning-compass/compass-workspace/.venv/lib/python3.14/site-packages/anthropic/_base_client.py", line 521, in _build_request
+    headers = self._build_headers(options, retries_taken=retries_taken)
+  File "/Users/presence/dev/tools/claude-plugins/planning-compass/compass-workspace/.venv/lib/python3.14/site-packages/anthropic/_base_client.py", line 451, in _build_headers
+    self._validate_headers(headers_dict, custom_headers)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/presence/dev/tools/claude-plugins/planning-compass/compass-workspace/.venv/lib/python3.14/site-packages/anthropic/_client.py", line 196, in _validate_headers
+    raise TypeError(
+        '"Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"'
+    )
+TypeError: "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"

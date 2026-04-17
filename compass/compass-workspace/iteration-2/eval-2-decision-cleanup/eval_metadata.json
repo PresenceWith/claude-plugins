@@ -1,0 +1,27 @@
+{
+  "eval_id": 2,
+  "eval_name": "decision-cleanup",
+  "prompt": "우리 팀에서 내부 도구를 만들고 있는데, 요구사항이 계속 바뀌고 있어서 뭐가 결정된 건지 뭐가 아직 논의 중인지 모르겠어. 지금까지 나온 내용 좀 정리해줘. 대충 말하면: 사용자 인증은 OAuth로 가기로 했고, DB는 PostgreSQL이나 MongoDB 중 고민 중이고, 프론트는 React 확정이고, 배포 전략은 아직 논의도 안 했어. API 구조도 REST vs GraphQL 사이에서 결정 못했고, 모니터링도 봐야 하고, CI/CD 파이프라인도 정해야 해.",
+  "assertions": [
+    {
+      "text": "Clear categorization: Decided (OAuth, React), Undecided (DB, API), Not yet discussed (Deploy, Monitoring, CI/CD) are clearly separated",
+      "type": "qualitative"
+    },
+    {
+      "text": "Decision cleanup intervention: Proposes a priority order for tackling undecided items",
+      "type": "qualitative"
+    },
+    {
+      "text": "State file accuracy: state.md correctly categorizes OAuth and React as decided, DB and API as undecided",
+      "type": "file_check"
+    },
+    {
+      "text": "Visualization suggestion: Offers or mentions a status dashboard or similar visual overview",
+      "type": "qualitative"
+    },
+    {
+      "text": "Pre-decision summary: When suggesting which to tackle first, provides context for why",
+      "type": "qualitative"
+    }
+  ]
+}

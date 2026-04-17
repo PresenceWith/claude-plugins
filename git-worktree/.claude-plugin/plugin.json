@@ -1,0 +1,10 @@
+{
+  "name": "git-worktree",
+  "version": "0.1.0",
+  "description": "Git worktree management skills: merge worktrees with structured commits, verify implementations, and maintain verification skills.",
+  "author": {
+    "name": "presence",
+    "email": "sleet0328@gmail.com"
+  },
+  "keywords": ["git", "worktree", "verification", "workflow"]
+}

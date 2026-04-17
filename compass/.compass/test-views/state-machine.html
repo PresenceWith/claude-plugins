@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — State Machine</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 32px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; text-align: center; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 24px; text-align: center; }
+    .container { overflow-x: auto; width: 100%; max-width: 1100px; }
+    svg { width: 100%; height: auto; }
+    .legend {
+      display: flex;
+      gap: 24px;
+      margin-top: 24px;
+      padding: 12px 20px;
+      background: #1a1a2e;
+      border-radius: 10px;
+      border: 1px solid #2a2a4a;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: #a0a0b0;
+      white-space: nowrap;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .meta { color: #666; font-size: 11px; margin-top: 20px; text-align: right; width: 100%; max-width: 1100px; }
+  </style>
+</head>
+<body>
+  <h1>Planning Compass — State Machine</h1>
+  <p class="subtitle">주문 생명주기 — 생성부터 완료까지의 상태 전이</p>
+
+  <div class="container">
+    <svg viewBox="0 0 1060 580" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <marker id="arr-primary" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto-start-reverse">
+          <polygon points="0,1 10,4 0,7" fill="#6366f1"/>
+        </marker>
+        <marker id="arr-error" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto-start-reverse">
+          <polygon points="0,1 10,4 0,7" fill="#f87171"/>
+        </marker>
+        <marker id="arr-success" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto-start-reverse">
+          <polygon points="0,1 10,4 0,7" fill="#4ade80"/>
+        </marker>
+        <marker id="arr-self" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto-start-reverse">
+          <polygon points="0,1 10,4 0,7" fill="#38bdf8"/>
+        </marker>
+
+        <filter id="glow-active" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="8" result="blur"/>
+          <feFlood flood-color="#facc15" flood-opacity="0.35" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="glow"/>
+          <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-final" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="8" result="blur"/>
+          <feFlood flood-color="#4ade80" flood-opacity="0.35" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="glow"/>
+          <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-error" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="6" result="blur"/>
+          <feFlood flood-color="#f87171" flood-opacity="0.25" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="glow"/>
+          <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+
+        <!-- Subtle grid pattern -->
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e1e36" stroke-width="0.5"/>
+        </pattern>
+
+        <!-- Happy path lane gradient -->
+        <linearGradient id="happy-lane" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#6366f1" stop-opacity="0.06"/>
+          <stop offset="50%" stop-color="#6366f1" stop-opacity="0.04"/>
+          <stop offset="100%" stop-color="#6366f1" stop-opacity="0.01"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Background grid -->
+      <rect width="1060" height="580" fill="url(#grid)" opacity="0.3"/>
+
+      <!-- ========== HAPPY PATH LANE ========== -->
+      <rect x="35" y="155" width="920" height="120" rx="10" fill="url(#happy-lane)" stroke="#6366f110" stroke-width="1"/>
+      <!-- Lane label -->
+      <rect x="430" y="158" width="110" height="18" rx="9" fill="#6366f10c" stroke="#6366f120" stroke-width="0.5"/>
+      <text x="485" y="170" text-anchor="middle" fill="#6366f1" font-size="9" font-weight="600" letter-spacing="2" opacity="0.7">HAPPY PATH</text>
+
+      <!-- ========== TRANSITION ARROWS ========== -->
+
+      <!-- Initial → 주문 생성 -->
+      <line x1="78" y1="215" x2="112" y2="215" stroke="#6366f1" stroke-width="2.5" marker-end="url(#arr-primary)"/>
+
+      <!-- 주문 생성 → 결제 대기 -->
+      <path d="M 238,215 L 290,215" stroke="#6366f1" stroke-width="2.5" fill="none" marker-end="url(#arr-primary)"/>
+      <rect x="240" y="197" width="56" height="18" rx="9" fill="#0f0f1a" stroke="#6366f130" stroke-width="0.5"/>
+      <text x="268" y="209" text-anchor="middle" fill="#6366f1" font-size="10">주문 확인</text>
+
+      <!-- 결제 대기 → 결제 완료 -->
+      <path d="M 416,215 L 475,215" stroke="#6366f1" stroke-width="2.5" fill="none" marker-end="url(#arr-primary)"/>
+      <rect x="420" y="197" width="56" height="18" rx="9" fill="#0f0f1a" stroke="#6366f130" stroke-width="0.5"/>
+      <text x="448" y="209" text-anchor="middle" fill="#6366f1" font-size="10">결제 성공</text>
+
+      <!-- 결제 완료 → 배송 준비 -->
+      <path d="M 601,215 L 656,215" stroke="#6366f1" stroke-width="2.5" fill="none" marker-end="url(#arr-primary)"/>
+      <rect x="603" y="197" width="56" height="18" rx="9" fill="#0f0f1a" stroke="#6366f130" stroke-width="0.5"/>
+      <text x="631" y="209" text-anchor="middle" fill="#6366f1" font-size="10">재고 확인</text>
+
+      <!-- 배송 준비 → 배송 중 -->
+      <path d="M 782,215 L 840,215" stroke="#6366f1" stroke-width="2.5" fill="none" marker-end="url(#arr-primary)"/>
+      <rect x="784" y="197" width="56" height="18" rx="9" fill="#0f0f1a" stroke="#6366f130" stroke-width="0.5"/>
+      <text x="812" y="209" text-anchor="middle" fill="#6366f1" font-size="10">출고 완료</text>
+
+      <!-- 배송 중 → 완료 -->
+      <path d="M 930,245 C 955,300 955,360 930,410" stroke="#4ade80" stroke-width="2.5" fill="none" marker-end="url(#arr-success)"/>
+      <rect x="955" y="318" width="56" height="18" rx="9" fill="#0f0f1a" stroke="#4ade8030" stroke-width="0.5"/>
+      <text x="983" y="330" text-anchor="middle" fill="#4ade80" font-size="10">수령 확인</text>
+
+      <!-- ========== ERROR TRANSITIONS ========== -->
+
+      <!-- 결제 대기 → 결제 실패 -->
+      <path d="M 353,245 C 353,300 353,340 353,370" stroke="#f87171" stroke-width="2" stroke-dasharray="6,3" fill="none" marker-end="url(#arr-error)"/>
+      <rect x="358" y="300" width="56" height="18" rx="9" fill="#0f0f1a" stroke="#f8717130" stroke-width="0.5"/>
+      <text x="386" y="312" text-anchor="middle" fill="#f87171" font-size="10">결제 실패</text>
+
+      <!-- 결제 실패 → 결제 대기 (retry) -->
+      <path d="M 315,390 C 250,370 250,280 290,245" stroke="#f87171" stroke-width="1.5" stroke-dasharray="6,3" fill="none" marker-end="url(#arr-error)"/>
+      <rect x="225" y="310" width="46" height="18" rx="9" fill="#0f0f1a" stroke="#f8717130" stroke-width="0.5"/>
+      <text x="248" y="322" text-anchor="middle" fill="#f87171" font-size="9">재시도</text>
+      <!-- Guard condition badge -->
+      <rect x="222" y="330" width="60" height="16" rx="8" fill="#f8717110" stroke="#f8717125" stroke-width="0.5"/>
+      <text x="252" y="341" text-anchor="middle" fill="#f87171" font-size="8" font-weight="600">[시도 &lt; 3]</text>
+
+      <!-- 결제 실패 → 주문 취소 -->
+      <path d="M 383,410 C 440,440 530,445 580,430" stroke="#f87171" stroke-width="1.5" stroke-dasharray="6,3" fill="none" marker-end="url(#arr-error)"/>
+      <rect x="455" y="444" width="80" height="18" rx="9" fill="#0f0f1a" stroke="#f8717130" stroke-width="0.5"/>
+      <text x="495" y="456" text-anchor="middle" fill="#f87171" font-size="9">시도 초과 [≥3]</text>
+
+      <!-- 배송 준비 → 주문 취소 -->
+      <path d="M 719,245 C 719,340 670,400 645,420" stroke="#f87171" stroke-width="1.5" stroke-dasharray="6,3" fill="none" marker-end="url(#arr-error)"/>
+      <rect x="724" y="340" width="56" height="18" rx="9" fill="#0f0f1a" stroke="#f8717130" stroke-width="0.5"/>
+      <text x="752" y="352" text-anchor="middle" fill="#f87171" font-size="9">취소 요청</text>
+
+      <!-- ========== SELF-TRANSITION ========== -->
+      <path d="M 875,185 C 855,130 935,120 940,180" stroke="#38bdf8" stroke-width="2" fill="none" marker-end="url(#arr-self)"/>
+      <rect x="865" y="122" width="76" height="18" rx="9" fill="#0f0f1a" stroke="#38bdf830" stroke-width="0.5"/>
+      <text x="903" y="134" text-anchor="middle" fill="#38bdf8" font-size="10" font-weight="500">위치 업데이트</text>
+
+      <!-- ========== STATES ========== -->
+
+      <!-- Initial state -->
+      <circle cx="60" cy="215" r="14" fill="#6366f115" stroke="#6366f1" stroke-width="2"/>
+      <circle cx="60" cy="215" r="5" fill="#6366f1"/>
+
+      <!-- State 1: 주문 생성 -->
+      <rect x="112" y="185" width="126" height="60" rx="14"
+            fill="#1a1a2e" stroke="#4a4a7a" stroke-width="2"/>
+      <text x="175" y="211" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="bold">주문 생성</text>
+      <text x="175" y="231" text-anchor="middle" fill="#94a3b8" font-size="10">정보 수집 완료</text>
+
+      <!-- State 2: 결제 대기 (ACTIVE) -->
+      <g filter="url(#glow-active)">
+        <rect x="290" y="185" width="126" height="60" rx="14"
+              fill="#1a1a2e" stroke="#facc15" stroke-width="3"/>
+      </g>
+      <circle cx="404" cy="195" r="5" fill="#facc15">
+        <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <text x="353" y="211" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="bold">결제 대기</text>
+      <text x="353" y="231" text-anchor="middle" fill="#facc15" font-size="10">결제 수단 선택</text>
+
+      <!-- State 3: 결제 완료 -->
+      <rect x="475" y="185" width="126" height="60" rx="14"
+            fill="#1a1a2e" stroke="#4a4a7a" stroke-width="2"/>
+      <text x="538" y="211" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="bold">결제 완료</text>
+      <text x="538" y="231" text-anchor="middle" fill="#94a3b8" font-size="10">금액 확정</text>
+      <!-- Guard condition -->
+      <rect x="475" y="250" width="72" height="18" rx="9" fill="#6366f10c" stroke="#6366f125" stroke-width="0.5"/>
+      <text x="511" y="262" text-anchor="middle" fill="#6366f1" font-size="9" font-weight="500">[금액 &gt; 0]</text>
+
+      <!-- State 4: 배송 준비 -->
+      <rect x="656" y="185" width="126" height="60" rx="14"
+            fill="#1a1a2e" stroke="#4a4a7a" stroke-width="2"/>
+      <text x="719" y="211" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="bold">배송 준비</text>
+      <text x="719" y="231" text-anchor="middle" fill="#94a3b8" font-size="10">상품 포장</text>
+
+      <!-- State 5: 배송 중 -->
+      <circle cx="900" cy="215" r="52" fill="#1a1a2e" stroke="#4a4a7a" stroke-width="2"/>
+      <text x="900" y="211" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="bold">배송 중</text>
+      <text x="900" y="231" text-anchor="middle" fill="#94a3b8" font-size="10">운송 추적</text>
+
+      <!-- State 6: 완료 (FINAL) -->
+      <g filter="url(#glow-final)">
+        <circle cx="900" cy="440" r="40" fill="#1a1a2e" stroke="#4ade80" stroke-width="3"/>
+        <circle cx="900" cy="440" r="32" fill="none" stroke="#4ade80" stroke-width="1.5" opacity="0.5"/>
+      </g>
+      <text x="900" y="438" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="bold">완료</text>
+      <text x="900" y="458" text-anchor="middle" fill="#4ade80" font-size="10" opacity="0.7">배송 수령</text>
+
+      <!-- Error State: 결제 실패 -->
+      <g filter="url(#glow-error)">
+        <rect x="290" y="375" width="126" height="56" rx="14"
+              fill="#1a1a2e" stroke="#f87171" stroke-width="2.5"/>
+        <rect x="290" y="375" width="126" height="5" rx="2.5" fill="#f87171" opacity="0.4"/>
+      </g>
+      <text x="353" y="401" text-anchor="middle" fill="#f87171" font-size="13" font-weight="bold">결제 실패</text>
+      <text x="353" y="420" text-anchor="middle" fill="#f87171" font-size="10" opacity="0.7">재시도 가능</text>
+
+      <!-- Terminal: 주문 취소 -->
+      <g filter="url(#glow-error)">
+        <circle cx="615" cy="430" r="36" fill="#1a1a2e" stroke="#f87171" stroke-width="2.5"/>
+        <circle cx="615" cy="430" r="28" fill="none" stroke="#f87171" stroke-width="1" opacity="0.4"/>
+      </g>
+      <text x="615" y="428" text-anchor="middle" fill="#f87171" font-size="12" font-weight="bold">주문 취소</text>
+      <text x="615" y="448" text-anchor="middle" fill="#f87171" font-size="9" opacity="0.6">최종 상태</text>
+
+      <!-- ========== CURRENT STATE INFO BOX ========== -->
+      <rect x="55" y="360" width="190" height="110" rx="10"
+            fill="#1a1a2e" stroke="#facc1525" stroke-width="1.5"/>
+      <rect x="55" y="360" width="190" height="4" rx="2" fill="#facc15" opacity="0.3"/>
+      <text x="150" y="383" text-anchor="middle" fill="#facc15" font-size="11" font-weight="bold">현재 상태: 결제 대기</text>
+      <line x1="75" y1="393" x2="225" y2="393" stroke="#2a2a4a" stroke-width="1"/>
+      <text x="150" y="412" text-anchor="middle" fill="#c0c0d0" font-size="11">가능한 전이:</text>
+      <text x="150" y="433" text-anchor="middle" fill="#6366f1" font-size="11">→ 결제 완료 (결제 성공)</text>
+      <text x="150" y="453" text-anchor="middle" fill="#f87171" font-size="11">→ 결제 실패 (결제 오류)</text>
+
+    </svg>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background: radial-gradient(circle, #6366f1 40%, transparent 60%); border: 2px solid #6366f1"></span> 시작</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#facc15"></span> 현재/활성</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#1a1a2e; border: 2px solid #4a4a7a"></span> 일반 상태</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#4ade80"></span> 최종 완료</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#f87171"></span> 에러/취소</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#38bdf8"></span> 자기 전이</span>
+  </div>
+
+  <div class="meta">
+    Order Lifecycle State Machine · Planning Compass · 2026-03-31
+  </div>
+</body>
+</html>

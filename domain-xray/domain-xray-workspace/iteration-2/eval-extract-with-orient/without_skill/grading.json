@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-extract-with-orient",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "template-structure-intact", "passed": false, "evidence": "표준 템플릿 미사용. 자체 8섹션 구조(Perceptual Intuitions, Failure Modes, Judgment Calls, Political Dimension 등)"},
+    {"text": "orient-context-used", "passed": true, "evidence": "orient의 7개 영역을 참조('solid understanding of the data analysis landscape'). 하지만 앵커 포인트나 우선순위 정보는 미활용"},
+    {"text": "has-scope-section", "passed": false, "evidence": "[Scope] 섹션 없음. 우선순위 영역 구분 없이 전체를 동일 깊이로 요청"},
+    {"text": "depth-over-volume", "passed": false, "evidence": "'Depth Over Volume' 미포함. 자체 포맷 사용"},
+    {"text": "output-in-english", "passed": true, "evidence": "영문 작성"},
+    {"text": "file-saved", "passed": true, "evidence": "tacit-knowledge-prompt-data-analysis.md 존재"}
+  ]
+}

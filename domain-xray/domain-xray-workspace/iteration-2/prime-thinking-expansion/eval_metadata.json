@@ -1,0 +1,47 @@
+{
+  "eval_id": 3,
+  "eval_name": "prime-thinking-expansion",
+  "prompt": "/domain-prime",
+  "assertions": [
+    {
+      "name": "three-distinct-question-types",
+      "type": "qualitative",
+      "description": "3가지 다른 타입: Q1 예측, Q2 연결, Q3 관계"
+    },
+    {
+      "name": "layer1-reasoning-surfaced",
+      "type": "qualitative",
+      "description": "각 답변 후 선택에 내포된 전제를 명시화"
+    },
+    {
+      "name": "layer2-perspective-shifted-concise",
+      "type": "qualitative",
+      "description": "관점 전환이 1-2문장, 프레임 이름만 제시, 구체적 답 설명 없음"
+    },
+    {
+      "name": "layer3-open-question-posed",
+      "type": "qualitative",
+      "description": "답 없는 후속 사고 방향 제시"
+    },
+    {
+      "name": "no-answer-judgment",
+      "type": "qualitative",
+      "description": "정답/오답 판정 없음"
+    },
+    {
+      "name": "orient-terms-only",
+      "type": "qualitative",
+      "description": "orient 맵에 있는 용어만 사용"
+    },
+    {
+      "name": "wrap-up-three-questions",
+      "type": "qualitative",
+      "description": "마무리에 열린 질문 3개 모아서 제시"
+    },
+    {
+      "name": "no-file-artifact",
+      "type": "qualitative",
+      "description": "파일 생성 없음"
+    }
+  ]
+}

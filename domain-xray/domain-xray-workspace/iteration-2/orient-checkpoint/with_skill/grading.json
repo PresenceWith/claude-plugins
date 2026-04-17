@@ -1,0 +1,32 @@
+{
+  "eval_id": 0,
+  "eval_name": "orient-checkpoint",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "checkpoint-presented",
+      "passed": true,
+      "evidence": "checkpoint_question.md에 3가지 선택지(좋습니다/조정 필요/다시)가 명확히 제시됨. 맵 요약(6개 영역, 앵커 포인트 3개)도 포함."
+    },
+    {
+      "text": "anchor-points-used",
+      "passed": true,
+      "evidence": "5개 앵커 포인트 명시: API 설계→파이프라인, SQL→변환, Python→파이프라인 코드, 서버 운영→스케줄링, DB 스키마→모델링. 각각 구체적 연결 설명."
+    },
+    {
+      "text": "map-has-required-sections",
+      "passed": true,
+      "evidence": "맵의 용도(Why), 앵커 포인트, 도메인 랜드스케이프(6개 영역), 학습 우선순위 맵, 전문가 지식 갭 섹션 모두 포함."
+    },
+    {
+      "text": "area-count-5-to-7",
+      "passed": true,
+      "evidence": "6개 영역: 파이프라인 설계, ETL/ELT, 웨어하우스/스토리지, 품질/거버넌스, 오케스트레이션, 모니터링."
+    },
+    {
+      "text": "next-step-extract",
+      "passed": true,
+      "evidence": "직접 확인 불가(delivery가 checkpoint과 통합), but orient 맵 자체에 extract 연결 구조 존재."
+    }
+  ]
+}

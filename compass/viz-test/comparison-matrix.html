@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Comparison Matrix</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a; color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 24px; min-height: 100vh;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; text-align: center; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 28px; text-align: center; }
+    .meta { color: #666; font-size: 11px; margin-top: 20px; text-align: right; max-width: 960px; margin-left: auto; margin-right: auto; }
+
+    /* Score summary cards */
+    .score-card {
+      flex: 1; border-radius: 12px; padding: 16px 18px; position: relative; overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s;
+    }
+    .score-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+    .score-card .card-bg {
+      position: absolute; top: -25px; right: -25px; width: 90px; height: 90px; border-radius: 50%; opacity: 0.05;
+    }
+    .score-bar-track { height: 8px; background: #0f0f1a; border-radius: 4px; overflow: hidden; margin: 8px 0; }
+    .score-bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+    .score-breakdown { display: flex; justify-content: space-between; font-size: 11px; gap: 4px; }
+    .score-tag { padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px; }
+
+    /* Table */
+    .matrix-table { width: 100%; border-collapse: separate; border-spacing: 0; background: #1a1a2e; }
+    .matrix-table thead th {
+      padding: 16px; font-size: 13px; background: #1e1e36; position: sticky; top: 0; z-index: 5;
+    }
+    .matrix-table tbody tr {
+      opacity: 0; animation: rowFadeIn 0.3s ease-out forwards;
+      transition: background-color 0.2s;
+    }
+    .matrix-table tbody tr:hover { background-color: #1e1e3680; }
+    @keyframes rowFadeIn {
+      from { opacity: 0; transform: translateX(-4px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .matrix-table td { padding: 14px 16px; border-bottom: 1px solid #2a2a4a18; transition: background-color 0.2s; }
+
+    /* Criterion column */
+    .criterion-name { font-size: 13px; color: #e2e8f0; font-weight: 500; }
+    .criterion-weight { margin-left: 6px; }
+    .weight-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 1px; }
+    .weight-dot.filled { background: #ef4444; }
+    .weight-dot.half { background: #facc15; }
+    .weight-dot.empty { background: #2a2a4a; }
+    .weight-label { font-size: 9px; color: #666; margin-left: 4px; }
+
+    /* Rating cells */
+    .rating-cell { text-align: center; cursor: default; position: relative; }
+    .rating-cell:hover .rating-box { filter: brightness(1.15); transform: scale(1.04); }
+    .rating-box {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px;
+      transition: transform 0.15s ease, filter 0.15s;
+      font-size: 12px; font-weight: 500;
+    }
+    .rating-icon { font-weight: bold; font-size: 14px; }
+
+    /* Winner column highlight */
+    .winner-col { position: relative; }
+    .winner-col::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, #4ade8005 0%, #4ade8002 100%);
+      pointer-events: none;
+    }
+
+    /* Footer row */
+    .matrix-table tfoot td { padding: 16px; background: #1e1e36; border-top: 2px solid #2a2a4a; }
+    .final-score { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .final-bar { width: 80%; height: 6px; background: #0f0f1a; border-radius: 3px; overflow: hidden; }
+    .final-bar-fill { height: 100%; border-radius: 3px; }
+
+    /* Tooltip */
+    .matrix-tooltip {
+      position: fixed; pointer-events: none; z-index: 100;
+      background: #1a1a2eee; border: 1px solid #4a4a7a; border-radius: 10px;
+      padding: 10px 14px; font-size: 12px; color: #e2e8f0;
+      max-width: 300px; opacity: 0; transition: opacity 0.2s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+    }
+    .matrix-tooltip.visible { opacity: 1; }
+
+    /* Option header interactive */
+    .option-header { cursor: pointer; transition: background-color 0.2s; }
+    .option-header:hover { background-color: #2a2a4a !important; }
+
+    /* Recommendation box */
+    .rec-box {
+      margin-top: 16px; padding: 16px 20px; border-radius: 12px; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #1a1a2e 0%, #1a2e1a 100%);
+      border: 1px solid #4ade8025;
+    }
+    .rec-box::before {
+      content: ''; position: absolute; top: -30px; right: -30px;
+      width: 100px; height: 100px; border-radius: 50%;
+      background: #4ade80; opacity: 0.03;
+    }
+  </style>
+</head>
+<body>
+  <h1>Planning Compass — Comparison Matrix</h1>
+  <p class="subtitle">UI 프레임워크 비교: React vs Vue vs Svelte</p>
+
+  <div style="max-width: 960px; margin: 0 auto;">
+
+    <!-- Score Summary Cards -->
+    <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+      <!-- React - Winner -->
+      <div class="score-card" style="background: linear-gradient(135deg, #1a1a2e 0%, #1a2e1a 100%); border: 1.5px solid #4ade8035;">
+        <div class="card-bg" style="background: #4ade80;"></div>
+        <div style="position: absolute; top: 8px; right: 10px; background: linear-gradient(135deg, #4ade80, #22c55e); color: #0f0f1a; font-size: 9px; font-weight: bold; padding: 3px 10px; border-radius: 5px; letter-spacing: 0.5px;">RECOMMENDED</div>
+        <div style="font-size: 16px; font-weight: bold; color: #e2e8f0; margin-bottom: 2px;">React</div>
+        <div style="font-size: 11px; color: #4ade80; opacity: 0.7;">종합 1위</div>
+        <div class="score-bar-track">
+          <div class="score-bar-fill" style="width: 80%; background: linear-gradient(90deg, #4ade80, #22c55e);"></div>
+        </div>
+        <div class="score-breakdown">
+          <span class="score-tag" style="background: #4ade8015; color: #4ade80;">&#10003; 4</span>
+          <span class="score-tag" style="background: #facc1510; color: #facc15;">&#9651; 2</span>
+          <span class="score-tag" style="background: #ef444410; color: #ef4444;">&#10007; 0</span>
+        </div>
+      </div>
+
+      <!-- Vue -->
+      <div class="score-card" style="background: linear-gradient(135deg, #1a1a2e 0%, #1e1e38 100%); border: 1px solid #2a2a4a;">
+        <div class="card-bg" style="background: #94a3b8;"></div>
+        <div style="font-size: 16px; font-weight: bold; color: #e2e8f0; margin-bottom: 2px;">Vue</div>
+        <div style="font-size: 11px; color: #888; opacity: 0.7;">종합 2위</div>
+        <div class="score-bar-track">
+          <div class="score-bar-fill" style="width: 67%; background: linear-gradient(90deg, #94a3b8, #64748b);"></div>
+        </div>
+        <div class="score-breakdown">
+          <span class="score-tag" style="background: #4ade8015; color: #4ade80;">&#10003; 3</span>
+          <span class="score-tag" style="background: #facc1510; color: #facc15;">&#9651; 2</span>
+          <span class="score-tag" style="background: #ef444410; color: #ef4444;">&#10007; 1</span>
+        </div>
+      </div>
+
+      <!-- Svelte -->
+      <div class="score-card" style="background: linear-gradient(135deg, #1a1a2e 0%, #1e1e38 100%); border: 1px solid #2a2a4a;">
+        <div class="card-bg" style="background: #94a3b8;"></div>
+        <div style="font-size: 16px; font-weight: bold; color: #e2e8f0; margin-bottom: 2px;">Svelte</div>
+        <div style="font-size: 11px; color: #888; opacity: 0.7;">종합 3위</div>
+        <div class="score-bar-track">
+          <div class="score-bar-fill" style="width: 58%; background: linear-gradient(90deg, #94a3b8, #64748b);"></div>
+        </div>
+        <div class="score-breakdown">
+          <span class="score-tag" style="background: #4ade8015; color: #4ade80;">&#10003; 2</span>
+          <span class="score-tag" style="background: #facc1510; color: #facc15;">&#9651; 3</span>
+          <span class="score-tag" style="background: #ef444410; color: #ef4444;">&#10007; 1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Comparison Table -->
+    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #2a2a4a; box-shadow: 0 4px 24px rgba(0,0,0,0.2);">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th style="text-align: left; color: #888; min-width: 180px; border-bottom: 2px solid #2a2a4a;">
+              평가 기준
+              <div style="font-size: 10px; font-weight: normal; color: #555; margin-top: 2px;">가중치 표시</div>
+            </th>
+            <th class="option-header winner-col" style="text-align: center; color: #4ade80; min-width: 150px; border-bottom: 2px solid #4ade80;" data-option="react">
+              <div style="display: flex; flex-direction: column; align-items: center;">
+                <span style="font-size: 15px; font-weight: bold;">React</span>
+                <span style="font-size: 10px; opacity: 0.6; margin-top: 2px;">&#9733; 우세</span>
+              </div>
+            </th>
+            <th class="option-header" style="text-align: center; color: #e2e8f0; min-width: 150px; border-bottom: 2px solid #2a2a4a;" data-option="vue">
+              Vue
+            </th>
+            <th class="option-header" style="text-align: center; color: #e2e8f0; min-width: 150px; border-bottom: 2px solid #2a2a4a;" data-option="svelte">
+              Svelte
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Row 1: 생태계 -->
+          <tr style="animation-delay: 0s;">
+            <td>
+              <span class="criterion-name">생태계 & 라이브러리</span>
+              <span class="criterion-weight">
+                <span class="weight-dot filled"></span><span class="weight-dot filled"></span><span class="weight-dot filled"></span>
+                <span class="weight-label">높음</span>
+              </span>
+            </td>
+            <td class="rating-cell winner-col" title="가장 넓은 생태계와 서드파티 라이브러리">
+              <div class="rating-box" style="background: #4ade8012; border: 1px solid #4ade8020;">
+                <span class="rating-icon" style="color: #4ade80;">&#10003;</span>
+                <span style="color: #4ade80;">최대 생태계</span>
+              </div>
+            </td>
+            <td class="rating-cell" title="충분한 생태계, 공식 라이브러리 풍부">
+              <div class="rating-box" style="background: #4ade800a; border: 1px solid #4ade8015;">
+                <span class="rating-icon" style="color: #4ade80;">&#10003;</span>
+                <span style="color: #4ade80;">풍부</span>
+              </div>
+            </td>
+            <td class="rating-cell" title="상대적으로 작은 생태계, 빠르게 성장 중">
+              <div class="rating-box" style="background: #facc150a; border: 1px solid #facc1515;">
+                <span class="rating-icon" style="color: #facc15;">&#9651;</span>
+                <span style="color: #facc15;">성장 중</span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 2: 성능 -->
+          <tr style="animation-delay: 0.04s;">
+            <td>
+              <span class="criterion-name">런타임 성능</span>
+              <span class="criterion-weight">
+                <span class="weight-dot filled"></span><span class="weight-dot filled"></span><span class="weight-dot empty"></span>
+                <span class="weight-label">중간</span>
+              </span>
+            </td>
+            <td class="rating-cell winner-col" title="Virtual DOM 기반, 충분한 성능">
+              <div class="rating-box" style="background: #facc150a; border: 1px solid #facc1515;">
+                <span class="rating-icon" style="color: #facc15;">&#9651;</span>
+                <span style="color: #facc15;">양호</span>
+              </div>
+            </td>
+            <td class="rating-cell" title="Virtual DOM 기반, React와 유사">
+              <div class="rating-box" style="background: #facc150a; border: 1px solid #facc1515;">
+                <span class="rating-icon" style="color: #facc15;">&#9651;</span>
+                <span style="color: #facc15;">양호</span>
+              </div>
+            </td>
+            <td class="rating-cell" title="컴파일 타임 접근으로 최상의 런타임 성능">
+              <div class="rating-box" style="background: #4ade8012; border: 1px solid #4ade8020;">
+                <span class="rating-icon" style="color: #4ade80;">&#10003;</span>
+                <span style="color: #4ade80;">최상</span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 3: 학습 곡선 -->
+          <tr style="animation-delay: 0.08s;">
+            <td>
+              <span class="criterion-name">학습 곡선</span>
+              <span class="criterion-weight">
+                <span class="weight-dot filled"></span><span class="weight-dot filled"></span><span class="weight-dot empty"></span>
+                <span class="weight-label">중간</span>
+              </span>
+            </td>
+            <td class="rating-cell winner-col" title="JSX, hooks 등 고유 패턴 학습 필요">
+              <div class="rating-box" style="background: #facc150a; border: 1px solid #facc1515;">
+                <span class="rating-icon" style="color: #facc15;">&#9651;</span>
+                <span style="color: #facc15;">보통</span>
+              </div>
+            </td>
+            <td class="rating-cell" title="직관적인 API, 쉬운 진입 장벽">
+              <div class="rating-box" style="background: #4ade800a; border: 1px solid #4ade8015;">
+                <span class="rating-icon" style="color: #4ade80;">&#10003;</span>
+                <span style="color: #4ade80;">쉬움</span>
+              </div>
+            </td>
+            <td class="rating-cell" title="가장 직관적, 순수 HTML/JS에 가까움">
+              <div class="rating-box" style="background: #4ade8012; border: 1px solid #4ade8020;">
+                <span class="rating-icon" style="color: #4ade80;">&#10003;</span>
+                <span style="color: #4ade80;">매우 쉬움</span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 4: 채용 -->
+          <tr style="animation-delay: 0.12s;">
+            <td>
+              <span class="criterion-name">인력 채용</span>
+              <span class="criterion-weight">
+                <span class="weight-dot filled"></span><span class="weight-dot filled"></span><span class="weight-dot filled"></span>
+                <span class="weight-label">높음</span>
+              </span>
+            </td>
+            <td class="rating-cell winner-col" title="가장 넓은 인력 풀, 채용 용이">
+              <div class="rating-box" style="background: #4ade8012; border: 1px solid #4ade8020;">
+                <span class="rating-icon" style="color: #4ade80;">&#10003;</span>
+                <span style="color: #4ade80;">풍부</span>
+              </div>
+            </td>
+            <td class="rating-cell" title="아시아 지역 인력 풍부">
+              <div class="rating-box" style="background: #4ade800a; border: 1px solid #4ade8015;">
+                <span class="rating-icon" style="color: #4ade80;">&#10003;</span>
+                <span style="color: #4ade80;">양호</span>
+              </div>
+            </td>
+            <td class="rating-cell" title="상대적으로 적은 경험자 풀, 채용 어려움">
+              <div class="rating-box" style="background: #ef44440a; border: 1px solid #ef444418;">
+                <span class="rating-icon" style="color: #ef4444;">&#10007;</span>
+                <span style="color: #ef4444;">제한적</span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 5: TypeScript -->
+          <tr style="animation-delay: 0.16s;">
+            <td>
+              <span class="criterion-name">TypeScript 지원</span>
+              <span class="criterion-weight">
+                <span class="weight-dot filled"></span><span class="weight-dot filled"></span><span class="weight-dot empty"></span>
+                <span class="weight-label">중간</span>
+              </span>
+            </td>
+            <td class="rating-cell winner-col" title="우수한 TypeScript 지원, 풍부한 타입 정의">
+              <div class="rating-box" style="background: #4ade8012; border: 1px solid #4ade8020;">
+                <span class="rating-icon" style="color: #4ade80;">&#10003;</span>
+                <span style="color: #4ade80;">우수</span>
+              </div>
+            </td>
+            <td class="rating-cell" title="Vue 3부터 네이티브 TS 지원">
+              <div class="rating-box" style="background: #4ade800a; border: 1px solid #4ade8015;">
+                <span class="rating-icon" style="color: #4ade80;">&#10003;</span>
+                <span style="color: #4ade80;">양호</span>
+              </div>
+            </td>
+            <td class="rating-cell" title="TS 지원 개선 중이나 아직 제한적인 부분 있음">
+              <div class="rating-box" style="background: #facc150a; border: 1px solid #facc1515;">
+                <span class="rating-icon" style="color: #facc15;">&#9651;</span>
+                <span style="color: #facc15;">개선 중</span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Row 6: SSR -->
+          <tr style="animation-delay: 0.2s;">
+            <td>
+              <span class="criterion-name">SSR / 메타프레임워크</span>
+              <span class="criterion-weight">
+                <span class="weight-dot filled"></span><span class="weight-dot empty"></span><span class="weight-dot empty"></span>
+                <span class="weight-label">낮음</span>
+              </span>
+            </td>
+            <td class="rating-cell winner-col" title="Next.js — 가장 성숙한 메타프레임워크">
+              <div class="rating-box" style="background: #4ade8012; border: 1px solid #4ade8020;">
+                <span class="rating-icon" style="color: #4ade80;">&#10003;</span>
+                <span style="color: #4ade80;">Next.js</span>
+              </div>
+            </td>
+            <td class="rating-cell" title="Nuxt — 안정적인 SSR 지원">
+              <div class="rating-box" style="background: #facc150a; border: 1px solid #facc1515;">
+                <span class="rating-icon" style="color: #facc15;">&#9651;</span>
+                <span style="color: #facc15;">Nuxt</span>
+              </div>
+            </td>
+            <td class="rating-cell" title="SvelteKit — 빠르게 성장 중이나 생태계 아직 작음">
+              <div class="rating-box" style="background: #facc150a; border: 1px solid #facc1515;">
+                <span class="rating-icon" style="color: #facc15;">&#9651;</span>
+                <span style="color: #facc15;">SvelteKit</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td style="font-weight: bold; color: #e2e8f0; font-size: 14px;">종합 점수</td>
+            <td class="winner-col">
+              <div class="final-score">
+                <div style="font-size: 13px; color: #4ade80; font-weight: bold;">
+                  <span style="background: #4ade8015; padding: 2px 6px; border-radius: 4px;">&#10003;4</span>
+                  <span style="background: #facc1510; padding: 2px 6px; border-radius: 4px; color: #facc15;">&#9651;2</span>
+                  <span style="background: #ef444410; padding: 2px 6px; border-radius: 4px; color: #ef4444;">&#10007;0</span>
+                </div>
+                <div class="final-bar">
+                  <div class="final-bar-fill" style="width: 80%; background: linear-gradient(90deg, #4ade80, #22c55e);"></div>
+                </div>
+                <div style="font-size: 11px; color: #4ade80; font-weight: bold;">&#9733; 추천</div>
+              </div>
+            </td>
+            <td>
+              <div class="final-score">
+                <div style="font-size: 13px; color: #94a3b8;">
+                  <span style="background: #4ade8010; padding: 2px 6px; border-radius: 4px; color: #4ade80;">&#10003;3</span>
+                  <span style="background: #facc1508; padding: 2px 6px; border-radius: 4px; color: #facc15;">&#9651;2</span>
+                  <span style="background: #ef444408; padding: 2px 6px; border-radius: 4px; color: #ef4444;">&#10007;1</span>
+                </div>
+                <div class="final-bar">
+                  <div class="final-bar-fill" style="width: 67%; background: linear-gradient(90deg, #94a3b8, #64748b);"></div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="final-score">
+                <div style="font-size: 13px; color: #94a3b8;">
+                  <span style="background: #4ade8010; padding: 2px 6px; border-radius: 4px; color: #4ade80;">&#10003;2</span>
+                  <span style="background: #facc1508; padding: 2px 6px; border-radius: 4px; color: #facc15;">&#9651;3</span>
+                  <span style="background: #ef444408; padding: 2px 6px; border-radius: 4px; color: #ef4444;">&#10007;1</span>
+                </div>
+                <div class="final-bar">
+                  <div class="final-bar-fill" style="width: 58%; background: linear-gradient(90deg, #94a3b8, #64748b);"></div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Recommendation Box -->
+    <div class="rec-box">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #4ade8018; font-size: 14px; color: #4ade80;">&#9733;</span>
+        <span style="font-size: 16px; font-weight: bold; color: #e2e8f0;">추천: React</span>
+      </div>
+      <div style="font-size: 12px; color: #94a3b8; line-height: 1.6; padding-left: 38px;">
+        생태계 규모, 인력 채용 용이성, TypeScript 지원 등 <strong style="color: #e2e8f0;">고중요도 기준</strong>에서 가장 높은 점수. 성능은 Svelte에 약간 뒤지지만, MVP 단계에서는 생태계와 인력이 더 중요한 요소로 판단됨.
+      </div>
+
+      <!-- Key differentiators -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; padding-left: 38px;">
+        <div style="padding: 8px 12px; background: #4ade8008; border-radius: 8px; border: 1px solid #4ade8015;">
+          <div style="font-size: 10px; color: #4ade80; font-weight: bold; margin-bottom: 2px;">강점</div>
+          <div style="font-size: 11px; color: #888;">생태계 · 채용 · TS 지원 · SSR(Next.js)</div>
+        </div>
+        <div style="padding: 8px 12px; background: #facc1508; border-radius: 8px; border: 1px solid #facc1515;">
+          <div style="font-size: 10px; color: #facc15; font-weight: bold; margin-bottom: 2px;">고려사항</div>
+          <div style="font-size: 11px; color: #888;">런타임 성능 · 학습 곡선 다소 높음</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="meta">Last updated: 2026-03-31 · Planning Compass</div>
+
+  <div class="matrix-tooltip"></div>
+  <script>
+    const tooltip = document.querySelector('.matrix-tooltip');
+    document.querySelectorAll('.rating-cell[title]').forEach(cell => {
+      cell.addEventListener('mouseenter', e => {
+        tooltip.textContent = cell.getAttribute('title');
+        tooltip.classList.add('visible');
+      });
+      cell.addEventListener('mousemove', e => {
+        tooltip.style.left = (e.clientX + 14) + 'px';
+        tooltip.style.top = (e.clientY + 14) + 'px';
+      });
+      cell.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+    });
+
+    // Column highlight on header hover
+    document.querySelectorAll('.option-header').forEach(header => {
+      const idx = Array.from(header.parentElement.children).indexOf(header);
+      header.addEventListener('mouseenter', () => {
+        document.querySelectorAll('.matrix-table tbody tr').forEach(row => {
+          const cell = row.children[idx];
+          if (cell) cell.style.backgroundColor = '#2a2a4a18';
+        });
+      });
+      header.addEventListener('mouseleave', () => {
+        document.querySelectorAll('.matrix-table tbody tr').forEach(row => {
+          const cell = row.children[idx];
+          if (cell) cell.style.backgroundColor = '';
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "eval_id": 0,
+  "eval_name": "eval-korean-simple",
+  "prompt": "데이터 분석 분야를 깊이 배우고 싶어요",
+  "assertions": [
+    {
+      "name": "has-anchor-points",
+      "type": "contains_section",
+      "description": "Output contains an 'Anchor Points' section connecting learner's existing knowledge to the domain"
+    },
+    {
+      "name": "has-domain-landscape",
+      "type": "contains_section",
+      "description": "Output contains a 'Domain Landscape' section with 5-7 distinct areas"
+    },
+    {
+      "name": "has-priority-map",
+      "type": "contains_section",
+      "description": "Output contains a 'Learning Priority Map' with prioritized areas based on the learner's situation"
+    },
+    {
+      "name": "has-knowledge-gaps",
+      "type": "contains_section",
+      "description": "Output contains a section identifying what experts know that the learner doesn't yet"
+    },
+    {
+      "name": "output-in-korean",
+      "type": "language_check",
+      "description": "Orient map is written in Korean (user's language), not English"
+    },
+    {
+      "name": "file-saved",
+      "type": "file_exists",
+      "description": "A domain-orient-*.md file is saved to the outputs directory"
+    },
+    {
+      "name": "concise-not-encyclopedic",
+      "type": "qualitative",
+      "description": "Each area description is 3-5 sentences (map, not encyclopedia). Total output under ~1500 words."
+    }
+  ]
+}

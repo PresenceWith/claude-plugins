@@ -1,0 +1,47 @@
+{
+  "eval_id": 3,
+  "eval_name": "prime-thinking-expansion",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "three-distinct-question-types",
+      "passed": true,
+      "evidence": "Q1=예측(파이프라인 초보 실수), Q2=연결(API 설계↔파이프라인), Q3=관계(파이프라인→모델링 영향). 3가지 다른 사고 축."
+    },
+    {
+      "text": "layer1-reasoning-surfaced",
+      "passed": true,
+      "evidence": "Q1: '파이프라인의 가장 위험한 실패는 데이터가 잘못 들어가는 것이라고 가정'. Q2: '잘못된 입력을 거르는 것이 시스템 안정성의 첫걸음이라는 프레임'. Q3: '기술적 오류가 아니라 의미적 불일치가 치명적이라고 가정'."
+    },
+    {
+      "text": "layer2-perspective-shifted",
+      "passed": true,
+      "evidence": "Q1: 코드 문제→시스템 설계 문제로 전환. Q2: 거부하면 끝(API)→거부된 데이터는 어디로(파이프라인) 전환. Q3: 단방향→양방향 피드백 루프 전환. 각각 실제 전문가 관점 차이."
+    },
+    {
+      "text": "layer3-open-question-posed",
+      "passed": true,
+      "evidence": "Q1: 복구 설계 부재. Q2: data contract vs API spec 차이. Q3: grain 선정의 파이프라인 설계 결정. 모두 답 없는 열린 질문."
+    },
+    {
+      "text": "no-answer-judgment",
+      "passed": true,
+      "evidence": "어떤 선택지도 정답/오답으로 판정하지 않음. '맞습니다/틀렸습니다' 표현 없음."
+    },
+    {
+      "text": "orient-terms-only",
+      "passed": true,
+      "evidence": "사용된 용어: idempotency, DAG, ETL, star schema, grain, schema drift, data contract — 모두 orient 맵에 있는 용어. 새 개념 도입 없음."
+    },
+    {
+      "text": "wrap-up-three-questions",
+      "passed": true,
+      "evidence": "'생각해볼 질문들' 섹션에 3개 열린 질문 모아서 제시. '읽기 전과 후에 어떻게 달라지는지 관찰해보세요' 마무리."
+    },
+    {
+      "text": "no-file-artifact",
+      "passed": true,
+      "evidence": "prime_session.md는 평가용으로만 생성. 스킬 자체는 파일 산출물 없이 대화형으로 진행."
+    }
+  ]
+}

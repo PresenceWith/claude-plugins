@@ -1,0 +1,31 @@
+{
+  "eval_id": 1,
+  "run_type": "with_skill",
+  "expectations": [
+    {
+      "text": "Information limiting: Does not dump all features at once; presents 3-5 key items first and offers to expand",
+      "passed": true,
+      "evidence": "Presents only 3 core areas with brief 1-line previews each. Explicitly proposes '하나씩 깊이 들어가는 방식' and asks user to choose which area to explore first."
+    },
+    {
+      "text": "Positional anchoring: New concepts are introduced in relation to existing structure",
+      "passed": true,
+      "evidence": "Establishes '포트폴리오 → 클라이언트 소통 → 견적서' flow first, then positions all subsequent discussion relative to this framework."
+    },
+    {
+      "text": "Must-have vs nice-to-have: Explicitly separates MVP-essential from later features",
+      "passed": true,
+      "evidence": "Explicitly lists '나중에 다뤄도 되는 것들' (기술 스택, 수익 모델, 경쟁 서비스 분석) with reasons why each can wait."
+    },
+    {
+      "text": "State file created with correct schema",
+      "passed": true,
+      "evidence": "state.md created with Goal, Elements (6 items, typed), Relations, Decided (3), Undecided (5), Active Discussion, and Meta sections."
+    },
+    {
+      "text": "Does not overwhelm: Response feels structured and digestible",
+      "passed": true,
+      "evidence": "Response is ~40 lines, ends with exactly 2 bounded questions. Compare to without_skill version at 257 lines with 10 sections."
+    }
+  ]
+}

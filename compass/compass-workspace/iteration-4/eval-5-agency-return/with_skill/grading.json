@@ -1,0 +1,10 @@
+{
+  "expectations": [
+    {"text": "새로운 기술적 옵션이나 결정사항을 제시하지 않음 (push-mode 중단)", "passed": true, "evidence": "DB, 인증, 결제 등 이전 턴에서 던진 새 옵션을 이어가지 않고 완전히 멈춤"},
+    {"text": "사용자의 수동적 응답 패턴을 인식한 반응 (명시적 또는 암묵적)", "passed": true, "evidence": "'잠깐, 제가 한 번에 너무 많이 던진 것 같아요. DB, 인증, 결제까지 한꺼번에 물어봤는데 — 아직 그 단계가 아닐 수도 있거든요.' — 명시적 인식"},
+    {"text": "구체적이고 제한된 선택지(A/B/C 형식 등)를 제시하여 주도권 환원", "passed": true, "evidence": "(A) 학생 경험 흐름 구체화, (B) MVP 범위 정하기, (C) 앞서나간 부분 다시 얘기 — 3개 선택지"},
+    {"text": "지금까지 결정된 사항을 간략히 정리", "passed": true, "evidence": "'Monaco 에디터 + Docker 컨테이너 + ECS Fargate — 기술 스택의 큰 뼈대는 잡혔어요'"},
+    {"text": "대화 톤이 push에서 pull로 전환됨", "passed": true, "evidence": "'어디서부터 가고 싶으세요?' — 사용자에게 방향 결정권 완전 이전"}
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

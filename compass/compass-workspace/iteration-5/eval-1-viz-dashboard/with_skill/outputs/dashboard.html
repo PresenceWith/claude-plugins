@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Status Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 24px; }
+    .meta { color: #666; font-size: 11px; margin-top: 24px; text-align: right; }
+
+    .decided { color: #4ade80; }
+    .active { color: #facc15; }
+    .undecided { color: #888; }
+
+    .card {
+      background: #1a1a2e;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 8px 0;
+      border: 1px solid #2a2a4a;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 700px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .column {
+      min-height: 120px;
+    }
+
+    .card-decided {
+      background: #1a1a2e;
+      border: 1px solid #4ade80;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+
+    .card-active {
+      background: #1a1a2e;
+      border: 2px solid #facc15;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.1);
+    }
+
+    .card-undecided {
+      background: #1a1a2e;
+      border: 1px dashed #6b7280;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      color: #e2e8f0;
+      font-weight: bold;
+    }
+
+    .card-status-decided {
+      font-size: 11px;
+      color: #4ade80;
+    }
+
+    .card-status-active {
+      font-size: 11px;
+      color: #facc15;
+      animation: pulse 2s infinite;
+    }
+
+    .card-status-undecided {
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .card-detail {
+      font-size: 13px;
+      color: #888888;
+      margin-top: 4px;
+    }
+
+    .card-relation {
+      font-size: 11px;
+      color: #666666;
+      margin-top: 4px;
+    }
+
+    .new-badge {
+      background: #4ade80;
+      color: #0f0f1a;
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-left: 6px;
+      font-weight: bold;
+    }
+
+    .progress-wrapper {
+      margin-bottom: 24px;
+    }
+
+    .progress-bar {
+      display: flex;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #1a1a2e;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #888888;
+      margin-top: 6px;
+    }
+
+    .progress-summary {
+      text-align: center;
+      font-size: 14px;
+      color: #e2e8f0;
+      margin-top: 4px;
+    }
+
+    .decision-order {
+      margin-top: 24px;
+      padding: 16px;
+      background: #1a1a2e;
+      border-radius: 8px;
+      border: 1px solid #2a2a4a;
+    }
+
+    .decision-order h3 {
+      font-size: 14px;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+    }
+
+    .decision-order .steps {
+      font-size: 13px;
+      color: #888888;
+    }
+  </style>
+</head>
+<body>
+
+  <div style="max-width: 960px; margin: 0 auto; overflow-x: auto;">
+    <h1>Planning Compass — Status Dashboard</h1>
+    <p class="subtitle">내부 도구 프로젝트 — 기술 결정 현황</p>
+
+    <!-- Progress Bar -->
+    <div class="progress-wrapper">
+      <div class="progress-bar">
+        <!-- 3 decided / 7 total = 42.9%, 1 active / 7 = 14.3%, 3 undecided / 7 = 42.9% -->
+        <div style="width: 42.9%; background: #4ade80;"></div>
+        <div style="width: 14.3%; background: #facc15;"></div>
+        <div style="width: 42.9%; background: #6b7280;"></div>
+      </div>
+      <div class="progress-labels">
+        <span>3 결정됨</span>
+        <span>1 논의 중</span>
+        <span>3 미결정</span>
+      </div>
+      <div class="progress-summary">
+        7개 항목 중 3개 결정
+      </div>
+    </div>
+
+    <!-- 3-Column Grid -->
+    <div class="grid-container">
+
+      <!-- Decided Column -->
+      <div class="column">
+        <h2 style="color: #4ade80; font-size: 16px; margin-bottom: 12px;">Decided</h2>
+
+        <!-- 사용자 인증 -->
+        <div class="card-decided">
+          <div class="card-header">
+            <strong class="card-title">사용자 인증</strong>
+            <span class="card-status-decided">결정</span>
+          </div>
+          <div class="card-detail">OAuth</div>
+          <div class="card-relation">API 구조와 연동</div>
+        </div>
+
+        <!-- 데이터베이스 -->
+        <div class="card-decided">
+          <div class="card-header">
+            <strong class="card-title">데이터베이스 <span class="new-badge">NEW</span></strong>
+            <span class="card-status-decided">결정</span>
+          </div>
+          <div class="card-detail">PostgreSQL</div>
+          <div class="card-relation">API 구조에서 의존</div>
+        </div>
+
+        <!-- 프론트엔드 -->
+        <div class="card-decided">
+          <div class="card-header">
+            <strong class="card-title">프론트엔드</strong>
+            <span class="card-status-decided">결정</span>
+          </div>
+          <div class="card-detail">React</div>
+          <div class="card-relation">API 구조에서 의존</div>
+        </div>
+
+      </div>
+
+      <!-- In Discussion Column -->
+      <div class="column">
+        <h2 style="color: #facc15; font-size: 16px; margin-bottom: 12px;">In Discussion</h2>
+
+        <!-- API 구조 -->
+        <div class="card-active">
+          <div class="card-header">
+            <strong class="card-title">API 구조</strong>
+            <span class="card-status-active">논의 중</span>
+          </div>
+          <div class="card-detail">REST vs GraphQL</div>
+          <div class="card-relation">Frontend, Database에서 의존</div>
+        </div>
+
+      </div>
+
+      <!-- Undecided Column -->
+      <div class="column">
+        <h2 style="color: #6b7280; font-size: 16px; margin-bottom: 12px;">Undecided</h2>
+
+        <!-- 배포 전략 -->
+        <div class="card-undecided">
+          <div class="card-header">
+            <strong class="card-title">배포 전략</strong>
+            <span class="card-status-undecided">미결정</span>
+          </div>
+          <div class="card-detail">아직 논의 시작 전</div>
+          <div class="card-relation">CI/CD 파이프라인에 의존</div>
+        </div>
+
+        <!-- 모니터링 -->
+        <div class="card-undecided">
+          <div class="card-header">
+            <strong class="card-title">모니터링</strong>
+            <span class="card-status-undecided">미결정</span>
+          </div>
+          <div class="card-detail">미정</div>
+          <div class="card-relation">배포 전략에 의존</div>
+        </div>
+
+        <!-- CI/CD 파이프라인 -->
+        <div class="card-undecided">
+          <div class="card-header">
+            <strong class="card-title">CI/CD 파이프라인</strong>
+            <span class="card-status-undecided">미결정</span>
+          </div>
+          <div class="card-detail">미정</div>
+          <div class="card-relation">배포 전략의 선행 결정</div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Decision Order -->
+    <div class="decision-order">
+      <h3>권장 결정 순서</h3>
+      <div class="steps">
+        &#9312; API 구조 (REST vs GraphQL) &rarr; &#9313; CI/CD 파이프라인 &rarr; &#9314; 배포 전략 &rarr; &#9315; 모니터링
+      </div>
+    </div>
+
+    <div class="meta">
+      Last updated: 2026-03-30 · Planning Compass
+    </div>
+  </div>
+
+</body>
+</html>

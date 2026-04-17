@@ -1,0 +1,87 @@
+{
+  "expectations": [
+    {
+      "text": "HTML file generated: A dashboard.html file exists in outputs",
+      "passed": true,
+      "evidence": "dashboard.html exists in outputs directory (10,785 bytes). File contains a complete HTML document with DOCTYPE, head, body, styles, and structured content."
+    },
+    {
+      "text": "Three-column layout: Dashboard shows Decided, In Discussion, and Undecided columns",
+      "passed": true,
+      "evidence": "HTML uses a CSS grid with 'grid-template-columns: 1fr 1fr 1fr' (line 123). Three columns have headers: 'Decided' (line 289), 'In Discussion' (line 321), and 'Undecided' (line 340). Each column contains the correct items: Decided has 3 cards (UserAuth/OAuth, Database/PostgreSQL, Frontend/React), In Discussion has 1 card (API Structure: REST vs GraphQL), Undecided has 3 cards (Deploy Strategy, Monitoring, CI/CD Pipeline)."
+    },
+    {
+      "text": "Content fits viewport: No horizontal scrolling needed, all text fully visible",
+      "passed": true,
+      "evidence": "The dashboard uses max-width: 960px on .dashboard-container (line 49), an overflow-x: auto wrapper around the entire content (line 43-44, applied at line 259), box-sizing: border-box globally (line 9), and relative grid units (1fr 1fr 1fr) with no fixed pixel widths exceeding viewport. A responsive media query at max-width: 700px collapses the grid to a single column (lines 127-129). No element uses a fixed width that could exceed the viewport."
+    },
+    {
+      "text": "Progress indicator: Shows overall progress (e.g., 3/7 decided)",
+      "passed": true,
+      "evidence": "Progress section at lines 265-281 displays '3 / 7 확정' (3/7 decided). Includes a segmented progress bar with three color-coded segments: decided at 42.86% (green), discussing at 14.28% (yellow), undecided at 42.86% (gray). A legend below the bar shows counts: '확정 (3)', '논의 중 (1)', '미결 (3)'."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "output_chars": 14262,
+    "transcript_chars": 2075
+  },
+  "timing": {
+    "total_tokens": 23736,
+    "executor_duration_seconds": 103.2,
+    "total_duration_seconds": 103.2
+  },
+  "claims": [
+    {
+      "claim": "총 7개 항목 중 3개가 확정, 1개가 논의 중, 3개가 아직 논의 시작 전",
+      "type": "factual",
+      "verified": true,
+      "evidence": "state.md and dashboard.html both confirm: 3 decided (UserAuth, Database, Frontend), 1 in discussion (API Structure), 3 undecided (Deploy Strategy, Monitoring, CI/CD Pipeline). Matches the input prompt exactly."
+    },
+    {
+      "claim": "세 컬럼(확정 / 논의 중 / 미결)으로 현황을 한눈에 볼 수 있고, 진행률 바도 포함되어 있습니다",
+      "type": "quality",
+      "verified": true,
+      "evidence": "dashboard.html contains a three-column grid layout with labeled columns and a segmented progress bar with legend. The layout is clean and well-organized with color coding for visual distinction."
+    },
+    {
+      "claim": "API 구조 결정이 다음으로 가장 우선 결정해야 할 항목",
+      "type": "factual",
+      "verified": true,
+      "evidence": "response.md identifies API Structure as the top priority, and the recommended decision order in the dashboard lists it as #1. This is logically sound since it depends on already-decided items (Frontend/React, Database/PostgreSQL) and blocks nothing yet decided."
+    },
+    {
+      "claim": "배포 전략, 모니터링, CI/CD는 논의 시작 전 상태",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Matches input prompt exactly: '배포 전략은 아직 논의도 안 했어', '모니터링도 봐야 하고', 'CI/CD 파이프라인도 정해야 해'. All three appear in Undecided column with '논의 시작 전' labels."
+    },
+    {
+      "claim": "PostgreSQL이 '방금 결정됨'으로 표시됨",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The Database card has a 'NEW' badge (CSS ::after pseudo-element with content 'NEW' on .card-recent class, line 301) and shows '방금 결정됨' as the relation text. This correctly reflects the input: 'DB는 PostgreSQL 확정했고(방금 결정)'."
+    }
+  ],
+  "user_notes_summary": null,
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "HTML file generated: A dashboard.html file exists in outputs",
+        "reason": "This assertion only checks file existence. A 0-byte file or an HTML file with completely wrong content would also pass. Consider combining with a content check (e.g., 'dashboard.html contains all 7 decision items') or drop it since the other assertions implicitly require the file to exist with correct content."
+      },
+      {
+        "reason": "No assertion checks that the dashboard correctly categorizes each item. The prompt specifies OAuth/PostgreSQL/React as decided and API as in-discussion, but the assertions only check that three columns exist — not that items appear in the correct columns. A dashboard that put everything in 'Decided' would pass all current assertions."
+      },
+      {
+        "reason": "No assertion checks the recommended decision order section, which is a notable value-add in the output (lines 366-389). If this is considered part of the skill's expected behavior, it should be tested."
+      }
+    ],
+    "overall": "The assertions cover structural requirements well (layout, progress, viewport fit) but lack content correctness checks. The biggest gap is that no assertion verifies items are categorized correctly — all items could be in wrong columns and still pass. Consider adding an assertion like 'OAuth, PostgreSQL, React appear in the Decided column; API Structure appears in In Discussion'."
+  }
+}

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Mindmap</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 32px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; text-align: center; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 28px; text-align: center; }
+    .container { overflow-x: auto; width: 100%; max-width: 1100px; }
+    svg { width: 100%; height: auto; }
+    .meta { color: #666; font-size: 11px; margin-top: 20px; text-align: right; width: 100%; max-width: 1100px; }
+  </style>
+</head>
+<body>
+  <h1>Planning Compass — Mindmap</h1>
+  <p class="subtitle">스타트업 런칭 준비 마인드맵</p>
+
+  <div class="container">
+    <svg viewBox="0 0 1100 950" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <!-- Glow filters per domain -->
+        <filter id="glow-product" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#6366f1" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-team" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#3b82f6" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-funding" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#10b981" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-marketing" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#f59e0b" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-legal" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#ef4444" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+
+        <!-- Center glow -->
+        <filter id="glow-center" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+          <feFlood flood-color="#8b5cf6" flood-opacity="0.35" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+
+        <!-- Node shadow for detail nodes -->
+        <filter id="node-shadow">
+          <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.25"/>
+        </filter>
+
+        <!-- Central node radial gradient -->
+        <radialGradient id="center-grad" cx="50%" cy="40%" r="55%">
+          <stop offset="0%" stop-color="#3a2a6a"/>
+          <stop offset="100%" stop-color="#1a1a2e"/>
+        </radialGradient>
+
+        <!-- Arrowhead for cross-links -->
+        <marker id="cross-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0,0 8,3 0,6" fill="#94a3b8" fill-opacity="0.6"/>
+        </marker>
+
+        <style>
+          .branch-group {
+            opacity: 0;
+            transform-origin: center;
+            animation: branchFadeIn 0.5s ease-out forwards;
+          }
+          .branch-group:nth-child(1) { animation-delay: 0.1s; }
+          .branch-group:nth-child(2) { animation-delay: 0.2s; }
+          .branch-group:nth-child(3) { animation-delay: 0.3s; }
+          .branch-group:nth-child(4) { animation-delay: 0.4s; }
+          .branch-group:nth-child(5) { animation-delay: 0.5s; }
+
+          @keyframes branchFadeIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to   { opacity: 1; transform: scale(1); }
+          }
+
+          .central-node {
+            animation: centralPulseIn 0.6s ease-out;
+          }
+          @keyframes centralPulseIn {
+            0%   { opacity: 0; transform: scale(0.5); }
+            70%  { transform: scale(1.08); }
+            100% { opacity: 1; transform: scale(1); }
+          }
+
+          .node-group { cursor: pointer; transition: transform 0.2s ease, filter 0.2s ease; }
+          .node-group:hover { transform: scale(1.06); }
+          .node-group:hover rect, .node-group:hover circle { stroke-width: 3; }
+
+          .branch-group { transition: opacity 0.3s; }
+          .branch-group.dimmed { opacity: 0.25; }
+
+          .cross-link { opacity: 0.4; transition: opacity 0.3s; }
+          .cross-link:hover { opacity: 1; }
+          .cross-link:hover path { stroke-width: 2; }
+
+          .mindmap-tooltip {
+            position: fixed; pointer-events: none; z-index: 100;
+            background: #1a1a2eee; border: 1px solid #4a4a7a; border-radius: 10px;
+            padding: 10px 14px; font-size: 12px; color: #e2e8f0;
+            max-width: 260px; opacity: 0; transition: opacity 0.2s;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+          }
+          .mindmap-tooltip.visible { opacity: 1; }
+          .mindmap-tooltip .status-tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 10px; font-weight: bold; margin-top: 6px;
+          }
+        </style>
+      </defs>
+
+      <!-- Background -->
+      <rect width="1100" height="950" fill="#0f0f1a"/>
+
+      <!-- Branch background zones (rendered before branch groups) -->
+      <!-- Product zone (top-right, ~-36deg from 12 o'clock) -->
+      <circle cx="720" cy="240" r="200" fill="#6366f1" fill-opacity="0.03"/>
+      <!-- Team zone (right, ~36deg) -->
+      <circle cx="780" cy="520" r="180" fill="#3b82f6" fill-opacity="0.03"/>
+      <!-- Funding zone (bottom, ~108deg) -->
+      <circle cx="550" cy="700" r="190" fill="#10b981" fill-opacity="0.03"/>
+      <!-- Marketing zone (left, ~180deg) -->
+      <circle cx="250" cy="560" r="190" fill="#f59e0b" fill-opacity="0.03"/>
+      <!-- Legal zone (top-left, ~252deg) -->
+      <circle cx="280" cy="270" r="180" fill="#ef4444" fill-opacity="0.03"/>
+
+      <!-- === CONNECTOR LINES (rendered before nodes) === -->
+
+      <!-- Product branch connectors (center 550,420 -> 720,260) -->
+      <path d="M 550,420 Q 660,300 720,260" stroke="#6366f1" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <!-- Product -> MVP 기능 -->
+      <path d="M 720,260 Q 800,180 860,160" stroke="#6366f1" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <!-- Product -> UX 디자인 -->
+      <path d="M 720,260 Q 820,240 890,248" stroke="#6366f1" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <!-- Product -> 기술 스택 -->
+      <path d="M 720,260 Q 790,310 850,330" stroke="#6366f1" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+
+      <!-- Team branch connectors (center 550,420 -> 770,510) -->
+      <path d="M 550,420 Q 690,440 770,510" stroke="#3b82f6" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <!-- Team -> 공동창업자 -->
+      <path d="M 770,510 Q 850,470 910,460" stroke="#3b82f6" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <!-- Team -> 첫 채용 -->
+      <path d="M 770,510 Q 860,520 920,530" stroke="#3b82f6" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <!-- Team -> 문화 -->
+      <path d="M 770,510 Q 840,570 900,600" stroke="#3b82f6" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+
+      <!-- Funding branch connectors (center 550,420 -> 550,650) -->
+      <path d="M 550,420 Q 530,540 550,650" stroke="#10b981" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <!-- Funding -> 시드 투자 -->
+      <path d="M 550,650 Q 610,720 660,750" stroke="#10b981" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <!-- Funding -> 부트스트래핑 -->
+      <path d="M 550,650 Q 510,720 490,770" stroke="#10b981" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <!-- Funding -> 정부 지원금 -->
+      <path d="M 550,650 Q 430,710 360,760" stroke="#10b981" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+
+      <!-- Marketing branch connectors (center 550,420 -> 300,560) -->
+      <path d="M 550,420 Q 390,480 300,560" stroke="#f59e0b" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <!-- Marketing -> 콘텐츠 -->
+      <path d="M 300,560 Q 220,510 170,490" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <!-- Marketing -> SNS -->
+      <path d="M 300,560 Q 210,570 150,580" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <!-- Marketing -> 커뮤니티 -->
+      <path d="M 300,560 Q 230,630 170,670" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+
+      <!-- Legal branch connectors (center 550,420 -> 300,270) -->
+      <path d="M 550,420 Q 390,340 300,270" stroke="#ef4444" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <!-- Legal -> 법인 설립 -->
+      <path d="M 300,270 Q 230,210 180,180" stroke="#ef4444" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <!-- Legal -> 특허 -->
+      <path d="M 300,270 Q 210,260 155,260" stroke="#ef4444" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <!-- Legal -> 이용약관 -->
+      <path d="M 300,270 Q 240,330 190,360" stroke="#ef4444" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+
+      <!-- === CROSS-BRANCH LINKS === -->
+      <!-- Product (UX 디자인) <-> Marketing (커뮤니티) : user feedback loop -->
+      <g class="cross-link" data-relation="user-feedback">
+        <path d="M 890,264 Q 700,680 170,686" stroke="#94a3b8" stroke-opacity="0.45" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#cross-arrow)"/>
+        <rect x="490" y="572" width="90" height="18" rx="5" fill="#1a1a2e" fill-opacity="0.9" stroke="#94a3b8" stroke-width="0.5" stroke-opacity="0.3"/>
+        <text x="535" y="584" text-anchor="middle" dominant-baseline="central" fill="#94a3b8" font-size="10">사용자 피드백</text>
+      </g>
+      <!-- Funding (정부 지원금) <-> Legal (법인 설립) : prerequisite -->
+      <g class="cross-link" data-relation="requirement">
+        <path d="M 360,776 Q 140,520 180,196" stroke="#94a3b8" stroke-opacity="0.45" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#cross-arrow)"/>
+        <rect x="120" y="465" width="60" height="18" rx="5" fill="#1a1a2e" fill-opacity="0.9" stroke="#94a3b8" stroke-width="0.5" stroke-opacity="0.3"/>
+        <text x="150" y="477" text-anchor="middle" dominant-baseline="central" fill="#94a3b8" font-size="10">필수 요건</text>
+      </g>
+      <!-- Team (문화) <-> Product (UX 디자인) : culture influences UX -->
+      <g class="cross-link" data-relation="influences">
+        <path d="M 900,616 Q 960,430 890,264" stroke="#94a3b8" stroke-opacity="0.45" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#cross-arrow)"/>
+        <rect x="920" y="430" width="50" height="18" rx="5" fill="#1a1a2e" fill-opacity="0.9" stroke="#94a3b8" stroke-width="0.5" stroke-opacity="0.3"/>
+        <text x="945" y="442" text-anchor="middle" dominant-baseline="central" fill="#94a3b8" font-size="10">영향</text>
+      </g>
+
+      <!-- === CENTRAL NODE === -->
+      <g class="central-node" data-tooltip="스타트업 런칭을 위한 종합 준비 계획" data-status="active">
+        <circle cx="550" cy="420" r="56" fill="url(#center-grad)" stroke="#8b5cf6" stroke-width="3" filter="url(#glow-center)"/>
+        <circle cx="550" cy="420" r="64" fill="none" stroke="#8b5cf6" stroke-width="0.8" stroke-opacity="0.25"/>
+        <circle cx="550" cy="420" r="70" fill="none" stroke="#8b5cf6" stroke-width="0.4" stroke-opacity="0.12"/>
+        <text x="550" y="414" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="15" font-weight="bold">스타트업 런칭</text>
+        <text x="550" y="434" text-anchor="middle" dominant-baseline="central" fill="#8b5cf6" font-size="10">Startup Launch Plan</text>
+      </g>
+
+      <!-- === BRANCH GROUPS === -->
+
+      <!-- Branch 1: Product (제품) — Indigo #6366f1 -->
+      <g class="branch-group">
+        <!-- Primary node -->
+        <g class="node-group core" data-tooltip="MVP 기능, UX 디자인, 기술 스택 결정" data-status="active">
+          <rect x="670" y="240" width="100" height="40" rx="10" fill="#1a1a2e" stroke="#6366f1" stroke-width="2.5" filter="url(#glow-product)"/>
+          <rect x="670" y="240" width="4" height="40" rx="2" fill="#6366f1"/>
+          <circle cx="762" cy="248" r="5" fill="#facc15" stroke="#facc1540" stroke-width="2">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <text x="720" y="262" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">제품</text>
+        </g>
+        <!-- Detail: MVP 기능 -->
+        <g class="node-group detail" data-tooltip="최소 기능 제품의 핵심 기능 정의" data-status="undecided">
+          <rect x="818" y="144" width="96" height="32" rx="8" fill="#1a1a2e" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="908" cy="150" r="4" fill="#6b7280"/>
+          <text x="866" y="162" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">MVP 기능</text>
+        </g>
+        <!-- Detail: UX 디자인 -->
+        <g class="node-group detail" data-tooltip="사용자 경험 설계 및 프로토타이핑" data-status="undecided">
+          <rect x="848" y="232" width="104" height="32" rx="8" fill="#1a1a2e" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="946" cy="238" r="4" fill="#6b7280"/>
+          <text x="900" y="250" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">UX 디자인</text>
+        </g>
+        <!-- Detail: 기술 스택 -->
+        <g class="node-group detail" data-tooltip="프론트엔드, 백엔드, 인프라 기술 선택" data-status="undecided">
+          <rect x="808" y="314" width="96" height="32" rx="8" fill="#1a1a2e" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="898" cy="320" r="4" fill="#6b7280"/>
+          <text x="856" y="332" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">기술 스택</text>
+        </g>
+      </g>
+
+      <!-- Branch 2: Team (팀) — Blue #3b82f6 -->
+      <g class="branch-group">
+        <g class="node-group core" data-tooltip="공동창업자, 첫 채용, 문화 구축" data-status="active">
+          <rect x="726" y="490" width="88" height="40" rx="10" fill="#1a1a2e" stroke="#3b82f6" stroke-width="2.5" filter="url(#glow-team)"/>
+          <rect x="726" y="490" width="4" height="40" rx="2" fill="#3b82f6"/>
+          <circle cx="806" cy="498" r="5" fill="#facc15" stroke="#facc1540" stroke-width="2">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <text x="770" y="512" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">팀</text>
+        </g>
+        <!-- Detail: 공동창업자 -->
+        <g class="node-group detail" data-tooltip="공동창업자 발굴 및 역할 분담" data-status="undecided">
+          <rect x="870" y="444" width="104" height="32" rx="8" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="968" cy="450" r="4" fill="#6b7280"/>
+          <text x="922" y="462" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">공동창업자</text>
+        </g>
+        <!-- Detail: 첫 채용 -->
+        <g class="node-group detail" data-tooltip="초기 팀 빌딩을 위한 첫 채용 계획" data-status="undecided">
+          <rect x="880" y="514" width="96" height="32" rx="8" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="970" cy="520" r="4" fill="#6b7280"/>
+          <text x="928" y="532" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">첫 채용</text>
+        </g>
+        <!-- Detail: 문화 -->
+        <g class="node-group detail" data-tooltip="조직 문화 및 가치관 정의" data-status="undecided">
+          <rect x="860" y="600" width="80" height="32" rx="8" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="934" cy="606" r="4" fill="#6b7280"/>
+          <text x="900" y="618" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">문화</text>
+        </g>
+      </g>
+
+      <!-- Branch 3: Funding (자금) — Emerald #10b981 -->
+      <g class="branch-group">
+        <g class="node-group core" data-tooltip="시드 투자, 부트스트래핑, 정부 지원금" data-status="active">
+          <rect x="506" y="630" width="88" height="40" rx="10" fill="#1a1a2e" stroke="#10b981" stroke-width="2.5" filter="url(#glow-funding)"/>
+          <rect x="506" y="630" width="4" height="40" rx="2" fill="#10b981"/>
+          <circle cx="586" cy="638" r="5" fill="#facc15" stroke="#facc1540" stroke-width="2">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <text x="550" y="652" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">자금</text>
+        </g>
+        <!-- Detail: 시드 투자 -->
+        <g class="node-group detail" data-tooltip="시드 라운드 투자 유치 전략" data-status="undecided">
+          <rect x="616" y="734" width="96" height="32" rx="8" fill="#1a1a2e" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="706" cy="740" r="4" fill="#6b7280"/>
+          <text x="664" y="752" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">시드 투자</text>
+        </g>
+        <!-- Detail: 부트스트래핑 -->
+        <g class="node-group detail" data-tooltip="자체 자금으로 초기 운영" data-status="undecided">
+          <rect x="438" y="754" width="112" height="32" rx="8" fill="#1a1a2e" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="544" cy="760" r="4" fill="#6b7280"/>
+          <text x="494" y="772" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">부트스트래핑</text>
+        </g>
+        <!-- Detail: 정부 지원금 -->
+        <g class="node-group detail" data-tooltip="정부 창업 지원 프로그램 활용" data-status="undecided">
+          <rect x="300" y="744" width="112" height="32" rx="8" fill="#1a1a2e" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="406" cy="750" r="4" fill="#6b7280"/>
+          <text x="356" y="762" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">정부 지원금</text>
+        </g>
+      </g>
+
+      <!-- Branch 4: Marketing (마케팅) — Amber #f59e0b -->
+      <g class="branch-group">
+        <g class="node-group core" data-tooltip="콘텐츠 마케팅, SNS, 커뮤니티 전략" data-status="active">
+          <rect x="250" y="540" width="100" height="40" rx="10" fill="#1a1a2e" stroke="#f59e0b" stroke-width="2.5" filter="url(#glow-marketing)"/>
+          <rect x="250" y="540" width="4" height="40" rx="2" fill="#f59e0b"/>
+          <circle cx="342" cy="548" r="5" fill="#facc15" stroke="#facc1540" stroke-width="2">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <text x="300" y="562" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">마케팅</text>
+        </g>
+        <!-- Detail: 콘텐츠 -->
+        <g class="node-group detail" data-tooltip="블로그, 영상 등 콘텐츠 마케팅" data-status="undecided">
+          <rect x="100" y="474" width="88" height="32" rx="8" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="182" cy="480" r="4" fill="#6b7280"/>
+          <text x="144" y="492" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">콘텐츠</text>
+        </g>
+        <!-- Detail: SNS -->
+        <g class="node-group detail" data-tooltip="소셜 미디어 채널 운영 전략" data-status="undecided">
+          <rect x="80" y="564" width="72" height="32" rx="8" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="146" cy="570" r="4" fill="#6b7280"/>
+          <text x="116" y="582" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">SNS</text>
+        </g>
+        <!-- Detail: 커뮤니티 -->
+        <g class="node-group detail" data-tooltip="사용자 커뮤니티 구축 및 관리" data-status="undecided">
+          <rect x="100" y="654" width="104" height="32" rx="8" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="198" cy="660" r="4" fill="#6b7280"/>
+          <text x="152" y="672" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">커뮤니티</text>
+        </g>
+      </g>
+
+      <!-- Branch 5: Legal (법률) — Red #ef4444 -->
+      <g class="branch-group">
+        <g class="node-group core" data-tooltip="법인 설립, 특허, 이용약관 준비" data-status="undecided">
+          <rect x="252" y="250" width="96" height="40" rx="10" fill="#1a1a2e" stroke="#ef4444" stroke-width="2.5" filter="url(#glow-legal)"/>
+          <rect x="252" y="250" width="4" height="40" rx="2" fill="#ef4444"/>
+          <circle cx="340" cy="258" r="5" fill="#6b7280"/>
+          <text x="300" y="272" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">법률</text>
+        </g>
+        <!-- Detail: 법인 설립 -->
+        <g class="node-group detail" data-tooltip="법인 유형 선택 및 설립 절차" data-status="undecided">
+          <rect x="128" y="164" width="96" height="32" rx="8" fill="#1a1a2e" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="218" cy="170" r="4" fill="#6b7280"/>
+          <text x="176" y="182" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">법인 설립</text>
+        </g>
+        <!-- Detail: 특허 -->
+        <g class="node-group detail" data-tooltip="기술 특허 및 지식재산권 확보" data-status="undecided">
+          <rect x="85" y="244" width="72" height="32" rx="8" fill="#1a1a2e" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="151" cy="250" r="4" fill="#6b7280"/>
+          <text x="121" y="262" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">특허</text>
+        </g>
+        <!-- Detail: 이용약관 -->
+        <g class="node-group detail" data-tooltip="서비스 이용약관 및 개인정보처리방침" data-status="undecided">
+          <rect x="128" y="344" width="104" height="32" rx="8" fill="#1a1a2e" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="226" cy="350" r="4" fill="#6b7280"/>
+          <text x="180" y="362" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">이용약관</text>
+        </g>
+      </g>
+
+      <!-- === LEGEND (bottom-right, positioned by formula) === -->
+      <!-- legendX = 1100 - 190 = 910, legendY = 950 - 120 - 10 = 820 -->
+      <g class="legend" transform="translate(910, 820)">
+        <rect x="0" y="0" width="170" height="118" rx="10" fill="#1a1a2eee" stroke="#2a2a4a" stroke-width="1"/>
+        <text x="14" y="20" fill="#888888" font-size="10" font-weight="bold">범례</text>
+
+        <!-- Status indicators with rings -->
+        <circle cx="22" cy="38" r="5" fill="#4ade80" stroke="#4ade8040" stroke-width="2"/>
+        <text x="34" y="41" fill="#94a3b8" font-size="10">결정됨</text>
+
+        <circle cx="90" cy="38" r="5" fill="#facc15" stroke="#facc1540" stroke-width="2"/>
+        <text x="102" y="41" fill="#94a3b8" font-size="10">논의 중</text>
+
+        <circle cx="22" cy="58" r="5" fill="#6b7280"/>
+        <text x="34" y="61" fill="#94a3b8" font-size="10">미결정</text>
+
+        <!-- Node types -->
+        <line x1="14" y1="78" x2="52" y2="78" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+        <text x="60" y="81" fill="#94a3b8" font-size="10">핵심 요소</text>
+
+        <line x1="14" y1="94" x2="52" y2="94" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round"/>
+        <text x="60" y="97" fill="#94a3b8" font-size="10">세부 요소</text>
+
+        <!-- Cross-link -->
+        <line x1="14" y1="110" x2="52" y2="110" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="60" y="113" fill="#94a3b8" font-size="10">교차 연결</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Tooltip -->
+  <div class="mindmap-tooltip"></div>
+
+  <div class="meta">
+    Last updated: 2026-04-05 · Planning Compass
+  </div>
+
+  <script>
+    const tooltip = document.querySelector('.mindmap-tooltip');
+    const allBranches = document.querySelectorAll('.branch-group');
+
+    document.querySelectorAll('.node-group, .central-node').forEach(node => {
+      node.addEventListener('mouseenter', e => {
+        const desc = node.getAttribute('data-tooltip');
+        const status = node.getAttribute('data-status');
+        const statusLabel = { decided: '결정됨', active: '논의 중', undecided: '미결정' }[status] || '';
+        const statusColor = { decided: '#4ade80', active: '#facc15', undecided: '#6b7280' }[status] || '#6b7280';
+        tooltip.innerHTML = `${desc}${statusLabel ? `<br><span class="status-tag" style="background:${statusColor}18;color:${statusColor}">${statusLabel}</span>` : ''}`;
+        tooltip.classList.add('visible');
+
+        const parentBranch = node.closest('.branch-group');
+        if (parentBranch) {
+          allBranches.forEach(b => {
+            b.classList.toggle('dimmed', b !== parentBranch);
+          });
+        }
+      });
+
+      node.addEventListener('mousemove', e => {
+        tooltip.style.left = (e.clientX + 14) + 'px';
+        tooltip.style.top = (e.clientY + 14) + 'px';
+      });
+
+      node.addEventListener('mouseleave', () => {
+        tooltip.classList.remove('visible');
+        allBranches.forEach(b => b.classList.remove('dimmed'));
+      });
+    });
+  </script>
+</body>
+</html>

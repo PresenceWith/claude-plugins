@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6개월 프로젝트 로드맵 타임라인</title>
+<style>
+  body {
+    margin: 0; padding: 24px;
+    background: #0f0f1a;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display: flex; justify-content: center; align-items: flex-start;
+    min-height: 100vh;
+  }
+  .tl-tooltip {
+    position: fixed; pointer-events: none; z-index: 100;
+    background: #1a1a2eee; border: 1px solid #4a4a7a; border-radius: 10px;
+    padding: 10px 14px; font-size: 12px; color: #e2e8f0;
+    max-width: 280px; opacity: 0; transition: opacity 0.15s;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+  }
+  .tl-tooltip.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div style="overflow-x: auto; max-width: 960px; width: 100%;">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 460"
+       style="width: 100%; background: #0f0f1a;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+
+    <defs>
+      <marker id="arrow-critical" viewBox="0 0 10 6" refX="10" refY="3"
+              markerWidth="8" markerHeight="6" orient="auto">
+        <path d="M0,0 L10,3 L0,6" fill="#facc15"/>
+      </marker>
+      <marker id="arrow-optional" viewBox="0 0 10 6" refX="10" refY="3"
+              markerWidth="8" markerHeight="6" orient="auto">
+        <path d="M0,0 L10,3 L0,6" fill="#6b7280"/>
+      </marker>
+
+      <filter id="glow-decided" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+        <feFlood flood-color="#4ade80" flood-opacity="0.3" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-active" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+        <feFlood flood-color="#facc15" flood-opacity="0.35" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+
+      <!-- Phase gradient fills -->
+      <linearGradient id="grad-completed" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#4ade80" stop-opacity="0.08"/>
+        <stop offset="100%" stop-color="#4ade80" stop-opacity="0.02"/>
+      </linearGradient>
+      <linearGradient id="grad-active" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#facc15" stop-opacity="0.08"/>
+        <stop offset="100%" stop-color="#facc15" stop-opacity="0.02"/>
+      </linearGradient>
+      <linearGradient id="grad-future-odd" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#6366f1" stop-opacity="0.07"/>
+        <stop offset="100%" stop-color="#6366f1" stop-opacity="0.015"/>
+      </linearGradient>
+      <linearGradient id="grad-future-even" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.07"/>
+        <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.015"/>
+      </linearGradient>
+
+      <style>
+        .milestone-group { cursor: pointer; }
+        .milestone-group:hover .ms-dot { transform: scale(1.15); }
+        .milestone-group:hover .ms-label { fill: #ffffff !important; }
+        .ms-dot { transition: transform 0.2s ease; transform-origin: center; }
+
+        .dep-arrow { transition: stroke-opacity 0.3s; }
+        .dep-arrow.dimmed { stroke-opacity: 0.05 !important; }
+        .dep-arrow.highlighted { stroke-opacity: 0.8 !important; }
+
+        .milestone-group {
+          opacity: 0; animation: milestoneFadeIn 0.5s ease-out forwards;
+        }
+        @keyframes milestoneFadeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-marker line {
+          stroke-dasharray: 4,3;
+          animation: progressDash 1s linear infinite;
+        }
+        @keyframes progressDash {
+          to { stroke-dashoffset: -7; }
+        }
+      </style>
+    </defs>
+
+    <!--
+      LAYOUT:
+      6 phases. Milestone counts: 2, 3, 2, 3, 3, 2 = 15 total
+      Phase widths: 2ms→140, 3ms→180. Total = 140*3 + 180*3 = 420+540 = 960
+      Padding: 10px left for first milestone visibility
+
+      spineY = 230 (center of vertical space)
+      Above labels: stemY=-55, labelY=-62, descY=-46
+      Below labels: stemY=55, labelY=68, descY=82
+      svgHeight = 460
+    -->
+
+    <!-- ===== PHASE BACKGROUNDS ===== -->
+
+    <!-- Phase 1: 1월 (Completed) x=0 w=140 -->
+    <rect x="0" y="0" width="140" height="460" fill="url(#grad-completed)" stroke="#4ade8018" stroke-width="1.5"/>
+    <text x="70" y="24" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="bold">1월</text>
+    <rect x="38" y="30" width="64" height="17" rx="9" fill="#4ade8015" stroke="#4ade8035"/>
+    <text x="70" y="42" text-anchor="middle" fill="#94a3b8" font-size="9">4주 · 완료</text>
+    <line x1="140" y1="0" x2="140" y2="460" stroke="#2a2a4a" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+    <!-- Phase 2: 2월 (Completed) x=140 w=180 -->
+    <rect x="140" y="0" width="180" height="460" fill="url(#grad-completed)" stroke="#4ade8018" stroke-width="1.5"/>
+    <text x="230" y="24" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="bold">2월</text>
+    <rect x="198" y="30" width="64" height="17" rx="9" fill="#4ade8015" stroke="#4ade8035"/>
+    <text x="230" y="42" text-anchor="middle" fill="#94a3b8" font-size="9">4주 · 완료</text>
+    <line x1="320" y1="0" x2="320" y2="460" stroke="#2a2a4a" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+    <!-- Phase 3: 3월 (Active) x=320 w=140 -->
+    <rect x="320" y="0" width="140" height="460" fill="url(#grad-active)" stroke="#facc1518" stroke-width="1.5"/>
+    <text x="390" y="24" text-anchor="middle" fill="#facc15" font-size="14" font-weight="bold">3월</text>
+    <rect x="352" y="30" width="76" height="17" rx="9" fill="#facc1515" stroke="#facc1535"/>
+    <text x="390" y="42" text-anchor="middle" fill="#94a3b8" font-size="9">4주 · 진행중</text>
+    <line x1="460" y1="0" x2="460" y2="460" stroke="#2a2a4a" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+    <!-- Phase 4: 4월 (Future odd) x=460 w=180 -->
+    <rect x="460" y="0" width="180" height="460" fill="url(#grad-future-odd)"/>
+    <text x="550" y="24" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="bold">4월</text>
+    <rect x="518" y="30" width="64" height="17" rx="9" fill="#6366f115" stroke="#6366f135"/>
+    <text x="550" y="42" text-anchor="middle" fill="#94a3b8" font-size="9">4주</text>
+    <line x1="640" y1="0" x2="640" y2="460" stroke="#2a2a4a" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+    <!-- Phase 5: 5월 (Future even) x=640 w=180 -->
+    <rect x="640" y="0" width="180" height="460" fill="url(#grad-future-even)"/>
+    <text x="730" y="24" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="bold">5월</text>
+    <rect x="698" y="30" width="64" height="17" rx="9" fill="#8b5cf615" stroke="#8b5cf635"/>
+    <text x="730" y="42" text-anchor="middle" fill="#94a3b8" font-size="9">4주</text>
+    <line x1="820" y1="0" x2="820" y2="460" stroke="#2a2a4a" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+    <!-- Phase 6: 6월 (Future odd) x=820 w=140 -->
+    <rect x="820" y="0" width="140" height="460" fill="url(#grad-future-odd)"/>
+    <text x="890" y="24" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="bold">6월</text>
+    <rect x="858" y="30" width="64" height="17" rx="9" fill="#6366f115" stroke="#6366f135"/>
+    <text x="890" y="42" text-anchor="middle" fill="#94a3b8" font-size="9">4주</text>
+
+    <!-- ===== TIMELINE SPINE ===== -->
+    <line x1="25" y1="230" x2="935" y2="230" stroke="#2a2a4a" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Progress overlay (start to NOW at mid-March ~390) -->
+    <line x1="25" y1="230" x2="390" y2="230" stroke="#4ade80" stroke-width="3.5" stroke-linecap="round" opacity="0.5"/>
+    <!-- Start cap -->
+    <circle cx="25" cy="230" r="5" fill="#4ade80" opacity="0.6"/>
+    <!-- End arrow -->
+    <polygon points="935,225 948,230 935,235" fill="#2a2a4a"/>
+
+    <!-- ===== NOW MARKER ===== -->
+    <line x1="390" y1="58" x2="390" y2="380" stroke="#facc15" stroke-width="1.5" stroke-dasharray="3,5" opacity="0.35"/>
+    <rect x="368" y="56" width="44" height="20" rx="10" fill="#facc15"/>
+    <text x="390" y="68" text-anchor="middle" dominant-baseline="central" fill="#0f0f1a" font-size="10" font-weight="bold">NOW</text>
+
+    <!-- ===== DEPENDENCY ARROWS (critical path) ===== -->
+    <!-- 요구사항분석 → DB설계 -->
+    <path class="dep-arrow" data-from="ms0" data-to="ms2"
+          d="M 55 230 C 95 180, 140 180, 185 230"
+          fill="none" stroke="#facc15" stroke-width="2" stroke-opacity="0.4"
+          marker-end="url(#arrow-critical)"/>
+    <!-- DB설계 → 백엔드MVP -->
+    <path class="dep-arrow" data-from="ms2" data-to="ms5"
+          d="M 185 230 C 240 180, 310 180, 362 230"
+          fill="none" stroke="#facc15" stroke-width="2" stroke-opacity="0.4"
+          marker-end="url(#arrow-critical)"/>
+    <!-- 백엔드MVP → 통합테스트 -->
+    <path class="dep-arrow" data-from="ms5" data-to="ms7"
+          d="M 362 230 C 405 180, 455 180, 505 230"
+          fill="none" stroke="#facc15" stroke-width="2" stroke-opacity="0.4"
+          marker-end="url(#arrow-critical)"/>
+    <!-- 통합테스트 → 베타출시 -->
+    <path class="dep-arrow" data-from="ms7" data-to="ms10"
+          d="M 505 230 C 560 180, 630 180, 685 230"
+          fill="none" stroke="#facc15" stroke-width="2" stroke-opacity="0.4"
+          marker-end="url(#arrow-critical)"/>
+    <!-- 베타출시 → 정식출시 -->
+    <path class="dep-arrow" data-from="ms10" data-to="ms13"
+          d="M 685 230 C 740 180, 800 180, 855 230"
+          fill="none" stroke="#facc15" stroke-width="2" stroke-opacity="0.4"
+          marker-end="url(#arrow-critical)"/>
+
+    <!-- Optional: UI와이어프레임 → 프론트엔드MVP -->
+    <path class="dep-arrow" data-from="ms4" data-to="ms6"
+          d="M 275 230 C 310 280, 370 280, 418 230"
+          fill="none" stroke="#6b7280" stroke-width="1" stroke-dasharray="2,4" stroke-opacity="0.35"
+          marker-end="url(#arrow-optional)"/>
+
+    <!-- ===== MILESTONES =====
+      Phase 1 (0-140): milestones at 47, 93
+      Phase 2 (140-320): milestones at 185, 230, 275
+      Phase 3 (320-460): milestones at 362, 418
+      Phase 4 (460-640): milestones at 505, 550, 595
+      Phase 5 (640-820): milestones at 685, 730, 775
+      Phase 6 (820-960): milestones at 855, 925
+
+      Alternation: even=above, odd=below
+      Above: stemY=-55, labelY=-62, descY=-46
+      Below: stemY=55, labelY=68, descY=82
+    -->
+
+    <!-- #0 요구사항 분석 (Decided, ABOVE) -->
+    <g class="milestone-group" data-id="ms0" data-tooltip="요구사항 분석 완료 — 기능 목록 및 사용자 시나리오 확정"
+       transform="translate(55, 230)" style="animation-delay: 0.05s;">
+      <line x1="0" y1="0" x2="0" y2="-55" stroke="#4ade80" stroke-width="1.5" stroke-opacity="0.5"/>
+      <circle class="ms-dot" r="12" fill="#4ade80" filter="url(#glow-decided)"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#0f0f1a" font-size="11" font-weight="bold">&#10003;</text>
+      <text class="ms-label" x="0" y="-62" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="600">요구사항 분석</text>
+      <text x="0" y="-48" text-anchor="middle" fill="#888888" font-size="9">기능 목록 확정</text>
+    </g>
+
+    <!-- #1 기술 스택 확정 (Decided, BELOW) -->
+    <g class="milestone-group" data-id="ms1" data-tooltip="기술 스택 확정 — React, Node.js, PostgreSQL 선정"
+       transform="translate(102, 230)" style="animation-delay: 0.1s;">
+      <line x1="0" y1="0" x2="0" y2="55" stroke="#4ade80" stroke-width="1.5" stroke-opacity="0.5"/>
+      <circle class="ms-dot" r="12" fill="#4ade80" filter="url(#glow-decided)"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#0f0f1a" font-size="11" font-weight="bold">&#10003;</text>
+      <text class="ms-label" x="0" y="70" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="600">기술 스택 확정</text>
+      <text x="0" y="84" text-anchor="middle" fill="#888888" font-size="9">React + Node.js</text>
+    </g>
+
+    <!-- #2 DB 설계 (Decided, ABOVE) -->
+    <g class="milestone-group" data-id="ms2" data-tooltip="데이터베이스 스키마 설계 완료 — ERD 작성 및 검토"
+       transform="translate(185, 230)" style="animation-delay: 0.15s;">
+      <line x1="0" y1="0" x2="0" y2="-55" stroke="#4ade80" stroke-width="1.5" stroke-opacity="0.5"/>
+      <circle class="ms-dot" r="12" fill="#4ade80" filter="url(#glow-decided)"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#0f0f1a" font-size="11" font-weight="bold">&#10003;</text>
+      <text class="ms-label" x="0" y="-62" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="600">DB 설계</text>
+      <text x="0" y="-48" text-anchor="middle" fill="#888888" font-size="9">ERD 확정</text>
+    </g>
+
+    <!-- #3 API 설계 (Decided, BELOW) -->
+    <g class="milestone-group" data-id="ms3" data-tooltip="RESTful API 엔드포인트 설계 완료 — OpenAPI 스펙 작성"
+       transform="translate(230, 230)" style="animation-delay: 0.2s;">
+      <line x1="0" y1="0" x2="0" y2="55" stroke="#4ade80" stroke-width="1.5" stroke-opacity="0.5"/>
+      <circle class="ms-dot" r="12" fill="#4ade80" filter="url(#glow-decided)"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#0f0f1a" font-size="11" font-weight="bold">&#10003;</text>
+      <text class="ms-label" x="0" y="70" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="600">API 설계</text>
+      <text x="0" y="84" text-anchor="middle" fill="#888888" font-size="9">OpenAPI 스펙</text>
+    </g>
+
+    <!-- #4 UI 와이어프레임 (Decided, ABOVE) — staggered right 15px to avoid overlap with DB설계 -->
+    <g class="milestone-group" data-id="ms4" data-tooltip="UI 와이어프레임 작성 완료 — 주요 화면 10개 설계"
+       transform="translate(275, 230)" style="animation-delay: 0.25s;">
+      <line x1="0" y1="0" x2="0" y2="-55" stroke="#4ade80" stroke-width="1.5" stroke-opacity="0.5"/>
+      <circle class="ms-dot" r="12" fill="#4ade80" filter="url(#glow-decided)"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#0f0f1a" font-size="11" font-weight="bold">&#10003;</text>
+      <text class="ms-label" x="0" y="-62" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="600">UI 와이어프레임</text>
+      <text x="0" y="-48" text-anchor="middle" fill="#888888" font-size="9">주요 화면 설계</text>
+    </g>
+
+    <!-- #5 백엔드 MVP (ACTIVE, BELOW) — current milestone with pulse -->
+    <g class="milestone-group" data-id="ms5" data-tooltip="백엔드 MVP 개발 진행 중 — 핵심 API 구현 70% 완료"
+       transform="translate(362, 230)" style="animation-delay: 0.3s;">
+      <line x1="0" y1="0" x2="0" y2="55" stroke="#facc15" stroke-width="1.5" stroke-opacity="0.6"/>
+      <!-- Pulse ring -->
+      <circle r="22" fill="none" stroke="#facc15" stroke-width="1.5" stroke-opacity="0.25">
+        <animate attributeName="r" values="20;26;20" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0.25;0.08;0.25" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle class="ms-dot" r="16" fill="#facc15" filter="url(#glow-active)">
+        <animate attributeName="opacity" values="1;0.75;1" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#0f0f1a" font-size="12" font-weight="bold">&#9654;</text>
+      <text class="ms-label" x="0" y="70" text-anchor="middle" fill="#facc15" font-size="12" font-weight="bold">백엔드 MVP</text>
+      <text x="0" y="84" text-anchor="middle" fill="#94a3b8" font-size="9">핵심 API 70%</text>
+    </g>
+
+    <!-- #6 프론트엔드 MVP (Undecided, ABOVE) -->
+    <g class="milestone-group" data-id="ms6" data-tooltip="프론트엔드 MVP — React 컴포넌트 개발 예정"
+       transform="translate(418, 230)" style="animation-delay: 0.35s;">
+      <line x1="0" y1="0" x2="0" y2="-55" stroke="#6b7280" stroke-width="1" stroke-opacity="0.35" stroke-dasharray="3,3"/>
+      <circle class="ms-dot" r="14" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="4,3"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#6b7280" font-size="11">?</text>
+      <text class="ms-label" x="0" y="-62" text-anchor="middle" fill="#94a3b8" font-size="11">프론트엔드 MVP</text>
+      <text x="0" y="-48" text-anchor="middle" fill="#666666" font-size="9">React 개발</text>
+    </g>
+
+    <!-- #7 통합 테스트 (Undecided, BELOW) -->
+    <g class="milestone-group" data-id="ms7" data-tooltip="통합 테스트 — 프론트엔드/백엔드 연동 테스트"
+       transform="translate(505, 230)" style="animation-delay: 0.4s;">
+      <line x1="0" y1="0" x2="0" y2="55" stroke="#6b7280" stroke-width="1" stroke-opacity="0.35" stroke-dasharray="3,3"/>
+      <circle class="ms-dot" r="14" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="4,3"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#6b7280" font-size="11">?</text>
+      <text class="ms-label" x="0" y="70" text-anchor="middle" fill="#94a3b8" font-size="11">통합 테스트</text>
+      <text x="0" y="84" text-anchor="middle" fill="#666666" font-size="9">E2E 연동</text>
+    </g>
+
+    <!-- #8 성능 최적화 (Undecided, ABOVE) -->
+    <g class="milestone-group" data-id="ms8" data-tooltip="성능 최적화 — 응답 시간, 쿼리 최적화, 캐시 전략"
+       transform="translate(550, 230)" style="animation-delay: 0.45s;">
+      <line x1="0" y1="0" x2="0" y2="-55" stroke="#6b7280" stroke-width="1" stroke-opacity="0.35" stroke-dasharray="3,3"/>
+      <circle class="ms-dot" r="14" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="4,3"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#6b7280" font-size="11">?</text>
+      <text class="ms-label" x="0" y="-62" text-anchor="middle" fill="#94a3b8" font-size="11">성능 최적화</text>
+      <text x="0" y="-48" text-anchor="middle" fill="#666666" font-size="9">쿼리 튜닝</text>
+    </g>
+
+    <!-- #9 보안 감사 (Undecided, BELOW) -->
+    <g class="milestone-group" data-id="ms9" data-tooltip="보안 감사 — OWASP 기준 취약점 점검 및 침투 테스트"
+       transform="translate(595, 230)" style="animation-delay: 0.5s;">
+      <line x1="0" y1="0" x2="0" y2="55" stroke="#6b7280" stroke-width="1" stroke-opacity="0.35" stroke-dasharray="3,3"/>
+      <circle class="ms-dot" r="14" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="4,3"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#6b7280" font-size="11">?</text>
+      <text class="ms-label" x="0" y="70" text-anchor="middle" fill="#94a3b8" font-size="11">보안 감사</text>
+      <text x="0" y="84" text-anchor="middle" fill="#666666" font-size="9">OWASP 점검</text>
+    </g>
+
+    <!-- #10 베타 출시 (Undecided, ABOVE) -->
+    <g class="milestone-group" data-id="ms10" data-tooltip="베타 출시 — 제한된 사용자에게 서비스 공개"
+       transform="translate(685, 230)" style="animation-delay: 0.55s;">
+      <line x1="0" y1="0" x2="0" y2="-55" stroke="#6b7280" stroke-width="1" stroke-opacity="0.35" stroke-dasharray="3,3"/>
+      <circle class="ms-dot" r="14" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="4,3"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#6b7280" font-size="11">?</text>
+      <text class="ms-label" x="0" y="-62" text-anchor="middle" fill="#94a3b8" font-size="11">베타 출시</text>
+      <text x="0" y="-48" text-anchor="middle" fill="#666666" font-size="9">제한 공개</text>
+    </g>
+
+    <!-- #11 사용자 피드백 수집 (Undecided, BELOW) -->
+    <g class="milestone-group" data-id="ms11" data-tooltip="사용자 피드백 수집 — 베타 테스터 의견 수렴 및 분석"
+       transform="translate(730, 230)" style="animation-delay: 0.6s;">
+      <line x1="0" y1="0" x2="0" y2="55" stroke="#6b7280" stroke-width="1" stroke-opacity="0.35" stroke-dasharray="3,3"/>
+      <circle class="ms-dot" r="14" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="4,3"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#6b7280" font-size="11">?</text>
+      <text class="ms-label" x="0" y="70" text-anchor="middle" fill="#94a3b8" font-size="11">피드백 수집</text>
+      <text x="0" y="84" text-anchor="middle" fill="#666666" font-size="9">베타 테스터</text>
+    </g>
+
+    <!-- #12 버그 수정 (Undecided, ABOVE) -->
+    <g class="milestone-group" data-id="ms12" data-tooltip="버그 수정 — 베타 기간 발견된 이슈 우선순위별 해결"
+       transform="translate(775, 230)" style="animation-delay: 0.65s;">
+      <line x1="0" y1="0" x2="0" y2="-55" stroke="#6b7280" stroke-width="1" stroke-opacity="0.35" stroke-dasharray="3,3"/>
+      <circle class="ms-dot" r="14" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="4,3"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#6b7280" font-size="11">?</text>
+      <text class="ms-label" x="0" y="-62" text-anchor="middle" fill="#94a3b8" font-size="11">버그 수정</text>
+      <text x="0" y="-48" text-anchor="middle" fill="#666666" font-size="9">이슈 해결</text>
+    </g>
+
+    <!-- #13 정식 출시 (Undecided, BELOW) -->
+    <g class="milestone-group" data-id="ms13" data-tooltip="정식 출시 — 프로덕션 배포 및 전면 공개"
+       transform="translate(855, 230)" style="animation-delay: 0.7s;">
+      <line x1="0" y1="0" x2="0" y2="55" stroke="#6b7280" stroke-width="1" stroke-opacity="0.35" stroke-dasharray="3,3"/>
+      <circle class="ms-dot" r="14" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="4,3"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#6b7280" font-size="11">?</text>
+      <text class="ms-label" x="0" y="70" text-anchor="middle" fill="#94a3b8" font-size="11">정식 출시</text>
+      <text x="0" y="84" text-anchor="middle" fill="#666666" font-size="9">프로덕션 배포</text>
+    </g>
+
+    <!-- #14 마케팅 캠페인 (Undecided, ABOVE) -->
+    <g class="milestone-group" data-id="ms14" data-tooltip="마케팅 캠페인 — 출시 홍보 및 사용자 획득 전략 실행"
+       transform="translate(920, 230)" style="animation-delay: 0.75s;">
+      <line x1="0" y1="0" x2="0" y2="-55" stroke="#6b7280" stroke-width="1" stroke-opacity="0.35" stroke-dasharray="3,3"/>
+      <circle class="ms-dot" r="14" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="4,3"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#6b7280" font-size="11">?</text>
+      <text class="ms-label" x="0" y="-62" text-anchor="middle" fill="#94a3b8" font-size="11">마케팅 캠페인</text>
+      <text x="0" y="-48" text-anchor="middle" fill="#666666" font-size="9">사용자 획득</text>
+    </g>
+
+    <!-- ===== ACTIVE MILESTONE DETAIL CARD ===== -->
+    <g transform="translate(362, 330)">
+      <!-- Stem from milestone -->
+      <line x1="0" y1="-18" x2="0" y2="0" stroke="#facc1540" stroke-width="1"/>
+      <rect x="-85" y="0" width="170" height="80" rx="8" fill="#1a1a2e" stroke="#facc1530" stroke-width="1"/>
+      <!-- Top accent bar -->
+      <rect x="-85" y="0" width="170" height="4" rx="2" fill="#facc15"/>
+      <text x="0" y="22" text-anchor="middle" fill="#facc15" font-size="10" font-weight="bold">백엔드 MVP</text>
+      <text x="0" y="38" text-anchor="middle" fill="#94a3b8" font-size="9">핵심 API 구현</text>
+      <!-- Progress bar background -->
+      <rect x="-65" y="48" width="130" height="7" rx="3.5" fill="#2a2a4a"/>
+      <!-- Progress bar fill (70%) -->
+      <rect x="-65" y="48" width="91" height="7" rx="3.5" fill="#facc15" opacity="0.7"/>
+      <text x="0" y="68" text-anchor="middle" fill="#94a3b8" font-size="9">진행률 70%</text>
+    </g>
+
+    <!-- ===== LEGEND (bottom-right) ===== -->
+    <g class="legend" transform="translate(780, 340)">
+      <rect x="0" y="0" width="160" height="112" rx="8" fill="#0f0f1a" fill-opacity="0.95" stroke="#2a2a4a" stroke-width="1"/>
+      <text x="14" y="20" fill="#94a3b8" font-size="10" font-weight="bold">범례</text>
+
+      <circle cx="22" cy="38" r="6" fill="#4ade80"/>
+      <text x="34" y="41" fill="#94a3b8" font-size="10">완료/결정됨</text>
+
+      <circle cx="22" cy="56" r="6" fill="#facc15"/>
+      <text x="34" y="59" fill="#94a3b8" font-size="10">현재 진행</text>
+
+      <circle cx="22" cy="74" r="6" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <text x="34" y="77" fill="#94a3b8" font-size="10">미결정</text>
+
+      <line x1="14" y1="94" x2="42" y2="94" stroke="#facc15" stroke-width="2"/>
+      <text x="48" y="97" fill="#94a3b8" font-size="10">핵심 경로</text>
+    </g>
+
+  </svg>
+</div>
+
+<div class="tl-tooltip"></div>
+
+<script>
+const tooltip = document.querySelector('.tl-tooltip');
+const allArrows = document.querySelectorAll('.dep-arrow');
+const allMilestones = document.querySelectorAll('.milestone-group');
+
+allMilestones.forEach(ms => {
+  const msId = ms.getAttribute('data-id');
+
+  ms.addEventListener('mouseenter', e => {
+    const desc = ms.getAttribute('data-tooltip');
+    tooltip.innerHTML = desc;
+    tooltip.classList.add('visible');
+
+    allArrows.forEach(arrow => {
+      if (arrow.getAttribute('data-from') === msId || arrow.getAttribute('data-to') === msId) {
+        arrow.classList.add('highlighted');
+      } else {
+        arrow.classList.add('dimmed');
+      }
+    });
+  });
+
+  ms.addEventListener('mousemove', e => {
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY + 14) + 'px';
+  });
+
+  ms.addEventListener('mouseleave', () => {
+    tooltip.classList.remove('visible');
+    allArrows.forEach(a => a.classList.remove('highlighted', 'dimmed'));
+  });
+});
+</script>
+
+</body>
+</html>

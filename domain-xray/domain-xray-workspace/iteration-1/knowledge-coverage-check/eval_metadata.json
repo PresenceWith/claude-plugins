@@ -1,0 +1,38 @@
+{
+  "eval_id": 2,
+  "eval_name": "knowledge-coverage-check",
+  "prompt": "/domain-knowledge",
+  "assertions": [
+    {
+      "name": "extract-auto-detected",
+      "type": "qualitative",
+      "description": "domain-extract-*.md를 자동 감지하여 읽음"
+    },
+    {
+      "name": "expert-role-adopted",
+      "type": "qualitative",
+      "description": "20년 전문가 역할로 깊이 있는 지식 생성"
+    },
+    {
+      "name": "four-axes-substantive",
+      "type": "qualitative",
+      "description": "4축(용어/전제조건/함정/경험칙) 모두 구체적 시나리오와 함께 실질적으로 다뤄짐"
+    },
+    {
+      "name": "coverage-table-present",
+      "type": "contains_all",
+      "description": "Coverage 테이블 포함",
+      "targets": ["Coverage"]
+    },
+    {
+      "name": "depth-over-volume",
+      "type": "qualitative",
+      "description": "얕은 나열이 아닌 구체적 시나리오/엣지케이스 포함된 깊은 설명"
+    },
+    {
+      "name": "highlights-presented",
+      "type": "qualitative",
+      "description": "사용자에게 핵심 하이라이트 3-5개 제시"
+    }
+  ]
+}

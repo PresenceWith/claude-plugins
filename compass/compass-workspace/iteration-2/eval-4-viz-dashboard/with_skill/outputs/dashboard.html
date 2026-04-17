@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Status Dashboard</title>
+  <style>
+    /* Dark theme base */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 24px; }
+    .meta { color: #666; font-size: 11px; margin-top: 24px; text-align: right; }
+
+    /* Status colors */
+    .decided { color: #4ade80; }
+    .active { color: #facc15; }
+    .undecided { color: #888; }
+
+    /* Common components */
+    .card {
+      background: #1a1a2e;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 8px 0;
+      border: 1px solid #2a2a4a;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    /* Overflow safety wrapper */
+    .overflow-wrapper {
+      overflow-x: auto;
+    }
+
+    /* Dashboard-specific */
+    .dashboard-container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* Progress bar */
+    .progress-section {
+      margin-bottom: 28px;
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .progress-label {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .progress-count {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .progress-count strong {
+      color: #4ade80;
+      font-size: 15px;
+    }
+    .progress-bar-track {
+      width: 100%;
+      height: 10px;
+      background: #1a1a2e;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #2a2a4a;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.6s ease;
+    }
+    .progress-segments {
+      display: flex;
+      height: 100%;
+    }
+    .progress-decided {
+      background: #4ade80;
+    }
+    .progress-discussing {
+      background: #facc15;
+    }
+    .progress-undecided {
+      background: #333;
+    }
+    .progress-legend {
+      display: flex;
+      gap: 20px;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #666;
+    }
+    .progress-legend span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* Three-column grid */
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 700px) {
+      .columns {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .column-header {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .column-header .count-badge {
+      background: #2a2a4a;
+      padding: 1px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    /* Card specifics */
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .card-detail {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .card-relations {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #2a2a4a;
+    }
+
+    /* Status-specific card borders */
+    .card-decided {
+      border-left: 3px solid #4ade80;
+    }
+    .card-active {
+      border-left: 3px solid #facc15;
+    }
+    .card-undecided {
+      border-left: 3px solid #555;
+    }
+
+    /* Recently decided highlight */
+    .card-recent {
+      position: relative;
+    }
+    .card-recent::after {
+      content: "NEW";
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #4ade8033;
+      color: #4ade80;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Active discussion highlight */
+    .card-discussing {
+      border-color: #facc15;
+      box-shadow: 0 0 12px #facc1518;
+    }
+
+    /* Recommended order section */
+    .recommended-order {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #2a2a4a;
+    }
+    .recommended-order h2 {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .order-list {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .order-item {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .order-number {
+      background: #2a2a4a;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+    .order-arrow {
+      color: #444;
+      font-size: 14px;
+    }
+    .order-item.order-discussing {
+      border-color: #facc1555;
+    }
+    .order-item.order-discussing .order-number {
+      background: #facc1533;
+      color: #facc15;
+    }
+  </style>
+</head>
+<body>
+  <div class="overflow-wrapper">
+    <div class="dashboard-container">
+      <h1>Planning Compass — Status Dashboard</h1>
+      <p class="subtitle">내부 도구 개발 — 기술 스택 및 인프라 결정 현황 (7개 항목)</p>
+
+      <!-- Progress bar -->
+      <div class="progress-section">
+        <div class="progress-header">
+          <span class="progress-label">전체 결정 진행률</span>
+          <span class="progress-count"><strong>3</strong> / 7 확정</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-segments">
+            <div class="progress-decided" style="width: 42.86%;"></div>
+            <div class="progress-discussing" style="width: 14.28%;"></div>
+            <div class="progress-undecided" style="width: 42.86%;"></div>
+          </div>
+        </div>
+        <div class="progress-legend">
+          <span><span class="legend-dot" style="background:#4ade80;"></span> 확정 (3)</span>
+          <span><span class="legend-dot" style="background:#facc15;"></span> 논의 중 (1)</span>
+          <span><span class="legend-dot" style="background:#555;"></span> 미결 (3)</span>
+        </div>
+      </div>
+
+      <!-- Three columns -->
+      <div class="columns">
+        <!-- Decided -->
+        <div>
+          <div class="column-header decided">
+            <span>Decided</span>
+            <span class="count-badge">3</span>
+          </div>
+
+          <div class="card card-decided">
+            <div class="card-title">사용자 인증</div>
+            <div class="card-detail">
+              <span class="tag" style="background:#4ade8022; color:#4ade80;">OAuth</span>
+            </div>
+            <div class="card-relations">팀 합의 완료</div>
+          </div>
+
+          <div class="card card-decided card-recent">
+            <div class="card-title">데이터베이스</div>
+            <div class="card-detail">
+              <span class="tag" style="background:#4ade8022; color:#4ade80;">PostgreSQL</span>
+            </div>
+            <div class="card-relations">방금 결정됨</div>
+          </div>
+
+          <div class="card card-decided">
+            <div class="card-title">프론트엔드</div>
+            <div class="card-detail">
+              <span class="tag" style="background:#4ade8022; color:#4ade80;">React</span>
+            </div>
+            <div class="card-relations">기존 합의</div>
+          </div>
+        </div>
+
+        <!-- In Discussion -->
+        <div>
+          <div class="column-header active">
+            <span>In Discussion</span>
+            <span class="count-badge">1</span>
+          </div>
+
+          <div class="card card-active card-discussing">
+            <div class="card-title">API 구조</div>
+            <div class="card-detail">
+              <span class="tag" style="background:#facc1522; color:#facc15;">REST</span>
+              <span style="color:#555; font-size:12px; margin:0 4px;">vs</span>
+              <span class="tag" style="background:#facc1522; color:#facc15;">GraphQL</span>
+            </div>
+            <div class="card-relations">
+              관련: Frontend, Database, UserAuth
+            </div>
+          </div>
+        </div>
+
+        <!-- Undecided -->
+        <div>
+          <div class="column-header undecided">
+            <span>Undecided</span>
+            <span class="count-badge">3</span>
+          </div>
+
+          <div class="card card-undecided">
+            <div class="card-title">배포 전략</div>
+            <div class="card-detail" style="color:#666;">논의 시작 전</div>
+            <div class="card-relations">관련: CI/CD Pipeline, Monitoring</div>
+          </div>
+
+          <div class="card card-undecided">
+            <div class="card-title">모니터링</div>
+            <div class="card-detail" style="color:#666;">논의 시작 전</div>
+            <div class="card-relations">관련: 배포 전략</div>
+          </div>
+
+          <div class="card card-undecided">
+            <div class="card-title">CI/CD 파이프라인</div>
+            <div class="card-detail" style="color:#666;">논의 시작 전</div>
+            <div class="card-relations">관련: 배포 전략</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommended decision order -->
+      <div class="recommended-order">
+        <h2>권장 결정 순서</h2>
+        <div class="order-list">
+          <div class="order-item order-discussing">
+            <span class="order-number">1</span>
+            API 구조
+          </div>
+          <span class="order-arrow">&#8594;</span>
+          <div class="order-item">
+            <span class="order-number">2</span>
+            배포 전략
+          </div>
+          <span class="order-arrow">&#8594;</span>
+          <div class="order-item">
+            <span class="order-number">3</span>
+            CI/CD 파이프라인
+          </div>
+          <span class="order-arrow">&#8594;</span>
+          <div class="order-item">
+            <span class="order-number">4</span>
+            모니터링
+          </div>
+        </div>
+      </div>
+
+      <div class="meta">
+        Last updated: 2026-03-30 · Planning Compass
+      </div>
+    </div>
+  </div>
+</body>
+</html>

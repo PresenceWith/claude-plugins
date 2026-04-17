@@ -1,0 +1,10 @@
+{
+  "expectations": [
+    {"text": "정보 제한: 3-5개 핵심 항목만 먼저 제시하고, 나머지는 확장 가능하다고 안내", "passed": true, "evidence": "3가지 시나리오만 제시 ('포트폴리오 쪽은 이미 구체적...', '세 영역을 어떤 구조로 연결...', '기능은 너무 많이...'), 나머지는 탐색 후 확장하겠다는 접근"},
+    {"text": "위치 명시: 새로운 개념을 기존 맥락에 연결하여 설명", "passed": true, "evidence": "모든 시나리오가 사용자가 언급한 세 영역(포트폴리오, 클라이언트 소통, 견적서)에 직접 연결됨"},
+    {"text": "must-have vs nice-to-have 구분이 존재", "passed": false, "evidence": "First Turn Behavior를 따라 탐색 질문을 우선했기 때문에, 이 응답에서는 must-have/nice-to-have 분류가 없음. 의도적 선택이나 assertion 기준으로는 FAIL"},
+    {"text": "상태 파일(.compass/state.md)이 생성됨", "passed": true, "evidence": "state.md 파일이 outputs/에 존재"},
+    {"text": "응답이 구조적이고 소화 가능한 분량", "passed": true, "evidence": "약 10줄, 하나의 질문에 집중, 매우 소화 가능한 분량"}
+  ],
+  "summary": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8}
+}

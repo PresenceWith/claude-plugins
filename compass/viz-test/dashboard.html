@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a; color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 24px; min-height: 100vh;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; text-align: center; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 28px; text-align: center; }
+    .meta { color: #666; font-size: 11px; margin-top: 20px; text-align: right; max-width: 960px; margin-left: auto; margin-right: auto; }
+
+    /* Stat cards */
+    .stat-card {
+      flex: 1; border-radius: 12px; padding: 16px 18px; position: relative; overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .stat-card .stat-bg {
+      position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; border-radius: 50%;
+      opacity: 0.06;
+    }
+    .stat-number { font-size: 28px; font-weight: bold; line-height: 1; }
+    .stat-label { font-size: 11px; color: #888; margin-top: 4px; }
+    .stat-pct { font-size: 10px; opacity: 0.6; margin-top: 2px; }
+
+    /* Progress bar */
+    .progress-track { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: #1a1a2e; }
+    .progress-segment { transition: width 0.8s cubic-bezier(0.4,0,0.2,1); position: relative; }
+    .progress-segment::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      animation: shimmer 2s ease-in-out infinite;
+    }
+    @keyframes shimmer { 0%,100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
+
+    /* Category headers */
+    .category-section {
+      margin-bottom: 8px; padding: 6px 10px; border-radius: 6px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+    }
+
+    /* Dash cards */
+    .dash-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      cursor: default;
+      opacity: 0; animation: cardSlideIn 0.3s ease-out forwards;
+    }
+    .dash-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    }
+    @keyframes cardSlideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .col-count {
+      display: inline-block; min-width: 22px; height: 22px;
+      border-radius: 11px; font-size: 11px; font-weight: bold;
+      text-align: center; line-height: 22px; margin-left: 6px;
+    }
+    .category-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 9px; font-weight: bold; letter-spacing: 0.3px;
+    }
+    .dep-link {
+      font-size: 11px; color: #666; margin-top: 6px; padding-top: 6px; border-top: 1px solid #2a2a4a;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .dep-link span { color: #4a4a7a; }
+
+    /* Column headers */
+    .column-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+      padding-bottom: 10px; border-bottom: 2px solid;
+    }
+    .column-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* Decision order */
+    .decision-step {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 8px;
+      transition: transform 0.2s; cursor: default;
+    }
+    .decision-step:hover { transform: scale(1.05); }
+    .step-number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; border-radius: 50%;
+      font-size: 11px; font-weight: bold;
+    }
+    .step-arrow { color: #4a4a7a; font-size: 18px; margin: 0 2px; }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .dash-grid { grid-template-columns: 1fr !important; }
+      .stats-row { flex-wrap: wrap !important; }
+      .stat-card { min-width: 140px; }
+    }
+
+    /* Tooltip */
+    .dash-tooltip {
+      position: fixed; pointer-events: none; z-index: 100;
+      background: #1a1a2eee; border: 1px solid #4a4a7a; border-radius: 10px;
+      padding: 10px 14px; font-size: 12px; color: #e2e8f0;
+      max-width: 280px; opacity: 0; transition: opacity 0.2s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+    }
+    .dash-tooltip.visible { opacity: 1; }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  </style>
+</head>
+<body>
+  <h1>Planning Compass — Dashboard</h1>
+  <p class="subtitle">SaaS MVP 기획 진행 현황</p>
+
+  <div style="max-width: 960px; margin: 0 auto;">
+
+    <!-- Summary Stats Row -->
+    <div class="stats-row" style="display: flex; gap: 12px; margin-bottom: 20px;">
+      <div class="stat-card" style="background: linear-gradient(135deg, #1a1a2e 0%, #1e1e38 100%); border: 1px solid #3a3a5a;">
+        <div class="stat-bg" style="background: #e2e8f0;"></div>
+        <div class="stat-number" style="color: #e2e8f0;">12</div>
+        <div class="stat-label">전체 항목</div>
+      </div>
+      <div class="stat-card" style="background: linear-gradient(135deg, #1a1a2e 0%, #1a2e1a 100%); border: 1px solid #4ade8030;">
+        <div class="stat-bg" style="background: #4ade80;"></div>
+        <div class="stat-number" style="color: #4ade80;">5</div>
+        <div class="stat-label">결정됨</div>
+        <div class="stat-pct" style="color: #4ade80;">42%</div>
+      </div>
+      <div class="stat-card" style="background: linear-gradient(135deg, #1a1a2e 0%, #2e2a1a 100%); border: 1px solid #facc1530;">
+        <div class="stat-bg" style="background: #facc15;"></div>
+        <div class="stat-number" style="color: #facc15;">3</div>
+        <div class="stat-label">논의 중</div>
+        <div class="stat-pct" style="color: #facc15;">25%</div>
+      </div>
+      <div class="stat-card" style="background: linear-gradient(135deg, #1a1a2e 0%, #1e1e28 100%); border: 1px solid #6b728030;">
+        <div class="stat-bg" style="background: #6b7280;"></div>
+        <div class="stat-number" style="color: #6b7280;">4</div>
+        <div class="stat-label">미결정</div>
+        <div class="stat-pct" style="color: #6b7280;">33%</div>
+      </div>
+    </div>
+
+    <!-- Progress Bar - enhanced with labels -->
+    <div style="margin-bottom: 24px;">
+      <div class="progress-track">
+        <div class="progress-segment" style="width: 42%; background: linear-gradient(90deg, #4ade80, #22c55e); border-radius: 5px 0 0 5px;"></div>
+        <div class="progress-segment" style="width: 25%; background: linear-gradient(90deg, #facc15, #eab308);"></div>
+        <div class="progress-segment" style="width: 33%; background: linear-gradient(90deg, #6b7280, #4b5563); border-radius: 0 5px 5px 0;"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px;">
+        <span style="color: #4ade80;">5 결정</span>
+        <span style="color: #888;">진행률 <strong style="color: #e2e8f0;">42%</strong> · 12개 항목 중 5개 완료</span>
+        <span style="color: #6b7280;">4 미결정</span>
+      </div>
+    </div>
+
+    <!-- 3-Column Grid -->
+    <div class="dash-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+
+      <!-- Decided Column -->
+      <div>
+        <div class="column-header" style="border-color: #4ade8040;">
+          <div class="column-dot" style="background: #4ade80; box-shadow: 0 0 8px #4ade8060;"></div>
+          <h2 style="color: #4ade80; font-size: 15px; font-weight: bold;">결정됨</h2>
+          <span class="col-count" style="background: #4ade8018; color: #4ade80;">5</span>
+        </div>
+
+        <!-- Category: 인증 -->
+        <div class="category-section" style="background: #6366f108; color: #6366f1;">인증</div>
+
+        <div class="dash-card" style="background: #1a1a2e; border: 1px solid #4ade8040; border-left: 3px solid #4ade80; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; animation-delay: 0s;"
+             data-tooltip="Google, GitHub OAuth2 연동으로 결정 — 소셜 로그인 기반 사용자 유입 전략">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #e2e8f0; font-size: 13px;">OAuth 연동</strong>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="background: linear-gradient(135deg, #4ade80, #22c55e); color: #0f0f1a; font-size: 9px; padding: 2px 8px; border-radius: 4px; font-weight: bold;">NEW</span>
+            </div>
+          </div>
+          <div style="font-size: 12px; color: #4ade80; margin-top: 6px; opacity: 0.7;">Google + GitHub</div>
+        </div>
+
+        <!-- Category: 데이터 -->
+        <div class="category-section" style="background: #3b82f608; color: #3b82f6;">데이터</div>
+
+        <div class="dash-card" style="background: #1a1a2e; border: 1px solid #4ade8040; border-left: 3px solid #4ade80; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; animation-delay: 0.05s;"
+             data-tooltip="PostgreSQL 메인 DB + Redis 캐싱 레이어 — 안정성과 성능 확보">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #e2e8f0; font-size: 13px;">데이터베이스</strong>
+            <span style="font-size: 10px; color: #4ade80; opacity: 0.7;">결정</span>
+          </div>
+          <div style="font-size: 12px; color: #4ade80; margin-top: 6px; opacity: 0.7;">PostgreSQL + Redis</div>
+        </div>
+
+        <!-- Category: 인프라 -->
+        <div class="category-section" style="background: #10b98108; color: #10b981;">인프라</div>
+
+        <div class="dash-card" style="background: #1a1a2e; border: 1px solid #4ade8040; border-left: 3px solid #4ade80; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; animation-delay: 0.1s;"
+             data-tooltip="Docker 컨테이너 + Kubernetes 오케스트레이션">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #e2e8f0; font-size: 13px;">컨테이너 배포</strong>
+            <span style="font-size: 10px; color: #4ade80; opacity: 0.7;">결정</span>
+          </div>
+          <div style="font-size: 12px; color: #4ade80; margin-top: 6px; opacity: 0.7;">Docker + K8s</div>
+        </div>
+
+        <div class="dash-card" style="background: #1a1a2e; border: 1px solid #4ade8040; border-left: 3px solid #4ade80; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; animation-delay: 0.15s;"
+             data-tooltip="GitHub Actions 기반 CI/CD 파이프라인 — 자동 빌드/배포">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #e2e8f0; font-size: 13px;">CI/CD</strong>
+            <span style="font-size: 10px; color: #4ade80; opacity: 0.7;">결정</span>
+          </div>
+          <div style="font-size: 12px; color: #4ade80; margin-top: 6px; opacity: 0.7;">GitHub Actions</div>
+        </div>
+
+        <div class="dash-card" style="background: #1a1a2e; border: 1px solid #4ade8040; border-left: 3px solid #4ade80; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; animation-delay: 0.2s;"
+             data-tooltip="AWS ap-northeast-2 (서울) 리전 — 국내 레이턴시 최적화">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #e2e8f0; font-size: 13px;">클라우드 리전</strong>
+            <span style="font-size: 10px; color: #4ade80; opacity: 0.7;">결정</span>
+          </div>
+          <div style="font-size: 12px; color: #4ade80; margin-top: 6px; opacity: 0.7;">AWS Seoul</div>
+        </div>
+      </div>
+
+      <!-- Active Discussion Column -->
+      <div>
+        <div class="column-header" style="border-color: #facc1540;">
+          <div class="column-dot" style="background: #facc15; box-shadow: 0 0 8px #facc1560;"></div>
+          <h2 style="color: #facc15; font-size: 15px; font-weight: bold;">논의 중</h2>
+          <span class="col-count" style="background: #facc1518; color: #facc15;">3</span>
+        </div>
+
+        <div class="dash-card" style="background: linear-gradient(135deg, #1a1a2e 0%, #2a261e 100%); border: 1.5px solid #facc1560; border-left: 3px solid #facc15; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; box-shadow: 0 0 20px rgba(250,204,21,0.06); animation-delay: 0s;"
+             data-tooltip="JWT 토큰 기반 인증 vs 세션 기반 인증 — 무상태 vs 유상태 논의">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #e2e8f0; font-size: 13px;">인증 방식</strong>
+            <span style="font-size: 10px; color: #facc15; animation: pulse 2s infinite;">논의 중</span>
+          </div>
+          <div style="display: flex; gap: 6px; margin-top: 8px;">
+            <span style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: #facc1510; color: #facc15; border: 1px solid #facc1520;">JWT 토큰</span>
+            <span style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: #1a1a2e; color: #888; border: 1px solid #2a2a4a;">세션 기반</span>
+          </div>
+          <div class="category-badge" style="background: #6366f110; color: #6366f1; margin-top: 8px;">인증</div>
+          <div class="dep-link">
+            <span>&#8627;</span> OAuth 연동에 영향받음
+          </div>
+        </div>
+
+        <div class="dash-card" style="background: linear-gradient(135deg, #1a1a2e 0%, #2a261e 100%); border: 1.5px solid #facc1560; border-left: 3px solid #facc15; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; box-shadow: 0 0 20px rgba(250,204,21,0.06); animation-delay: 0.05s;"
+             data-tooltip="REST vs GraphQL — 클라이언트 데이터 요구사항에 따라 결정">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #e2e8f0; font-size: 13px;">API 설계</strong>
+            <span style="font-size: 10px; color: #facc15; animation: pulse 2s infinite;">논의 중</span>
+          </div>
+          <div style="display: flex; gap: 6px; margin-top: 8px;">
+            <span style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: #facc1510; color: #facc15; border: 1px solid #facc1520;">REST</span>
+            <span style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: #1a1a2e; color: #888; border: 1px solid #2a2a4a;">GraphQL</span>
+          </div>
+          <div class="category-badge" style="background: #3b82f610; color: #3b82f6; margin-top: 8px;">데이터</div>
+        </div>
+
+        <div class="dash-card" style="background: linear-gradient(135deg, #1a1a2e 0%, #2a261e 100%); border: 1.5px solid #facc1560; border-left: 3px solid #facc15; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; box-shadow: 0 0 20px rgba(250,204,21,0.06); animation-delay: 0.1s;"
+             data-tooltip="React vs Vue vs Svelte — 팀 역량과 생태계 고려">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #e2e8f0; font-size: 13px;">UI 프레임워크</strong>
+            <span style="font-size: 10px; color: #facc15; animation: pulse 2s infinite;">논의 중</span>
+          </div>
+          <div style="display: flex; gap: 6px; margin-top: 8px;">
+            <span style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: #facc1510; color: #facc15; border: 1px solid #facc1520;">React</span>
+            <span style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: #1a1a2e; color: #888; border: 1px solid #2a2a4a;">Vue</span>
+            <span style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: #1a1a2e; color: #888; border: 1px solid #2a2a4a;">Svelte</span>
+          </div>
+          <div class="category-badge" style="background: #06b6d410; color: #06b6d4; margin-top: 8px;">UI/UX</div>
+        </div>
+
+        <!-- Insight callout -->
+        <div style="background: #facc1508; border: 1px dashed #facc1530; border-radius: 8px; padding: 10px 12px; margin-top: 8px;">
+          <div style="font-size: 10px; color: #facc15; font-weight: bold; margin-bottom: 4px;">INSIGHT</div>
+          <div style="font-size: 11px; color: #888; line-height: 1.5;">3개 항목 모두 기술 스택 관련. 인증 방식 결정이 API와 UI 선택에 영향을 주므로 우선 결정 필요.</div>
+        </div>
+      </div>
+
+      <!-- Undecided Column -->
+      <div>
+        <div class="column-header" style="border-color: #6b728040;">
+          <div class="column-dot" style="background: #6b7280;"></div>
+          <h2 style="color: #6b7280; font-size: 15px; font-weight: bold;">미결정</h2>
+          <span class="col-count" style="background: #6b728018; color: #6b7280;">4</span>
+        </div>
+
+        <div class="dash-card" style="background: #1a1a2e; border: 1px dashed #6b728050; border-left: 3px solid #6b7280; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; animation-delay: 0s;"
+             data-tooltip="RBAC vs ABAC vs 커스텀 권한 모델 — 인증 방식 결정 후 진행">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #e2e8f0; font-size: 13px;">권한 관리</strong>
+            <span style="font-size: 10px; color: #6b7280;">미결정</span>
+          </div>
+          <div style="font-size: 11px; color: #666; margin-top: 6px;">RBAC · ABAC · 커스텀</div>
+          <div class="category-badge" style="background: #6366f110; color: #6366f1; margin-top: 6px;">인증</div>
+        </div>
+
+        <div class="dash-card" style="background: #1a1a2e; border: 1px dashed #6b728050; border-left: 3px solid #6b7280; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; animation-delay: 0.05s;"
+             data-tooltip="대시보드 레이아웃 및 위젯 구성 — UI 프레임워크 결정 후">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #e2e8f0; font-size: 13px;">대시보드 레이아웃</strong>
+            <span style="font-size: 10px; color: #6b7280;">미결정</span>
+          </div>
+          <div style="font-size: 11px; color: #666; margin-top: 6px;">그리드 · 탭 · 스크롤</div>
+          <div class="category-badge" style="background: #06b6d410; color: #06b6d4; margin-top: 6px;">UI/UX</div>
+        </div>
+
+        <div class="dash-card" style="background: #1a1a2e; border: 1px dashed #6b728050; border-left: 3px solid #6b7280; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; animation-delay: 0.1s;"
+             data-tooltip="Freemium vs 구독형 vs 종량제 — 시장 조사 필요">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #e2e8f0; font-size: 13px;">수익 모델</strong>
+            <span style="font-size: 10px; color: #6b7280;">미결정</span>
+          </div>
+          <div style="font-size: 11px; color: #666; margin-top: 6px;">Freemium · 구독형 · 종량제</div>
+          <div class="category-badge" style="background: #f59e0b10; color: #f59e0b; margin-top: 6px;">비즈니스</div>
+        </div>
+
+        <div class="dash-card" style="background: #1a1a2e; border: 1px dashed #6b728050; border-left: 3px solid #6b7280; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; animation-delay: 0.15s;"
+             data-tooltip="B2B vs B2C vs 하이브리드 — 수익 모델과 연동 필요">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #e2e8f0; font-size: 13px;">타겟 시장</strong>
+            <span style="font-size: 10px; color: #6b7280;">미결정</span>
+          </div>
+          <div style="font-size: 11px; color: #666; margin-top: 6px;">B2B · B2C · 하이브리드</div>
+          <div class="category-badge" style="background: #f59e0b10; color: #f59e0b; margin-top: 6px;">비즈니스</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decision Order - enhanced timeline style -->
+    <div style="margin-top: 24px; padding: 18px 22px; background: linear-gradient(135deg, #1a1a2e 0%, #1e1e38 100%); border-radius: 12px; border: 1px solid #2a2a4a;">
+      <h3 style="font-size: 13px; color: #e2e8f0; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #facc1518; font-size: 12px;">&#9654;</span>
+        권장 결정 순서
+      </h3>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px;">
+        <div class="decision-step" style="background: #4ade8010; border: 1px solid #4ade8025;">
+          <span class="step-number" style="background: #4ade8020; color: #4ade80;">1</span>
+          <span style="color: #e2e8f0; font-size: 13px;">인증 방식</span>
+        </div>
+        <span class="step-arrow">&#8594;</span>
+        <div class="decision-step" style="background: #3b82f610; border: 1px solid #3b82f625;">
+          <span class="step-number" style="background: #3b82f620; color: #3b82f6;">2</span>
+          <span style="color: #e2e8f0; font-size: 13px;">API 설계</span>
+        </div>
+        <span class="step-arrow">&#8594;</span>
+        <div class="decision-step" style="background: #06b6d410; border: 1px solid #06b6d425;">
+          <span class="step-number" style="background: #06b6d420; color: #06b6d4;">3</span>
+          <span style="color: #e2e8f0; font-size: 13px;">UI 프레임워크</span>
+        </div>
+        <span class="step-arrow">&#8594;</span>
+        <div class="decision-step" style="background: #f59e0b10; border: 1px solid #f59e0b25;">
+          <span class="step-number" style="background: #f59e0b20; color: #f59e0b;">4</span>
+          <span style="color: #e2e8f0; font-size: 13px;">수익 모델</span>
+        </div>
+      </div>
+      <div style="font-size: 11px; color: #666; margin-top: 10px; line-height: 1.5; padding-left: 30px; border-left: 2px solid #2a2a4a;">
+        인증 &#8594; API &#8594; UI 순으로 기술 스택 의존성이 존재. 비즈니스 모델은 기술 결정 후 병행 가능.
+      </div>
+    </div>
+  </div>
+
+  <div class="meta">Last updated: 2026-03-31 · Planning Compass</div>
+
+  <div class="dash-tooltip"></div>
+  <script>
+    const tooltip = document.querySelector('.dash-tooltip');
+    document.querySelectorAll('.dash-card[data-tooltip]').forEach(card => {
+      card.addEventListener('mouseenter', e => {
+        tooltip.textContent = card.getAttribute('data-tooltip');
+        tooltip.classList.add('visible');
+      });
+      card.addEventListener('mousemove', e => {
+        tooltip.style.left = (e.clientX + 14) + 'px';
+        tooltip.style.top = (e.clientY + 14) + 'px';
+      });
+      card.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+    });
+  </script>
+</body>
+</html>

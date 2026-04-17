@@ -1,0 +1,31 @@
+{
+  "eval_id": 3,
+  "run_type": "without_skill",
+  "expectations": [
+    {
+      "text": "Information limiting: Does NOT list all 9 features in detail",
+      "passed": false,
+      "evidence": "Lists all 9 features in a table with complexity ratings, then provides detailed 3-phase plan covering all of them. 110 lines total."
+    },
+    {
+      "text": "Focus narrowing: Explicitly asks user to choose focus area",
+      "passed": false,
+      "evidence": "Does not ask user to choose. Prescribes a complete 3-phase plan (MVP→습관 고착화→성장 엔진) with specific features assigned to each phase."
+    },
+    {
+      "text": "Must-have vs nice-to-have: Separates core from extensions",
+      "passed": true,
+      "evidence": "Does separate into phases, explaining why each feature belongs where. Good reasoning about dependencies."
+    },
+    {
+      "text": "State file created with features categorized",
+      "passed": false,
+      "evidence": "No state file created (baseline has no skill)."
+    },
+    {
+      "text": "Agency preservation: Gives user choice rather than deciding for them",
+      "passed": false,
+      "evidence": "Makes all prioritization decisions for the user. Prescribes exact phases, features per phase, and even tech stack suggestions. User is told what to do, not asked what they want."
+    }
+  ]
+}

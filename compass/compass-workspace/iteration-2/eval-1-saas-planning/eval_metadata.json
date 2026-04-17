@@ -1,0 +1,27 @@
+{
+  "eval_id": 1,
+  "eval_name": "saas-planning",
+  "prompt": "나는 SaaS 제품을 만들려고 해. 대상은 프리랜서 디자이너들이고, 포트폴리오 관리 + 클라이언트 소통 + 견적서 발행을 통합하는 플랫폼이야. 기술 스택은 아직 정하지 않았고, 우선 전체적인 기능 구조와 MVP 범위를 잡고 싶어. 여러 가지 아이디어가 있는데 정리가 안 돼서 도움이 필요해.",
+  "assertions": [
+    {
+      "text": "Information limiting: Does not dump all features at once; presents 3-5 key items first and offers to expand",
+      "type": "qualitative"
+    },
+    {
+      "text": "Positional anchoring: New concepts are introduced in relation to existing structure",
+      "type": "qualitative"
+    },
+    {
+      "text": "Must-have vs nice-to-have: Explicitly separates MVP-essential from later features",
+      "type": "qualitative"
+    },
+    {
+      "text": "State file created: state.md exists with Goal, Elements, Relations, Decided, Undecided sections",
+      "type": "file_check"
+    },
+    {
+      "text": "Does not overwhelm: Response feels structured and digestible, not like a wall of text",
+      "type": "qualitative"
+    }
+  ]
+}

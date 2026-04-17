@@ -1,0 +1,37 @@
+{
+  "eval_id": 0,
+  "eval_name": "eval-korean-simple",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "template-structure-intact",
+      "passed": true,
+      "evidence": "Output contains all required sections: [Context], [Task], [Output Constraint], and all four elements (Practical Terminology and Jargon, Hidden Preconditions, Beginner's Traps, Rules of Thumb). Also includes '>>> CONTINUE FROM HERE <<<' instruction."
+    },
+    {
+      "text": "output-in-english",
+      "passed": true,
+      "evidence": "Entire file is written in English despite the Korean input prompt."
+    },
+    {
+      "text": "domain-enriched",
+      "passed": true,
+      "evidence": "DOMAIN expanded from 'data analysis' to 12 sub-areas: EDA, statistical inference, hypothesis testing, data visualization and storytelling, SQL extraction, BI reporting, dashboard design, ETL/ELT, data warehousing, KPI frameworks, A/B testing, cohort/funnel analysis, data governance."
+    },
+    {
+      "text": "goal-enriched",
+      "passed": true,
+      "evidence": "GOAL synthesized into 6 dimensions: define project scope, evaluate specialist work quality, ask right technical questions, understand infrastructure/tooling decisions, set meaningful milestones, make informed strategic decisions — all framed for a complete beginner."
+    },
+    {
+      "text": "file-saved",
+      "passed": true,
+      "evidence": "File exists at outputs/tacit-knowledge-prompt-data-analysis.md"
+    },
+    {
+      "text": "no-template-mutation",
+      "passed": true,
+      "evidence": "All fixed template phrases preserved verbatim: 'You are a top-tier expert who has spent 20+ years in this domain', 'Output Volume: Absolute Maximum', 'Curse of Knowledge'."
+    }
+  ]
+}

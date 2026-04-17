@@ -1,0 +1,86 @@
+{
+  "metadata": {
+    "skill_name": "compass",
+    "iteration": 3,
+    "timestamp": "2026-03-30T12:00:00Z",
+    "configurations": ["with_skill", "old_skill"],
+    "notes": "Improved skill (with_skill) vs original skill (old_skill). New features: First Turn Behavior, Engagement Tracking, Assumption Transparency, strengthened Agency Return detection. Eval 6 (focus-narrowing) failed due to rate limits."
+  },
+  "runs": [
+    {
+      "eval_id": 1, "eval_name": "saas-planning", "configuration": "with_skill",
+      "result": {"pass_rate": 0.8, "passed": 4, "failed": 1, "total": 5},
+      "timing": {"total_tokens": 18643, "duration_ms": 61904}
+    },
+    {
+      "eval_id": 1, "eval_name": "saas-planning", "configuration": "old_skill",
+      "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5},
+      "timing": {"total_tokens": 18380, "duration_ms": 67938}
+    },
+    {
+      "eval_id": 2, "eval_name": "decision-cleanup", "configuration": "with_skill",
+      "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5},
+      "timing": {"total_tokens": 19184, "duration_ms": 59192}
+    },
+    {
+      "eval_id": 2, "eval_name": "decision-cleanup", "configuration": "old_skill",
+      "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5},
+      "timing": {"total_tokens": 18219, "duration_ms": 59970}
+    },
+    {
+      "eval_id": 3, "eval_name": "feature-overload", "configuration": "with_skill",
+      "result": {"pass_rate": 0.8, "passed": 4, "failed": 1, "total": 5},
+      "timing": {"total_tokens": 19013, "duration_ms": 65084}
+    },
+    {
+      "eval_id": 3, "eval_name": "feature-overload", "configuration": "old_skill",
+      "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5},
+      "timing": {"total_tokens": 18476, "duration_ms": 71533}
+    },
+    {
+      "eval_id": 4, "eval_name": "progressive-complexity", "configuration": "with_skill",
+      "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6},
+      "timing": {"total_tokens": 20287, "duration_ms": 64051}
+    },
+    {
+      "eval_id": 4, "eval_name": "progressive-complexity", "configuration": "old_skill",
+      "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6},
+      "timing": {"total_tokens": 19588, "duration_ms": 72293}
+    },
+    {
+      "eval_id": 5, "eval_name": "agency-return", "configuration": "with_skill",
+      "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5},
+      "timing": {"total_tokens": 20142, "duration_ms": 62759}
+    },
+    {
+      "eval_id": 5, "eval_name": "agency-return", "configuration": "old_skill",
+      "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5},
+      "timing": {"total_tokens": 19002, "duration_ms": 57733}
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {"mean": 0.92, "stddev": 0.11, "min": 0.8, "max": 1.0},
+      "total_tokens": {"mean": 19454, "stddev": 663, "min": 18643, "max": 20287},
+      "duration_ms": {"mean": 62598, "stddev": 2272, "min": 59192, "max": 65084}
+    },
+    "old_skill": {
+      "pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0},
+      "total_tokens": {"mean": 18733, "stddev": 533, "min": 18219, "max": 19588},
+      "duration_ms": {"mean": 65893, "stddev": 5918, "min": 57733, "max": 72293}
+    },
+    "delta": {
+      "pass_rate": -0.08,
+      "total_tokens": 721,
+      "duration_ms": -3295
+    }
+  },
+  "analyst_notes": [
+    "개선된 스킬이 eval-1, eval-3에서 assertion을 놓친 이유: 새로 추가된 'First Turn Behavior' 지침이 탐색 질문을 우선하도록 하여, 첫 응답에서 must-have/nice-to-have 분류나 시각화 제안이 생략됨",
+    "이것은 정량적 regression이지만 질적으로는 더 나은 대화 시작일 수 있음 — assertion이 '첫 턴에서 프레임워크 제시'를 기대하지만, 실제로는 '탐색 후 프레임워크'가 더 효과적일 수 있음",
+    "멀티턴 eval(4, 5)에서는 두 버전 모두 100% — old_skill도 이미 agency return과 decision cleanup을 잘 수행함",
+    "개선된 스킬이 old_skill보다 약 3초 빠른 평균 응답 시간을 보이지만 통계적으로 유의미하지 않음",
+    "핵심 질적 차이: eval-1 with_skill 응답은 10줄로 매우 간결하고 사용자 탐색에 집중, old_skill은 40줄로 이미 프레임워크를 제시. eval-5에서는 두 버전 모두 거의 동일한 agency return 패턴을 보여줌",
+    "eval-6 (focus-narrowing)은 rate limit으로 실패하여 평가 불가"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "eval_id": 3,
+  "eval_name": "feature-overload",
+  "prompt": "모바일 앱을 기획하고 있어. 피트니스 트래킹인데, 운동 기록, 식단 관리, 소셜 기능, 챌린지, 코칭 AI, 웨어러블 연동까지 생각 중이야. 그리고 결제도 필요하고 오프라인 모드도 지원해야 하고... 아 그리고 다국어도. 솔직히 뭐부터 해야 할지 모르겠어.",
+  "assertions": [
+    {
+      "text": "Information limiting: Does NOT list all 9 features in detail; presents core 3-5 first with offer to expand",
+      "type": "qualitative"
+    },
+    {
+      "text": "Focus narrowing: Explicitly asks user to choose which area to focus on first, rather than trying to plan everything at once",
+      "type": "qualitative"
+    },
+    {
+      "text": "Must-have vs nice-to-have: Clearly separates core features (exercise tracking) from nice-to-haves (social, AI coaching, multilingual)",
+      "type": "qualitative"
+    },
+    {
+      "text": "State file created: state.md exists with features categorized",
+      "type": "file_check"
+    },
+    {
+      "text": "Agency preservation: Gives user choice rather than making all prioritization decisions for them",
+      "type": "qualitative"
+    }
+  ]
+}

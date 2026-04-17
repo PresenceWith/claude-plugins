@@ -1,0 +1,9 @@
+{
+  "name": "claude-settings",
+  "version": "0.1.0",
+  "description": "Personal Claude Code settings, skills, and hooks bundle.",
+  "author": {
+    "name": "presence",
+    "email": "sleet0328@gmail.com"
+  }
+}

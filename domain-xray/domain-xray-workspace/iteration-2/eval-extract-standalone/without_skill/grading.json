@@ -1,0 +1,13 @@
+{
+  "eval_id": 4,
+  "eval_name": "eval-extract-standalone",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "template-structure-intact", "passed": false, "evidence": "자체 8섹션 구조. [Context]/[Task]/[Output Constraint] 미사용"},
+    {"text": "domain-enriched", "passed": true, "evidence": "PM 영역 8개 상세 커버(Prioritization, Customer Intuition, Stakeholder Mgmt, Roadmap, Engineering, Shipping, Career, Emotional)"},
+    {"text": "goal-enriched", "passed": true, "evidence": "'software engineer transitioning into PM', 'mentored dozens of engineers' — 엔지니어 전환 맥락 잘 반영"},
+    {"text": "depth-over-volume", "passed": false, "evidence": "'Depth Over Volume' 패턴 미적용. 자체 포맷으로 'go beyond surface-level' 지시"},
+    {"text": "no-template-mutation", "passed": false, "evidence": "표준 템플릿 미사용"},
+    {"text": "file-saved", "passed": true, "evidence": "extract-tacit-pm-knowledge-for-eng-transition.md 존재"}
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "eval_id": 2,
+  "run_type": "with_skill",
+  "expectations": [
+    {
+      "text": "Clear categorization: Decided, Undecided, Not-yet-discussed clearly separated",
+      "passed": true,
+      "evidence": "Three clear categories: 확정 (2건), 선택지 좁혀진 것 (2건), 논의 시작 전 (3건)."
+    },
+    {
+      "text": "Decision cleanup intervention: Proposes priority order for undecided items",
+      "passed": true,
+      "evidence": "Recommends DB first with dependency reasoning: 'API 구조 결정이 DB 특성에 영향을 받습니다' → DB first unblocks API."
+    },
+    {
+      "text": "State file accuracy: Correctly categorizes items",
+      "passed": true,
+      "evidence": "state.md correctly lists OAuth and React as decided, DB and API as undecided with options."
+    },
+    {
+      "text": "Visualization suggestion: Offers status dashboard or similar",
+      "passed": false,
+      "evidence": "Does not explicitly suggest a visualization. Misses an opportunity to offer 'want to see this as a dashboard?'"
+    },
+    {
+      "text": "Pre-decision summary: Provides context when suggesting which to tackle first",
+      "passed": true,
+      "evidence": "Explains dependency chain before recommending DB: API depends on DB choice, deployment depends on both."
+    }
+  ]
+}

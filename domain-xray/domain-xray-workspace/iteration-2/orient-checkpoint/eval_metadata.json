@@ -1,0 +1,33 @@
+{
+  "eval_id": 0,
+  "eval_name": "orient-checkpoint",
+  "prompt": "데이터 엔지니어링을 배우고 싶어요. 저는 백엔드 개발자로 3년 정도 일했고 Python이랑 SQL은 어느 정도 쓸 줄 아는데, 데이터 파이프라인이나 ETL 같은 건 전혀 모릅니다. 회사에서 데이터팀이랑 협업할 일이 생겨서 기본은 알아야 할 것 같아요.",
+  "assertions": [
+    {
+      "name": "checkpoint-presented",
+      "type": "qualitative",
+      "description": "맵 생성 후 저장 전에 체크포인트를 제시 — 3가지 선택지(진행/조정/재시작)"
+    },
+    {
+      "name": "anchor-points-used",
+      "type": "qualitative",
+      "description": "백엔드 개발, Python, SQL 경험이 앵커 포인트로 도메인 개념에 연결"
+    },
+    {
+      "name": "map-has-required-sections",
+      "type": "contains_all",
+      "description": "필수 섹션 포함",
+      "targets": ["Anchor Points", "Domain Landscape", "Learning Priority Map"]
+    },
+    {
+      "name": "area-count-5-to-7",
+      "type": "qualitative",
+      "description": "도메인 영역이 5-7개 범위"
+    },
+    {
+      "name": "next-step-extract",
+      "type": "qualitative",
+      "description": "/domain-extract 다음 단계 안내"
+    }
+  ]
+}

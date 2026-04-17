@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# backups of prior nested git repos
+**/.git.bak/
+**/.git.bak.*/
+
+# node
+node_modules/
+npm-debug.log*
+
+# editor / misc
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# playwright / test artifacts
+**/.playwright-mcp/
+**/test-results/
+**/playwright-report/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# local env
+.env
+.env.local

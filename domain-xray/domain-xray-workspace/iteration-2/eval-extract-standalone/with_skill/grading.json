@@ -1,0 +1,13 @@
+{
+  "eval_id": 4,
+  "eval_name": "eval-extract-standalone",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "template-structure-intact", "passed": true, "evidence": "[Context], [Task], [Output Constraint] 포함, 4축 모두 존재"},
+    {"text": "domain-enriched", "passed": true, "evidence": "PM 하위영역 20개 이상 나열: strategy, discovery, roadmap, prioritization, PRD, stakeholder mgmt, agile, sprint, A/B testing, competitive analysis, pricing, tech debt, JTBD 등"},
+    {"text": "goal-enriched", "passed": true, "evidence": "'transitioning from engineering background', 'reframe technical thinking into product thinking', 'influence without authority', 'leverage technical depth as asset rather than crutch'"},
+    {"text": "depth-over-volume", "passed": true, "evidence": "'Depth Over Volume' 지시 포함"},
+    {"text": "no-template-mutation", "passed": true, "evidence": "'top-tier expert who has spent 20+ years in this domain'와 'Curse of Knowledge' 원문 보존"},
+    {"text": "file-saved", "passed": true, "evidence": "domain-extract-product-management.md 존재"}
+  ]
+}

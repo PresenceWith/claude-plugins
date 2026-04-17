@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Mindmap</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 32px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; text-align: center; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 28px; text-align: center; }
+    .container { overflow-x: auto; width: 100%; max-width: 1100px; }
+    svg { width: 100%; height: auto; }
+    .meta { color: #666; font-size: 11px; margin-top: 20px; text-align: right; width: 100%; max-width: 1100px; }
+  </style>
+</head>
+<body>
+  <h1>Planning Compass — Mindmap</h1>
+  <p class="subtitle">Wedding Planning Overview</p>
+
+  <div class="container">
+    <svg viewBox="0 0 1050 850" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <filter id="glow-venue" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#6366f1" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-catering" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#3b82f6" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-guests" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#10b981" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-decor" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+          <feFlood flood-color="#f59e0b" flood-opacity="0.3" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+
+        <filter id="glow-center" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+          <feFlood flood-color="#8b5cf6" flood-opacity="0.35" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+
+        <filter id="node-shadow">
+          <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.25"/>
+        </filter>
+
+        <radialGradient id="center-grad" cx="50%" cy="40%" r="55%">
+          <stop offset="0%" stop-color="#3a2a6a"/>
+          <stop offset="100%" stop-color="#1a1a2e"/>
+        </radialGradient>
+
+        <marker id="cross-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0,0 8,3 0,6" fill="#94a3b8" fill-opacity="0.6"/>
+        </marker>
+
+        <style>
+          .branch-group {
+            opacity: 0;
+            transform-origin: center;
+            animation: branchFadeIn 0.5s ease-out forwards;
+          }
+          .branch-group:nth-child(1) { animation-delay: 0.1s; }
+          .branch-group:nth-child(2) { animation-delay: 0.2s; }
+          .branch-group:nth-child(3) { animation-delay: 0.3s; }
+          .branch-group:nth-child(4) { animation-delay: 0.4s; }
+
+          @keyframes branchFadeIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to   { opacity: 1; transform: scale(1); }
+          }
+
+          .central-node { animation: centralPulseIn 0.6s ease-out; }
+          @keyframes centralPulseIn {
+            0%   { opacity: 0; transform: scale(0.5); }
+            70%  { transform: scale(1.08); }
+            100% { opacity: 1; transform: scale(1); }
+          }
+
+          .node-group { cursor: pointer; transition: transform 0.2s ease, filter 0.2s ease; }
+          .node-group:hover { transform: scale(1.06); }
+          .node-group:hover rect, .node-group:hover circle { stroke-width: 3; }
+
+          .branch-group { transition: opacity 0.3s; }
+          .branch-group.dimmed { opacity: 0.25; }
+
+          .cross-link { opacity: 0.4; transition: opacity 0.3s; }
+          .cross-link:hover { opacity: 1; }
+          .cross-link:hover path { stroke-width: 2; }
+
+          .mindmap-tooltip {
+            position: fixed; pointer-events: none; z-index: 100;
+            background: #1a1a2eee; border: 1px solid #4a4a7a; border-radius: 10px;
+            padding: 10px 14px; font-size: 12px; color: #e2e8f0;
+            max-width: 260px; opacity: 0; transition: opacity 0.2s;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+          }
+          .mindmap-tooltip.visible { opacity: 1; }
+          .mindmap-tooltip .status-tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 10px; font-weight: bold; margin-top: 6px;
+          }
+        </style>
+      </defs>
+
+      <rect width="1050" height="850" fill="#0f0f1a"/>
+
+      <!-- Branch background zones -->
+      <circle cx="680" cy="220" r="190" fill="#6366f1" fill-opacity="0.03"/>
+      <circle cx="730" cy="520" r="170" fill="#3b82f6" fill-opacity="0.03"/>
+      <circle cx="360" cy="580" r="180" fill="#10b981" fill-opacity="0.03"/>
+      <circle cx="290" cy="260" r="180" fill="#f59e0b" fill-opacity="0.03"/>
+
+      <!-- === CONNECTORS === -->
+      <!-- Venue connectors -->
+      <path d="M 525,385 Q 620,280 680,230" stroke="#6366f1" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M 680,230 Q 760,150 820,130" stroke="#6366f1" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <path d="M 680,230 Q 790,220 860,230" stroke="#6366f1" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+
+      <!-- Catering connectors -->
+      <path d="M 525,385 Q 660,440 730,510" stroke="#3b82f6" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M 730,510 Q 820,480 880,470" stroke="#3b82f6" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <path d="M 730,510 Q 810,560 870,570" stroke="#3b82f6" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+
+      <!-- Guests connectors -->
+      <path d="M 525,385 Q 410,480 360,560" stroke="#10b981" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M 360,560 Q 300,630 260,670" stroke="#10b981" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <path d="M 360,560 Q 410,640 440,680" stroke="#10b981" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <path d="M 360,560 Q 310,550 180,590" stroke="#10b981" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+
+      <!-- Decor connectors -->
+      <path d="M 525,385 Q 380,300 300,250" stroke="#f59e0b" stroke-opacity="0.6" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M 300,250 Q 220,180 170,160" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <path d="M 300,250 Q 190,250 130,260" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+      <path d="M 300,250 Q 230,320 180,360" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="5 4" fill="none" stroke-linecap="round"/>
+
+      <!-- === CROSS-LINKS === -->
+      <!-- Venue <-> Catering: capacity constraint -->
+      <g class="cross-link" data-relation="capacity">
+        <path d="M 680,250 Q 790,380 730,490" stroke="#94a3b8" stroke-opacity="0.45" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#cross-arrow)"/>
+        <rect x="730" y="356" width="70" height="18" rx="5" fill="#1a1a2e" fill-opacity="0.9" stroke="#94a3b8" stroke-width="0.5" stroke-opacity="0.3"/>
+        <text x="765" y="368" text-anchor="middle" dominant-baseline="central" fill="#94a3b8" font-size="10">수용 인원</text>
+      </g>
+      <!-- Guests <-> Catering: dietary needs -->
+      <g class="cross-link" data-relation="dietary">
+        <path d="M 400,560 Q 580,650 730,530" stroke="#94a3b8" stroke-opacity="0.45" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#cross-arrow)"/>
+        <rect x="535" y="596" width="70" height="18" rx="5" fill="#1a1a2e" fill-opacity="0.9" stroke="#94a3b8" stroke-width="0.5" stroke-opacity="0.3"/>
+        <text x="570" y="608" text-anchor="middle" dominant-baseline="central" fill="#94a3b8" font-size="10">식단 요청</text>
+      </g>
+
+      <!-- === CENTRAL NODE === -->
+      <g class="central-node" data-tooltip="결혼식 전체 계획 및 준비" data-status="active">
+        <circle cx="525" cy="385" r="56" fill="url(#center-grad)" stroke="#8b5cf6" stroke-width="3" filter="url(#glow-center)"/>
+        <circle cx="525" cy="385" r="64" fill="none" stroke="#8b5cf6" stroke-width="0.8" stroke-opacity="0.25"/>
+        <circle cx="525" cy="385" r="70" fill="none" stroke="#8b5cf6" stroke-width="0.4" stroke-opacity="0.12"/>
+        <text x="525" y="379" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="15" font-weight="bold">결혼 준비</text>
+        <text x="525" y="399" text-anchor="middle" dominant-baseline="central" fill="#8b5cf6" font-size="10">Wedding Planning</text>
+      </g>
+
+      <!-- === BRANCHES === -->
+
+      <!-- Branch 1: Venue (장소) — Indigo -->
+      <g class="branch-group">
+        <g class="node-group core" data-tooltip="예식장, 피로연 장소 선택 및 예약" data-status="decided">
+          <rect x="630" y="210" width="100" height="40" rx="10" fill="#1a1a2e" stroke="#6366f1" stroke-width="2.5" filter="url(#glow-venue)"/>
+          <rect x="630" y="210" width="4" height="40" rx="2" fill="#6366f1"/>
+          <circle cx="722" cy="218" r="5" fill="#4ade80" stroke="#4ade8040" stroke-width="2"/>
+          <text x="680" y="232" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">장소</text>
+        </g>
+        <g class="node-group detail" data-tooltip="야외 정원 예식 또는 호텔 예식" data-status="decided">
+          <rect x="780" y="114" width="96" height="32" rx="8" fill="#1a1a2e" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="870" cy="120" r="4" fill="#4ade80" stroke="#4ade8040" stroke-width="2"/>
+          <text x="828" y="132" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">예식 유형</text>
+        </g>
+        <g class="node-group detail" data-tooltip="200명 수용 가능한 장소 확보" data-status="active">
+          <rect x="820" y="214" width="80" height="32" rx="8" fill="#1a1a2e" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="894" cy="220" r="4" fill="#facc15" stroke="#facc1540" stroke-width="2">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <text x="860" y="232" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">수용력</text>
+        </g>
+      </g>
+
+      <!-- Branch 2: Catering (음식) — Blue -->
+      <g class="branch-group">
+        <g class="node-group core" data-tooltip="메뉴 구성, 케이터링 업체 선정" data-status="active">
+          <rect x="686" y="490" width="88" height="40" rx="10" fill="#1a1a2e" stroke="#3b82f6" stroke-width="2.5" filter="url(#glow-catering)"/>
+          <rect x="686" y="490" width="4" height="40" rx="2" fill="#3b82f6"/>
+          <circle cx="766" cy="498" r="5" fill="#facc15" stroke="#facc1540" stroke-width="2">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <text x="730" y="512" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">음식</text>
+        </g>
+        <g class="node-group detail" data-tooltip="한식/양식 코스 선택" data-status="undecided">
+          <rect x="840" y="454" width="80" height="32" rx="8" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="914" cy="460" r="4" fill="#6b7280"/>
+          <text x="880" y="472" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">메뉴</text>
+        </g>
+        <g class="node-group detail" data-tooltip="웨딩 케이크 디자인 및 주문" data-status="undecided">
+          <rect x="830" y="554" width="96" height="32" rx="8" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="920" cy="560" r="4" fill="#6b7280"/>
+          <text x="878" y="572" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">케이크</text>
+        </g>
+      </g>
+
+      <!-- Branch 3: Guests (하객) — Emerald -->
+      <g class="branch-group">
+        <g class="node-group core" data-tooltip="하객 명단, 초대장, 좌석 배치" data-status="active">
+          <rect x="316" y="540" width="88" height="40" rx="10" fill="#1a1a2e" stroke="#10b981" stroke-width="2.5" filter="url(#glow-guests)"/>
+          <rect x="316" y="540" width="4" height="40" rx="2" fill="#10b981"/>
+          <circle cx="396" cy="548" r="5" fill="#facc15" stroke="#facc1540" stroke-width="2">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <text x="360" y="562" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">하객</text>
+        </g>
+        <g class="node-group detail" data-tooltip="RSVP 확인 및 참석자 관리" data-status="active">
+          <rect x="200" y="654" width="96" height="32" rx="8" fill="#1a1a2e" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="290" cy="660" r="4" fill="#facc15" stroke="#facc1540" stroke-width="2">
+            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <text x="248" y="672" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">RSVP</text>
+        </g>
+        <g class="node-group detail" data-tooltip="좌석 배치 계획" data-status="undecided">
+          <rect x="395" y="664" width="96" height="32" rx="8" fill="#1a1a2e" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="485" cy="670" r="4" fill="#6b7280"/>
+          <text x="443" y="682" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">좌석 배치</text>
+        </g>
+        <g class="node-group detail" data-tooltip="디지털 초대장 제작 및 발송" data-status="decided">
+          <rect x="110" y="574" width="88" height="32" rx="8" fill="#1a1a2e" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="192" cy="580" r="4" fill="#4ade80" stroke="#4ade8040" stroke-width="2"/>
+          <text x="154" y="592" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">초대장</text>
+        </g>
+      </g>
+
+      <!-- Branch 4: Decor (장식) — Amber -->
+      <g class="branch-group">
+        <g class="node-group core" data-tooltip="꽃꽂이, 조명, 테이블 데코" data-status="undecided">
+          <rect x="252" y="230" width="96" height="40" rx="10" fill="#1a1a2e" stroke="#f59e0b" stroke-width="2.5" filter="url(#glow-decor)"/>
+          <rect x="252" y="230" width="4" height="40" rx="2" fill="#f59e0b"/>
+          <circle cx="340" cy="238" r="5" fill="#6b7280"/>
+          <text x="300" y="252" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="13" font-weight="bold">장식</text>
+        </g>
+        <g class="node-group detail" data-tooltip="플라워 어레인지먼트 컨셉" data-status="undecided">
+          <rect x="110" y="144" width="88" height="32" rx="8" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="192" cy="150" r="4" fill="#6b7280"/>
+          <text x="154" y="162" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">꽃꽂이</text>
+        </g>
+        <g class="node-group detail" data-tooltip="무대 및 분위기 조명 디자인" data-status="undecided">
+          <rect x="70" y="244" width="72" height="32" rx="8" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="136" cy="250" r="4" fill="#6b7280"/>
+          <text x="106" y="262" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">조명</text>
+        </g>
+        <g class="node-group detail" data-tooltip="테이블 세팅 및 센터피스" data-status="undecided">
+          <rect x="110" y="344" width="112" height="32" rx="8" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 4" filter="url(#node-shadow)"/>
+          <circle cx="216" cy="350" r="4" fill="#6b7280"/>
+          <text x="166" y="362" text-anchor="middle" dominant-baseline="central" fill="#a0a0b0" font-size="11">테이블 세팅</text>
+        </g>
+      </g>
+
+      <!-- === LEGEND === -->
+      <g class="legend" transform="translate(860, 722)">
+        <rect x="0" y="0" width="170" height="118" rx="10" fill="#1a1a2eee" stroke="#2a2a4a" stroke-width="1"/>
+        <text x="14" y="20" fill="#888888" font-size="10" font-weight="bold">범례</text>
+
+        <circle cx="22" cy="38" r="5" fill="#4ade80" stroke="#4ade8040" stroke-width="2"/>
+        <text x="34" y="41" fill="#94a3b8" font-size="10">결정됨</text>
+
+        <circle cx="90" cy="38" r="5" fill="#facc15" stroke="#facc1540" stroke-width="2"/>
+        <text x="102" y="41" fill="#94a3b8" font-size="10">논의 중</text>
+
+        <circle cx="22" cy="58" r="5" fill="#6b7280"/>
+        <text x="34" y="61" fill="#94a3b8" font-size="10">미결정</text>
+
+        <line x1="14" y1="78" x2="52" y2="78" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+        <text x="60" y="81" fill="#94a3b8" font-size="10">핵심 요소</text>
+
+        <line x1="14" y1="94" x2="52" y2="94" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round"/>
+        <text x="60" y="97" fill="#94a3b8" font-size="10">세부 요소</text>
+
+        <line x1="14" y1="110" x2="52" y2="110" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="60" y="113" fill="#94a3b8" font-size="10">교차 연결</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="mindmap-tooltip"></div>
+
+  <div class="meta">
+    Last updated: 2026-04-05 · Planning Compass
+  </div>
+
+  <script>
+    const tooltip = document.querySelector('.mindmap-tooltip');
+    const allBranches = document.querySelectorAll('.branch-group');
+
+    document.querySelectorAll('.node-group, .central-node').forEach(node => {
+      node.addEventListener('mouseenter', e => {
+        const desc = node.getAttribute('data-tooltip');
+        const status = node.getAttribute('data-status');
+        const statusLabel = { decided: '결정됨', active: '논의 중', undecided: '미결정' }[status] || '';
+        const statusColor = { decided: '#4ade80', active: '#facc15', undecided: '#6b7280' }[status] || '#6b7280';
+        tooltip.innerHTML = `${desc}${statusLabel ? `<br><span class="status-tag" style="background:${statusColor}18;color:${statusColor}">${statusLabel}</span>` : ''}`;
+        tooltip.classList.add('visible');
+
+        const parentBranch = node.closest('.branch-group');
+        if (parentBranch) {
+          allBranches.forEach(b => {
+            b.classList.toggle('dimmed', b !== parentBranch);
+          });
+        }
+      });
+
+      node.addEventListener('mousemove', e => {
+        tooltip.style.left = (e.clientX + 14) + 'px';
+        tooltip.style.top = (e.clientY + 14) + 'px';
+      });
+
+      node.addEventListener('mouseleave', () => {
+        tooltip.classList.remove('visible');
+        allBranches.forEach(b => b.classList.remove('dimmed'));
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "eval_id": 3,
+  "eval_name": "prime-thinking-expansion",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "three-distinct-question-types",
+      "passed": true,
+      "evidence": "Q1=예측(파이프라인 초보 실수), Q2=연결(API 검증↔데이터 품질), Q3=관계(스토리지↔실시간 처리). 3가지 다른 사고 축."
+    },
+    {
+      "text": "layer1-reasoning-surfaced",
+      "passed": true,
+      "evidence": "Q1: '실패 대응에 있다고 가정'. Q2: '입구에서 나쁜 것을 걸러내는 것이라고 가정'. Q3: '스키마 유연성이라고 가정'. 각각 선택에 내포된 전제를 명확히 명시."
+    },
+    {
+      "text": "layer2-perspective-shifted-concise",
+      "passed": true,
+      "evidence": "Q1: '에러 핸들링 문제가 아니라 idempotency 설계 문제' (1문장). Q2: '검증 문제가 아니라 data contract 문제' (1문장). Q3: '스키마 유연성 문제가 아니라 저장 계층 분리 문제' (1문장). 모두 프레임 이름만 제시, 설명 없음. v1 대비 확실히 개선."
+    },
+    {
+      "text": "layer3-open-question-posed",
+      "passed": true,
+      "evidence": "Q1: idempotent 속성 질문. Q2: schema 변경 방어 질문. Q3: 배치/실시간 결과 일치 보장 질문. 모두 답 없는 열린 질문."
+    },
+    {
+      "text": "no-answer-judgment",
+      "passed": true,
+      "evidence": "어떤 선택지도 정답/오답으로 판정하지 않음."
+    },
+    {
+      "text": "orient-terms-only",
+      "passed": true,
+      "evidence": "사용된 용어: idempotency, ETL/ELT, data contract, schema drift, Parquet, partitioning, lambda/kappa — 모두 orient 맵 범위 내."
+    },
+    {
+      "text": "wrap-up-three-questions",
+      "passed": true,
+      "evidence": "'생각해볼 질문들' 섹션에 3개 열린 질문 모아서 제시."
+    },
+    {
+      "text": "no-file-artifact",
+      "passed": true,
+      "evidence": "prime_session.md는 평가용. 스킬 자체는 파일 산출물 없음."
+    }
+  ]
+}

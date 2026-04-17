@@ -1,0 +1,37 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-korean-urgent",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "template-structure-intact",
+      "passed": true,
+      "evidence": "All required sections present: [Context], [Task], [Output Constraint], four elements, continuation marker."
+    },
+    {
+      "text": "scm-domain-breadth",
+      "passed": true,
+      "evidence": "DOMAIN covers 10 SCM sub-areas: demand forecasting, procurement/SRM, inventory optimization, warehouse management, order management/fulfillment, transportation/freight logistics, production planning/scheduling, returns/reverse logistics, supply chain visibility/risk management, plus enterprise tech stack (ERP, WMS, TMS, OMS, APS, EDI/API)."
+    },
+    {
+      "text": "urgency-in-goal",
+      "passed": true,
+      "evidence": "GOAL captures: 'complete newcomer suddenly assigned', system scope/requirements definition, vendor proposal evaluation, asking informed questions, prioritization decisions, establishing credibility in cross-functional discussions with warehouse managers, procurement teams, transportation coordinators, IT architects."
+    },
+    {
+      "text": "output-in-english",
+      "passed": true,
+      "evidence": "Entire file is in English despite Korean input."
+    },
+    {
+      "text": "file-saved",
+      "passed": true,
+      "evidence": "File exists at outputs/tacit-knowledge-prompt-supply-chain-management.md"
+    },
+    {
+      "text": "no-template-mutation",
+      "passed": true,
+      "evidence": "Fixed phrases preserved verbatim."
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "expectations": [
+    {
+      "text": "HTML file generated: A mindmap.html file exists in outputs",
+      "passed": true,
+      "evidence": "mindmap.html exists in outputs directory (16505 bytes). Contains a complete HTML document with SVG-based mindmap rendering, including 9 category branches, detail nodes, cross-links, legend, and tooltips."
+    },
+    {
+      "text": "Connector visibility: Lines connecting nodes to center are clearly visible (not near-background colors)",
+      "passed": true,
+      "evidence": "Core connectors (center to branch nodes) use `cat.color + '99'` which is the category color at 60% opacity (e.g., #6366f199, #f472b699). Detail connectors use `cat.color + 'AA'` (~67% opacity). Background is #0f0f1a. These are vibrant category colors well above background visibility, not near-background grays. Satisfies the 50-70% opacity requirement using actual category colors."
+    },
+    {
+      "text": "Cross-branch relationships: Inter-node relationships shown as visual lines, not just text",
+      "passed": true,
+      "evidence": "crossLinks array (8 relationships) is rendered via SVG <path> elements in the `layerCross` group (lines 360-389). Each cross-link is a dashed quadratic Bezier curve drawn ON the map between core node positions, with a small label pill at the curve midpoint. Examples: workout->wearable ('실시간 데이터'), ai->workout ('데이터 의존'), challenge->social ('플랫폼 기반'). These are genuine SVG paths, not text annotations in a box."
+    },
+    {
+      "text": "Category color coding: Different branches use distinct colors matching a legend",
+      "passed": true,
+      "evidence": "Legend (lines 82-93) displays 9 colored swatches. Each swatch color exactly matches the corresponding category's color in the code: 운동 기록=#6366f1, 식단 관리=#f472b6, 소셜 기능=#facc15, 챌린지=#fb923c, AI 코칭=#4ade80, 웨어러블 연동=#22d3ee, 결제 시스템=#a78bfa, 오프라인 모드=#64748b, 다국어 지원=#94a3b8. All 9 are visually distinct. Node strokes and connector strokes use these same colors."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "output_chars": 22025,
+    "transcript_chars": 1922
+  },
+  "timing": {
+    "total_tokens": 42030,
+    "executor_duration_seconds": 248.2,
+    "total_duration_seconds": 248.2
+  },
+  "claims": [
+    {
+      "claim": "9개 핵심 영역으로 기능을 분류했다",
+      "type": "factual",
+      "verified": true,
+      "evidence": "HTML categories array contains exactly 9 entries: workout, diet, social, challenge, ai, wearable, payment, offline, i18n."
+    },
+    {
+      "claim": "기능 간 연결 관계가 마인드맵에 표현되어 있다",
+      "type": "quality",
+      "verified": true,
+      "evidence": "crossLinks array defines 8 inter-branch relationships, all rendered as SVG paths. However, the cross-link stroke color is #ffffff50 (white at 31% opacity) which is quite faint on the dark background."
+    },
+    {
+      "claim": "5개 핵심 미결정 사항이 있다",
+      "type": "factual",
+      "verified": true,
+      "evidence": "state.md Undecided section lists exactly 5 items: 기술 스택, 수익 모델, AI 엔진, MVP 범위, 타겟 시장. These match the response.md text."
+    },
+    {
+      "claim": "코칭 AI가 운동 기록과 식단 관리 데이터에 의존",
+      "type": "factual",
+      "verified": true,
+      "evidence": "crossLinks includes {from:'ai', to:'workout'} and {from:'ai', to:'diet'}, both labeled '데이터 의존'. Also present in state.md Relations section."
+    },
+    {
+      "claim": "챌린지가 소셜 기능 위에서 동작",
+      "type": "factual",
+      "verified": true,
+      "evidence": "crossLinks includes {from:'challenge', to:'social', label:'플랫폼 기반'}. state.md also has '챌린지 →depends-on→ 소셜 기능'."
+    }
+  ],
+  "user_notes_summary": null,
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Connector visibility: Lines connecting nodes to center are clearly visible (not near-background colors)",
+        "reason": "This assertion only checks center-to-branch connectors but does not cover the cross-branch relationship lines. The cross-links use #ffffff50 (white at ~31% opacity) which is noticeably faint. A separate assertion for cross-link contrast would catch this."
+      },
+      {
+        "reason": "No assertion checks interactivity. The mindmap includes tooltips with hover behavior -- this is a quality differentiator that goes unverified. An assertion like 'hovering a node shows contextual detail' would test this."
+      },
+      {
+        "reason": "No assertion checks that all 9 requested features from the prompt are represented as branches. The prompt explicitly listed: 운동 기록, 식단 관리, 소셜 기능, 챌린지, 코칭 AI, 웨어러블 연동, 결제, 오프라인 모드, 다국어. A completeness check would catch missing branches."
+      }
+    ],
+    "overall": "Assertions cover the key structural and visual properties well. The main gap is that cross-branch link visibility is not independently checked -- they use a faint neutral white (#ffffff50) rather than category colors, which could be a readability issue that slips through. Adding a completeness assertion for branch coverage would also strengthen the eval."
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-english-context",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "template-structure-intact",
+      "passed": true,
+      "evidence": "All required sections present: [Context], [Task], [Output Constraint], four elements, continuation marker."
+    },
+    {
+      "text": "context-aware-domain",
+      "passed": true,
+      "evidence": "DOMAIN covers 14 PM sub-disciplines: strategy/vision, customer discovery, user research, market analysis, competitive positioning, roadmap planning, prioritization frameworks (RICE, MoSCoW), PRD authorship, cross-functional orchestration, agile/scrum, go-to-market, product analytics, KPI instrumentation, stakeholder management, A/B experimentation, product lifecycle."
+    },
+    {
+      "text": "context-aware-goal",
+      "passed": true,
+      "evidence": "GOAL explicitly references engineering background, 'within the next month' urgency, and 6 specific competency gaps: own product vision, lead discovery conversations, translate ambiguous problems, evaluate design/GTM proposals, run cross-functional rituals, establish credibility."
+    },
+    {
+      "text": "file-saved",
+      "passed": true,
+      "evidence": "File exists at outputs/tacit-knowledge-prompt-product-management.md"
+    },
+    {
+      "text": "no-template-mutation",
+      "passed": true,
+      "evidence": "Fixed phrases preserved verbatim."
+    }
+  ]
+}

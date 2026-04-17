@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-extract-with-orient",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "template-structure-intact", "passed": true, "evidence": "[Context], [Scope], [Task], [Output Constraint] 모두 존재. 4축(Terminology, Hidden Preconditions, Beginner's Traps, Rules of Thumb) 포함"},
+    {"text": "orient-context-used", "passed": true, "evidence": "DOMAIN에 orient 파일의 7개 영역(수집/저장, 정제, EDA, 통계, 시각화, BI, 커뮤니케이션) 전체 반영. GOAL에 앵커 포인트(가계부, 비교쇼핑, 날씨예보, 레시피 조절)까지 통합"},
+    {"text": "has-scope-section", "passed": true, "evidence": "[Scope] 섹션이 orient의 우선순위 맵을 반영: 1)SQL/수집 2)정제 3)EDA 4)시각화를 중점 영역으로 지정"},
+    {"text": "depth-over-volume", "passed": true, "evidence": "'Depth Over Volume' 지시 포함, 'Absolute Maximum' 없음"},
+    {"text": "output-in-english", "passed": true, "evidence": "전체 영문 작성"},
+    {"text": "file-saved", "passed": true, "evidence": "domain-extract-data-analysis.md 존재"}
+  ]
+}

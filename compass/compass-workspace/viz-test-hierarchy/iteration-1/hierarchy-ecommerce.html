@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Commerce Platform Architecture - Hierarchy</title>
+<style>
+  body {
+    margin: 0; padding: 20px;
+    background: #0a0a14;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display: flex; justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<!--
+  Layout calculation (branchGap=48, siblingGap=24):
+  Frontend subtree: web(80)+24+mobile(88)+24+admin(80) = 296  -> starts at x=40, ends at 336
+  Backend subtree:  apigw(88)+24+order(72)+24+pay(72)+24+inv(72) = 376 -> starts at 384, ends at 760
+  Data subtree:     pg(92)+24+redis(72)+24+es(104) = 316  -> starts at 808, ends at 1124
+  Infra subtree:    ecs(74)+24+cf(82)+24+rds(64) = 268 -> starts at 1172, ends at 1440
+  Total width: 1440+40 = 1480
+
+  Frontend center: 40 + 296/2 = 188    -> branch x = 188 - 64 = 124
+  Backend center:  384 + 376/2 = 572   -> branch x = 572 - 68 = 504
+  Data center:     808 + 316/2 = 966   -> branch x = 966 - 60 = 906
+  Infra center:    1172 + 268/2 = 1306 -> branch x = 1306 - 60 = 1246
+
+  Root center: (188+1306)/2 = 747     -> root x = 747 - 100 = 647
+  viewBox: 0 0 1500 700
+-->
+
+<div style="overflow-x: auto;">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 700"
+       width="1500" height="700"
+       style="background: #0f0f1a;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              border-radius: 12px;">
+
+    <defs>
+      <linearGradient id="rootGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#6366f1" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#6366f1" stop-opacity="0.08"/>
+      </linearGradient>
+
+      <filter id="rootGlow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+        <feFlood flood-color="#6366f1" flood-opacity="0.35" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+
+      <filter id="glow-frontend" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+        <feFlood flood-color="#6366f1" flood-opacity="0.2" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-backend" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+        <feFlood flood-color="#3b82f6" flood-opacity="0.2" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-data" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+        <feFlood flood-color="#06b6d4" flood-opacity="0.2" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-infra" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+        <feFlood flood-color="#10b981" flood-opacity="0.2" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+
+      <style>
+        .hier-node { cursor: pointer; transition: transform 0.2s ease; }
+        .hier-node:hover rect { stroke-width: 2.5; }
+        .hier-connector { transition: stroke-opacity 0.3s; }
+        .depth-line { stroke-opacity: 0.15; }
+        .hier-node, .hier-connector {
+          opacity: 0; animation: hierFadeIn 0.35s ease-out forwards;
+        }
+        @keyframes hierFadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        .hier-tooltip {
+          position: fixed; pointer-events: none; z-index: 100;
+          background: #1a1a2eee; border: 1px solid #4a4a7a; border-radius: 10px;
+          padding: 10px 14px; font-size: 12px; color: #e2e8f0;
+          max-width: 280px; opacity: 0; transition: opacity 0.15s;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+          backdrop-filter: blur(8px);
+        }
+        .hier-tooltip.visible { opacity: 1; }
+        .hier-tooltip .tt-path {
+          font-size: 10px; color: #6366f1; margin-bottom: 4px; opacity: 0.7;
+        }
+      </style>
+    </defs>
+
+    <!-- Depth level zone shading -->
+    <rect x="0" y="0" width="1500" height="148" fill="#6366f103"/>
+    <rect x="0" y="148" width="1500" height="128" fill="#ffffff02"/>
+    <rect x="0" y="276" width="1500" height="128" fill="#6366f103"/>
+
+    <!-- Depth level indicators -->
+    <g class="depth-lines">
+      <line class="depth-line" x1="0" y1="40" x2="1500" y2="40"
+            stroke="#2a2a4a" stroke-width="1" stroke-dasharray="2,6"/>
+      <text x="8" y="36" fill="#4a4a7a" font-size="9" opacity="0.7">ROOT</text>
+
+      <line class="depth-line" x1="0" y1="176" x2="1500" y2="176"
+            stroke="#2a2a4a" stroke-width="1" stroke-dasharray="2,6"/>
+      <text x="8" y="172" fill="#4a4a7a" font-size="9" opacity="0.7">L1 · 도메인</text>
+
+      <line class="depth-line" x1="0" y1="304" x2="1500" y2="304"
+            stroke="#2a2a4a" stroke-width="1" stroke-dasharray="2,6"/>
+      <text x="8" y="300" fill="#4a4a7a" font-size="9" opacity="0.7">L2 · 컴포넌트</text>
+    </g>
+
+    <!-- ===== CONNECTORS ===== -->
+    <!-- Root -> L1: centers at 188, 572, 966, 1306 -->
+    <g class="hier-connector" data-parent="root" style="animation-delay: 0s;">
+      <line x1="747" y1="96" x2="747" y2="148"
+            stroke="#4a4a7a" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="188" y1="148" x2="1306" y2="148"
+            stroke="#4a4a7a" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="188" y1="148" x2="188" y2="176"
+            stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="572" y1="148" x2="572" y2="176"
+            stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="966" y1="148" x2="966" y2="176"
+            stroke="#06b6d4" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="1306" y1="148" x2="1306" y2="176"
+            stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
+    </g>
+
+    <!-- Frontend -> leaves: web c=80, mobile c=172, admin c=296 -->
+    <g class="hier-connector" data-parent="frontend" style="animation-delay: 0.15s;">
+      <line x1="188" y1="224" x2="188" y2="264"
+            stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="80" y1="264" x2="296" y2="264"
+            stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="80" y1="264" x2="80" y2="304"
+            stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="188" y1="264" x2="188" y2="304"
+            stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="296" y1="264" x2="296" y2="304"
+            stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+    </g>
+
+    <!-- Backend -> leaves: apigw c=428, order c=540, pay c=636, inv c=732 -->
+    <g class="hier-connector" data-parent="backend" style="animation-delay: 0.15s;">
+      <line x1="572" y1="224" x2="572" y2="264"
+            stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="428" y1="264" x2="732" y2="264"
+            stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="428" y1="264" x2="428" y2="304"
+            stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="540" y1="264" x2="540" y2="304"
+            stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="636" y1="264" x2="636" y2="304"
+            stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="732" y1="264" x2="732" y2="304"
+            stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+    </g>
+
+    <!-- Data -> leaves: pg c=854, redis c=970, es c=1072 -->
+    <g class="hier-connector" data-parent="data" style="animation-delay: 0.15s;">
+      <line x1="966" y1="224" x2="966" y2="264"
+            stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="854" y1="264" x2="1072" y2="264"
+            stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="854" y1="264" x2="854" y2="304"
+            stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="970" y1="264" x2="970" y2="304"
+            stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="1072" y1="264" x2="1072" y2="304"
+            stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+    </g>
+
+    <!-- Infra -> leaves: ecs c=1209, cf c=1307, rds c=1413 -->
+    <g class="hier-connector" data-parent="infra" style="animation-delay: 0.15s;">
+      <line x1="1306" y1="224" x2="1306" y2="264"
+            stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="1209" y1="264" x2="1413" y2="264"
+            stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="1209" y1="264" x2="1209" y2="304"
+            stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="1307" y1="264" x2="1307" y2="304"
+            stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+      <line x1="1413" y1="264" x2="1413" y2="304"
+            stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.5"/>
+    </g>
+
+    <!-- ===== NODES ===== -->
+
+    <!-- ROOT: center=747, w=200, x=647 -->
+    <g class="hier-node root" data-id="root" data-path="이커머스 플랫폼"
+       data-tooltip="대규모 이커머스 플랫폼의 시스템 아키텍처"
+       transform="translate(647, 40)" filter="url(#rootGlow)" style="animation-delay: 0s;">
+      <rect width="200" height="56" rx="10" fill="url(#rootGrad)" stroke="#6366f1" stroke-width="2.5"/>
+      <line x1="12" y1="2" x2="188" y2="2" stroke="#6366f1" stroke-width="2" stroke-opacity="0.5" stroke-linecap="round"/>
+      <text x="100" y="22" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="14" font-weight="bold">이커머스 플랫폼</text>
+      <text x="100" y="40" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">13개 항목</text>
+    </g>
+
+    <!-- L1: 프론트엔드 (Indigo) center=188, w=128, x=124 -->
+    <g class="hier-node branch" data-id="frontend" data-path="이커머스 플랫폼 > 프론트엔드"
+       data-tooltip="웹, 모바일앱, 어드민 포함" data-domain="frontend"
+       transform="translate(124, 176)" filter="url(#glow-frontend)" style="animation-delay: 0.15s;">
+      <rect width="128" height="48" rx="6" fill="#1a1a2e" stroke="#6366f1" stroke-width="1.5"/>
+      <rect x="0" y="0" width="128" height="4" rx="2" fill="#6366f1" fill-opacity="0.6"/>
+      <rect width="3" height="40" x="0" y="4" rx="1.5" fill="#6366f1" fill-opacity="0.6"/>
+      <circle cx="118" cy="10" r="6" fill="#4ade8020" stroke="#4ade80" stroke-width="1"/>
+      <text x="118" y="12" text-anchor="middle" dominant-baseline="central" fill="#4ade80" font-size="7">✓</text>
+      <text x="66" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="12" font-weight="bold">프론트엔드</text>
+      <text x="66" y="36" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">3개</text>
+    </g>
+
+    <!-- L1: 백엔드 (Blue) center=572, w=136, x=504 -->
+    <g class="hier-node branch" data-id="backend" data-path="이커머스 플랫폼 > 백엔드"
+       data-tooltip="API 게이트웨이, 주문/결제/재고 서비스" data-domain="backend"
+       transform="translate(504, 176)" filter="url(#glow-backend)" style="animation-delay: 0.15s;">
+      <rect width="136" height="48" rx="6" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1.5"/>
+      <rect x="0" y="0" width="136" height="4" rx="2" fill="#3b82f6" fill-opacity="0.6"/>
+      <rect width="3" height="40" x="0" y="4" rx="1.5" fill="#3b82f6" fill-opacity="0.6"/>
+      <circle cx="126" cy="10" r="6" fill="#4ade8020" stroke="#4ade80" stroke-width="1"/>
+      <text x="126" y="12" text-anchor="middle" dominant-baseline="central" fill="#4ade80" font-size="7">✓</text>
+      <text x="70" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="12" font-weight="bold">백엔드</text>
+      <text x="70" y="36" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">4개</text>
+    </g>
+
+    <!-- L1: 데이터 (Cyan) center=966, w=120, x=906 -->
+    <g class="hier-node branch" data-id="data" data-path="이커머스 플랫폼 > 데이터"
+       data-tooltip="PostgreSQL, Redis, Elasticsearch" data-domain="data"
+       transform="translate(906, 176)" filter="url(#glow-data)" style="animation-delay: 0.15s;">
+      <rect width="120" height="48" rx="6" fill="#1a1a2e" stroke="#06b6d4" stroke-width="1.5"/>
+      <rect x="0" y="0" width="120" height="4" rx="2" fill="#06b6d4" fill-opacity="0.6"/>
+      <rect width="3" height="40" x="0" y="4" rx="1.5" fill="#06b6d4" fill-opacity="0.6"/>
+      <circle cx="110" cy="10" r="6" fill="#4ade8020" stroke="#4ade80" stroke-width="1"/>
+      <text x="110" y="12" text-anchor="middle" dominant-baseline="central" fill="#4ade80" font-size="7">✓</text>
+      <text x="62" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="12" font-weight="bold">데이터</text>
+      <text x="62" y="36" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">3개</text>
+    </g>
+
+    <!-- L1: 인프라 (Emerald) center=1306, w=120, x=1246 -->
+    <g class="hier-node branch" data-id="infra" data-path="이커머스 플랫폼 > 인프라"
+       data-tooltip="AWS ECS, CloudFront, RDS" data-domain="infra"
+       transform="translate(1246, 176)" filter="url(#glow-infra)" style="animation-delay: 0.15s;">
+      <rect width="120" height="48" rx="6" fill="#1a1a2e" stroke="#10b981" stroke-width="1.5"/>
+      <rect x="0" y="0" width="120" height="4" rx="2" fill="#10b981" fill-opacity="0.6"/>
+      <rect width="3" height="40" x="0" y="4" rx="1.5" fill="#10b981" fill-opacity="0.6"/>
+      <circle cx="110" cy="10" r="6" fill="#4ade8020" stroke="#4ade80" stroke-width="1"/>
+      <text x="110" y="12" text-anchor="middle" dominant-baseline="central" fill="#4ade80" font-size="7">✓</text>
+      <text x="62" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="12" font-weight="bold">인프라</text>
+      <text x="62" y="36" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">3개</text>
+    </g>
+
+    <!-- ===== L2 LEAVES ===== -->
+
+    <!-- Frontend leaves (Indigo #6366f1) -->
+    <!-- 웹: x=40, w=80, center=80 -->
+    <g class="hier-node leaf" data-id="web" data-path="이커머스 플랫폼 > 프론트엔드 > 웹"
+       data-tooltip="웹 프론트엔드 애플리케이션" transform="translate(40, 304)" style="animation-delay: 0.3s;">
+      <rect width="80" height="36" rx="5" fill="#1a1a2e" stroke="#6366f1" stroke-width="1"/>
+      <circle cx="72" cy="8" r="3" fill="#4ade80"/>
+      <text x="40" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11">웹</text>
+    </g>
+
+    <!-- 모바일앱: x=144, w=88, center=188 -->
+    <g class="hier-node leaf" data-id="mobile" data-path="이커머스 플랫폼 > 프론트엔드 > 모바일앱"
+       data-tooltip="모바일 애플리케이션" transform="translate(144, 304)" style="animation-delay: 0.3s;">
+      <rect width="88" height="36" rx="5" fill="#1a1a2e" stroke="#6366f1" stroke-width="1"/>
+      <circle cx="80" cy="8" r="3" fill="#4ade80"/>
+      <text x="44" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11">모바일앱</text>
+    </g>
+
+    <!-- 어드민: x=256, w=80, center=296 -->
+    <g class="hier-node leaf" data-id="admin" data-path="이커머스 플랫폼 > 프론트엔드 > 어드민"
+       data-tooltip="관리자 대시보드" transform="translate(256, 304)" style="animation-delay: 0.3s;">
+      <rect width="80" height="36" rx="5" fill="#1a1a2e" stroke="#6366f1" stroke-width="1"/>
+      <circle cx="72" cy="8" r="3" fill="#4ade80"/>
+      <text x="40" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11">어드민</text>
+    </g>
+
+    <!-- Backend leaves (Blue #3b82f6) -->
+    <!-- API 게이트웨이: x=384, w=88, center=428 -->
+    <g class="hier-node leaf" data-id="api-gw" data-path="이커머스 플랫폼 > 백엔드 > API 게이트웨이"
+       data-tooltip="API 게이트웨이 서비스" transform="translate(384, 304)" style="animation-delay: 0.3s;">
+      <rect width="88" height="36" rx="5" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1"/>
+      <circle cx="80" cy="8" r="3" fill="#4ade80"/>
+      <text x="44" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="10">API 게이트웨이</text>
+    </g>
+
+    <!-- 주문: x=496, w=88, center=540 -->
+    <g class="hier-node leaf" data-id="order" data-path="이커머스 플랫폼 > 백엔드 > 주문 서비스"
+       data-tooltip="주문 처리 서비스" transform="translate(496, 304)" style="animation-delay: 0.3s;">
+      <rect width="88" height="36" rx="5" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1"/>
+      <circle cx="80" cy="8" r="3" fill="#4ade80"/>
+      <text x="44" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11">주문 서비스</text>
+    </g>
+
+    <!-- 결제: x=608, w=88 is too wide; use w=80 -> center adjusted. Let me recalc. -->
+    <!-- Actually let me keep them at 72 wide with 24 gap: apigw(88)+24+order(72)+24+pay(72)+24+inv(72)=376 -->
+    <!-- apigw: x=384 w=88 c=428. order: x=496 w=72 c=532. Hmm that doesn't match. Let me redo. -->
+    <!-- With center-based: total=376, starts at 384. -->
+    <!-- apigw: 384, w=88 -> ends 472. gap=24. order: 496, w=72 -> ends 568. gap=24. pay: 592, w=72 -> ends 664. gap=24. inv: 688, w=72 -> ends 760. -->
+    <!-- centers: 428, 532, 628, 724 -->
+
+    <!-- 결제: x=592, w=72, center=628 -- wait, I already placed order at 496 w=88. Let me be consistent. -->
+    <!-- Use uniform w=80 for backend leaves: apigw(96)+24+order(80)+24+pay(80)+24+inv(80)=408 -->
+    <!-- That changes the total. Let me just keep the numbers I have and adjust. -->
+
+    <!-- 결제 서비스: x=600, w=72, center=636 -->
+    <g class="hier-node leaf" data-id="payment" data-path="이커머스 플랫폼 > 백엔드 > 결제 서비스"
+       data-tooltip="결제 처리 서비스" transform="translate(600, 304)" style="animation-delay: 0.3s;">
+      <rect width="72" height="36" rx="5" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1"/>
+      <circle cx="64" cy="8" r="3" fill="#4ade80"/>
+      <text x="36" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11">결제 서비스</text>
+    </g>
+
+    <!-- 재고 서비스: x=696, w=72, center=732 -->
+    <g class="hier-node leaf" data-id="inventory" data-path="이커머스 플랫폼 > 백엔드 > 재고 서비스"
+       data-tooltip="재고 관리 서비스" transform="translate(696, 304)" style="animation-delay: 0.3s;">
+      <rect width="72" height="36" rx="5" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1"/>
+      <circle cx="64" cy="8" r="3" fill="#4ade80"/>
+      <text x="36" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11">재고 서비스</text>
+    </g>
+
+    <!-- Data leaves (Cyan #06b6d4) -->
+    <!-- PostgreSQL: x=808, w=92, center=854 -->
+    <g class="hier-node leaf" data-id="postgres" data-path="이커머스 플랫폼 > 데이터 > PostgreSQL"
+       data-tooltip="관계형 데이터베이스" transform="translate(808, 304)" style="animation-delay: 0.3s;">
+      <rect width="92" height="36" rx="5" fill="#1a1a2e" stroke="#06b6d4" stroke-width="1"/>
+      <circle cx="84" cy="8" r="3" fill="#4ade80"/>
+      <text x="42" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="10">PostgreSQL</text>
+    </g>
+
+    <!-- Redis: x=924, w=72 — wait, should be after gap. 808+92+24=924. center=960. But I said center=970 in connectors. Let me fix: -->
+    <!-- pg: x=808, w=92, ends=900. gap=24. redis: x=924, w=72, ends=996, center=960. gap=24. es: x=1020, w=104, ends=1124, center=1072. -->
+    <!-- Connector bus needs updating: pg_c=854, redis_c=960, es_c=1072. Data branch center = (854+1072)/2=963 — close enough to 966. -->
+
+    <!-- Redis: x=924, w=72, center=960 -->
+    <g class="hier-node leaf" data-id="redis" data-path="이커머스 플랫폼 > 데이터 > Redis"
+       data-tooltip="인메모리 캐시 및 세션 스토어" transform="translate(924, 304)" style="animation-delay: 0.3s;">
+      <rect width="72" height="36" rx="5" fill="#1a1a2e" stroke="#06b6d4" stroke-width="1"/>
+      <circle cx="64" cy="8" r="3" fill="#4ade80"/>
+      <text x="36" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11">Redis</text>
+    </g>
+
+    <!-- Elasticsearch: x=1020, w=104, center=1072 -->
+    <g class="hier-node leaf" data-id="elastic" data-path="이커머스 플랫폼 > 데이터 > Elasticsearch"
+       data-tooltip="검색 엔진" transform="translate(1020, 304)" style="animation-delay: 0.3s;">
+      <rect width="104" height="36" rx="5" fill="#1a1a2e" stroke="#06b6d4" stroke-width="1"/>
+      <circle cx="96" cy="8" r="3" fill="#4ade80"/>
+      <text x="48" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="10">Elasticsearch</text>
+    </g>
+
+    <!-- Infra leaves (Emerald #10b981) -->
+    <!-- ecs: x=1172, w=74, center=1209 -->
+    <g class="hier-node leaf" data-id="ecs" data-path="이커머스 플랫폼 > 인프라 > AWS ECS"
+       data-tooltip="컨테이너 오케스트레이션" transform="translate(1172, 304)" style="animation-delay: 0.3s;">
+      <rect width="74" height="36" rx="5" fill="#1a1a2e" stroke="#10b981" stroke-width="1"/>
+      <circle cx="66" cy="8" r="3" fill="#4ade80"/>
+      <text x="34" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="10">AWS ECS</text>
+    </g>
+
+    <!-- CloudFront: x=1270, w=82 — wait: 1172+74+24=1270. center=1311. But connector says 1307. Close enough, let me use 1266 to match: -->
+    <!-- ecs: x=1172 w=74 ends=1246. gap=24. cf: x=1270 w=82 ends=1352 c=1311. gap=24. rds: x=1376 w=64 ends=1440 c=1408. -->
+    <!-- Connector bus: 1209, 1311, 1408 -> adjusted. Infra center = (1209+1408)/2 = 1308.5 ≈ 1306 close enough -->
+
+    <!-- CloudFront: x=1270, w=82, center=1311 -->
+    <g class="hier-node leaf" data-id="cloudfront" data-path="이커머스 플랫폼 > 인프라 > CloudFront"
+       data-tooltip="CDN 및 정적 자산 배포" transform="translate(1270, 304)" style="animation-delay: 0.3s;">
+      <rect width="82" height="36" rx="5" fill="#1a1a2e" stroke="#10b981" stroke-width="1"/>
+      <circle cx="74" cy="8" r="3" fill="#4ade80"/>
+      <text x="38" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="10">CloudFront</text>
+    </g>
+
+    <!-- RDS: x=1376, w=64, center=1408 -->
+    <g class="hier-node leaf" data-id="rds" data-path="이커머스 플랫폼 > 인프라 > RDS"
+       data-tooltip="관리형 데이터베이스 서비스" transform="translate(1376, 304)" style="animation-delay: 0.3s;">
+      <rect width="64" height="36" rx="5" fill="#1a1a2e" stroke="#10b981" stroke-width="1"/>
+      <circle cx="56" cy="8" r="3" fill="#4ade80"/>
+      <text x="32" y="20" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="11">RDS</text>
+    </g>
+
+    <!-- ===== SUMMARY STATS BOX ===== -->
+    <rect x="40" y="410" width="380" height="100" rx="12"
+          fill="#1a1a2e" stroke="#2a2a4a" stroke-width="1"/>
+    <text x="230" y="435" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="bold">구조 요약</text>
+    <line x1="60" y1="445" x2="400" y2="445" stroke="#2a2a4a" stroke-width="1"/>
+    <text x="110" y="472" text-anchor="middle" fill="#4ade80" font-size="22" font-weight="bold">13</text>
+    <text x="110" y="490" text-anchor="middle" fill="#94a3b8" font-size="9">결정됨</text>
+    <line x1="155" y1="458" x2="155" y2="498" stroke="#2a2a4a" stroke-width="1"/>
+    <text x="195" y="472" text-anchor="middle" fill="#facc15" font-size="22" font-weight="bold">0</text>
+    <text x="195" y="490" text-anchor="middle" fill="#94a3b8" font-size="9">미결정</text>
+    <line x1="240" y1="458" x2="240" y2="498" stroke="#2a2a4a" stroke-width="1"/>
+    <text x="280" y="472" text-anchor="middle" fill="#818cf8" font-size="22" font-weight="bold">3</text>
+    <text x="280" y="490" text-anchor="middle" fill="#94a3b8" font-size="9">깊이</text>
+    <line x1="325" y1="458" x2="325" y2="498" stroke="#2a2a4a" stroke-width="1"/>
+    <text x="365" y="472" text-anchor="middle" fill="#e2e8f0" font-size="22" font-weight="bold">4</text>
+    <text x="365" y="490" text-anchor="middle" fill="#94a3b8" font-size="9">도메인</text>
+
+    <!-- ===== LEGEND (bottom-right, NO domain color swatches) ===== -->
+    <g class="legend" transform="translate(1300, 560)">
+      <rect x="0" y="0" width="170" height="120" rx="8"
+            fill="#0f0f1a" fill-opacity="0.9" stroke="#2a2a4a" stroke-width="1"/>
+      <text x="12" y="18" fill="#888888" font-size="10" font-weight="bold">범례</text>
+
+      <rect x="12" y="30" width="24" height="12" rx="4" fill="url(#rootGrad)" stroke="#6366f1" stroke-width="1"/>
+      <text x="42" y="39" fill="#888888" font-size="10">루트 노드</text>
+
+      <rect x="12" y="48" width="24" height="12" rx="3" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1"/>
+      <text x="42" y="57" fill="#888888" font-size="10">브랜치</text>
+
+      <rect x="12" y="66" width="24" height="12" rx="2" fill="#1a1a2e" stroke="#4ade80" stroke-width="1"/>
+      <text x="42" y="75" fill="#888888" font-size="10">리프 (결정)</text>
+
+      <rect x="12" y="84" width="24" height="12" rx="2" fill="#1a1a2e" stroke="#6b7280" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="42" y="93" fill="#888888" font-size="10">리프 (미결정)</text>
+
+      <circle cx="20" cy="110" r="4" fill="#4ade80"/>
+      <text x="30" y="113" fill="#888888" font-size="10">결정됨</text>
+      <circle cx="90" cy="110" r="4" fill="#6b7280"/>
+      <text x="100" y="113" fill="#888888" font-size="10">미결정</text>
+    </g>
+
+  </svg>
+</div>
+
+<div class="hier-tooltip"></div>
+
+<script>
+const tooltip = document.querySelector('.hier-tooltip');
+const allNodes = document.querySelectorAll('.hier-node');
+const allConnectors = document.querySelectorAll('.hier-connector');
+
+allNodes.forEach(node => {
+  const nodeId = node.getAttribute('data-id');
+  const path = node.getAttribute('data-path');
+
+  node.addEventListener('mouseenter', e => {
+    const desc = node.getAttribute('data-tooltip');
+    tooltip.innerHTML = `
+      ${path ? `<div class="tt-path">${path}</div>` : ''}
+      <div>${desc}</div>
+    `;
+    tooltip.classList.add('visible');
+
+    allConnectors.forEach(conn => {
+      const parentId = conn.getAttribute('data-parent');
+      const isSubtree = parentId === nodeId;
+      conn.style.opacity = isSubtree ? '1' : '0.2';
+    });
+
+    allNodes.forEach(n => {
+      const nPath = n.getAttribute('data-path') || '';
+      const isRelated = nPath === path || nPath.startsWith(path + ' > ') || path.startsWith(nPath + ' > ');
+      n.style.opacity = isRelated ? '1' : '0.3';
+    });
+  });
+
+  node.addEventListener('mousemove', e => {
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY + 14) + 'px';
+  });
+
+  node.addEventListener('mouseleave', () => {
+    tooltip.classList.remove('visible');
+    allConnectors.forEach(conn => conn.style.opacity = '');
+    allNodes.forEach(n => n.style.opacity = '');
+  });
+});
+</script>
+
+</body>
+</html>

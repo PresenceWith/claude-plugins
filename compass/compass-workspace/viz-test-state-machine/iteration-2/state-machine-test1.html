@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주문 처리 시스템 상태 머신</title>
+<style>
+  body { margin: 0; padding: 20px; background: #0a0a14; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+  div { width: 100%; }
+</style>
+</head>
+<body>
+<div style="overflow-x: auto; max-width: 100%;">
+  <svg width="100%" viewBox="0 0 1400 700"
+       preserveAspectRatio="xMidYMid meet"
+       style="background: #0f0f1a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 12px;">
+    <defs>
+      <marker id="arrow-primary" markerWidth="10" markerHeight="8"
+              refX="9" refY="4" orient="auto-start-reverse">
+        <polygon points="0,1 10,4 0,7" fill="#6366f1"/>
+      </marker>
+      <marker id="arrow-error" markerWidth="10" markerHeight="8"
+              refX="9" refY="4" orient="auto-start-reverse">
+        <polygon points="0,1 10,4 0,7" fill="#f87171"/>
+      </marker>
+      <marker id="arrow-secondary" markerWidth="10" markerHeight="8"
+              refX="9" refY="4" orient="auto-start-reverse">
+        <polygon points="0,1 10,4 0,7" fill="#888888"/>
+      </marker>
+      <marker id="arrow-init" markerWidth="8" markerHeight="6"
+              refX="7" refY="3" orient="auto-start-reverse">
+        <polygon points="0,0.5 8,3 0,5.5" fill="#e2e8f0"/>
+      </marker>
+      <marker id="arrow-success" markerWidth="10" markerHeight="8"
+              refX="9" refY="4" orient="auto-start-reverse">
+        <polygon points="0,1 10,4 0,7" fill="#4ade80"/>
+      </marker>
+
+      <!-- Glow filters -->
+      <filter id="glow-active" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+        <feFlood flood-color="#facc15" flood-opacity="0.3" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-final" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+        <feFlood flood-color="#4ade80" flood-opacity="0.25" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-error" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+        <feFlood flood-color="#f87171" flood-opacity="0.25" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+        <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+
+      <!-- Happy path gradient -->
+      <linearGradient id="happyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#6366f1" stop-opacity="0.06"/>
+        <stop offset="100%" stop-color="#6366f1" stop-opacity="0.01"/>
+      </linearGradient>
+
+      <style>
+        .state-node { cursor: pointer; transition: transform 0.2s ease; }
+        .state-node:hover { transform: scale(1.03); }
+        .sm-transition { transition: stroke-opacity 0.3s, stroke-width 0.3s; }
+        .sm-transition.dimmed { stroke-opacity: 0.15; }
+        .sm-transition.highlighted { stroke-opacity: 1; }
+
+        @keyframes statePulse {
+          0%, 100% { stroke-opacity: 1; }
+          50%      { stroke-opacity: 0.5; }
+        }
+        .state-node.active rect.main-rect {
+          animation: statePulse 2s ease-in-out infinite;
+        }
+
+        .state-node, .sm-transition {
+          opacity: 0; animation: smFadeIn 0.4s ease-out forwards;
+        }
+        @keyframes smFadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+
+        .sm-tooltip {
+          position: fixed; pointer-events: none; z-index: 100;
+          background: #1a1a2e; border: 1px solid #4a4a7a; border-radius: 8px;
+          padding: 10px 14px; font-size: 12px; color: #e2e8f0;
+          max-width: 300px; opacity: 0; transition: opacity 0.15s;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+        }
+        .sm-tooltip.visible { opacity: 1; }
+        .sm-tooltip .tt-transitions {
+          margin-top: 6px; padding-top: 6px; border-top: 1px solid #2a2a4a;
+          font-size: 11px; color: #888888;
+        }
+        .sm-tooltip .tt-transition-item {
+          display: flex; align-items: center; gap: 4px; margin-top: 2px;
+        }
+      </style>
+    </defs>
+
+    <!--
+      ITERATION 2: Fixes applied
+      - Increased curve control point offset to 35px for visible arcs
+      - Uniform horizontal spacing (gap=80px between states)
+      - Secondary transition stroke-width: 2, dash: 8,4
+      - Better legend/info box positioning
+
+      Layout (y=200 main row, y=440 branch row):
+      Col 0: 장바구니담김  x=80   w=140
+      Col 1: 주문접수       x=300  w=120
+      Col 2: 결제대기       x=500  w=130  (active)
+      Col 3: 결제완료       x=710  w=120
+      Col 4: 배송준비       x=910  w=120
+      Col 5: 배송중         x=1060 w=100
+      Col 6: 배송완료       x=1230 w=120
+
+      Branch row (y=440):
+      주문취소:  x=500  (circle r=36, cx=565)
+      반품요청:  x=1040  w=120
+      반품완료:  cx=850 (circle r=36)
+    -->
+
+    <!-- ============ HAPPY PATH LANE ============ -->
+    <rect x="50" y="170" width="1320" height="110" rx="8" fill="url(#happyGrad)" stroke="#6366f110" stroke-width="1"/>
+    <g transform="translate(710, 166)">
+      <rect x="-48" y="-12" width="96" height="18" rx="9" fill="#6366f10c" stroke="#6366f120" stroke-width="1"/>
+      <text x="0" y="1" text-anchor="middle" dominant-baseline="central" fill="#6366f1" fill-opacity="0.7" font-size="10" font-weight="600" letter-spacing="2">HAPPY PATH</text>
+    </g>
+
+    <!-- ============ COMPOSITE: 결제 프로세스 ============ -->
+    <rect x="488" y="178" width="355" height="94" rx="16"
+          fill="#6366f1" fill-opacity="0.04"
+          stroke="#6366f1" stroke-width="1" stroke-opacity="0.2" stroke-dasharray="8,4"/>
+    <text x="500" y="193" fill="#6366f1" fill-opacity="0.6" font-size="11" font-weight="bold">결제 프로세스</text>
+
+    <!-- ============ COMPOSITE: 배송 프로세스 ============ -->
+    <rect x="898" y="178" width="464" height="94" rx="16"
+          fill="#10b981" fill-opacity="0.04"
+          stroke="#10b981" stroke-width="1" stroke-opacity="0.2" stroke-dasharray="8,4"/>
+    <text x="910" y="193" fill="#10b981" fill-opacity="0.6" font-size="11" font-weight="bold">배송 프로세스</text>
+
+    <!-- ============ TRANSITIONS (with improved 35px curve offset) ============ -->
+
+    <!-- T1: 장바구니담김 → 주문접수 (주문하기) -->
+    <g class="sm-transition primary" data-from="cart" data-to="ordered" style="animation-delay: 0.5s;">
+      <path d="M 220,225 Q 260,190 300,225" stroke="#6366f1" stroke-width="2.5" fill="none" marker-end="url(#arrow-primary)"/>
+      <rect x="232" y="182" width="56" height="20" rx="9" fill="#0f0f1a" stroke="#6366f130" stroke-width="1"/>
+      <text x="260" y="192" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="10">주문하기</text>
+    </g>
+
+    <!-- T2: 주문접수 → 결제대기 (결제요청) -->
+    <g class="sm-transition primary" data-from="ordered" data-to="pay-wait" style="animation-delay: 0.6s;">
+      <path d="M 420,225 Q 460,190 500,225" stroke="#6366f1" stroke-width="2.5" fill="none" marker-end="url(#arrow-primary)"/>
+      <rect x="432" y="182" width="56" height="20" rx="9" fill="#0f0f1a" stroke="#6366f130" stroke-width="1"/>
+      <text x="460" y="192" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="10">결제요청</text>
+    </g>
+
+    <!-- T3: 결제대기 → 결제완료 (결제성공) -->
+    <g class="sm-transition primary" data-from="pay-wait" data-to="paid" style="animation-delay: 0.7s;">
+      <path d="M 630,225 Q 670,190 710,225" stroke="#6366f1" stroke-width="2.5" fill="none" marker-end="url(#arrow-primary)"/>
+      <rect x="642" y="182" width="56" height="20" rx="9" fill="#0f0f1a" stroke="#6366f130" stroke-width="1"/>
+      <text x="670" y="192" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="10">결제성공</text>
+    </g>
+
+    <!-- T4: 결제대기 → 주문취소 (결제실패/시간초과) ERROR path -->
+    <g class="sm-transition error-path" data-from="pay-wait" data-to="cancelled" style="animation-delay: 0.8s;">
+      <path d="M 565,254 Q 545,340 535,404" stroke="#f87171" stroke-width="2" stroke-dasharray="6,3" fill="none" marker-end="url(#arrow-error)"/>
+      <rect x="485" y="325" width="108" height="20" rx="9" fill="#0f0f1a" stroke="#f8717130" stroke-width="1"/>
+      <text x="539" y="335" text-anchor="middle" dominant-baseline="central" fill="#f87171" font-size="10">결제실패/시간초과</text>
+    </g>
+
+    <!-- T5: 결제완료 → 배송준비 (상품확인) -->
+    <g class="sm-transition primary" data-from="paid" data-to="ship-prep" style="animation-delay: 0.9s;">
+      <path d="M 830,225 Q 870,190 910,225" stroke="#6366f1" stroke-width="2.5" fill="none" marker-end="url(#arrow-primary)"/>
+      <rect x="842" y="182" width="56" height="20" rx="9" fill="#0f0f1a" stroke="#6366f130" stroke-width="1"/>
+      <text x="870" y="192" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="10">상품확인</text>
+    </g>
+
+    <!-- T6: 배송준비 → 배송중 (출고) -->
+    <g class="sm-transition primary" data-from="ship-prep" data-to="shipping" style="animation-delay: 1.0s;">
+      <path d="M 1030,225 Q 1045,190 1060,225" stroke="#6366f1" stroke-width="2.5" fill="none" marker-end="url(#arrow-primary)"/>
+      <rect x="1015" y="182" width="44" height="20" rx="9" fill="#0f0f1a" stroke="#6366f130" stroke-width="1"/>
+      <text x="1037" y="192" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="10">출고</text>
+    </g>
+
+    <!-- T7: 배송중 → 배송완료 (수령확인) -->
+    <g class="sm-transition primary" data-from="shipping" data-to="delivered" style="animation-delay: 1.1s;">
+      <path d="M 1160,225 Q 1195,190 1230,225" stroke="#6366f1" stroke-width="2.5" fill="none" marker-end="url(#arrow-primary)"/>
+      <rect x="1167" y="182" width="56" height="20" rx="9" fill="#0f0f1a" stroke="#6366f130" stroke-width="1"/>
+      <text x="1195" y="192" text-anchor="middle" dominant-baseline="central" fill="#e2e8f0" font-size="10">수령확인</text>
+    </g>
+
+    <!-- T8: 배송완료 → 반품요청 (반품신청) with guard [7일이내] -->
+    <g class="sm-transition secondary" data-from="delivered" data-to="return-req" style="animation-delay: 1.2s;">
+      <path d="M 1290,254 Q 1220,360 1140,440" stroke="#888888" stroke-width="2" stroke-dasharray="8,4" stroke-opacity="0.8" fill="none" marker-end="url(#arrow-secondary)"/>
+      <rect x="1178" y="336" width="60" height="20" rx="9" fill="#0f0f1a" stroke="#88888830" stroke-width="1"/>
+      <text x="1208" y="346" text-anchor="middle" dominant-baseline="central" fill="#888888" font-size="10">반품신청</text>
+      <!-- Guard condition badge -->
+      <rect x="1180" y="358" width="64" height="18" rx="8" fill="#88888810" stroke="#88888825" stroke-width="1"/>
+      <text x="1212" y="368" text-anchor="middle" dominant-baseline="central" fill="#666666" font-size="9" font-weight="600" font-style="italic">[7일이내]</text>
+    </g>
+
+    <!-- T9: 반품요청 → 반품완료 (반품승인) -->
+    <g class="sm-transition primary" data-from="return-req" data-to="returned" style="animation-delay: 1.3s;">
+      <path d="M 1040,462 Q 960,445 890,462" stroke="#4ade80" stroke-width="2.5" fill="none" marker-end="url(#arrow-success)"/>
+      <rect x="938" y="432" width="56" height="20" rx="9" fill="#0f0f1a" stroke="#4ade8030" stroke-width="1"/>
+      <text x="966" y="442" text-anchor="middle" dominant-baseline="central" fill="#4ade80" font-size="10">반품승인</text>
+    </g>
+
+    <!-- ============ INITIAL STATE INDICATOR ============ -->
+    <g class="initial-indicator" style="animation-delay: 0s; opacity:0; animation: smFadeIn 0.4s ease-out forwards;">
+      <circle cx="40" cy="225" r="14" fill="#e2e8f115" stroke="#e2e8f0" stroke-width="2"/>
+      <circle cx="40" cy="225" r="5" fill="#e2e8f0"/>
+      <path d="M 54,225 L 78,225" stroke="#e2e8f0" stroke-width="2" fill="none" marker-end="url(#arrow-init)"/>
+    </g>
+
+    <!-- ============ STATE NODES ============ -->
+
+    <!-- S1: 장바구니담김 -->
+    <g class="state-node normal" data-id="cart" data-tooltip="사용자가 상품을 장바구니에 담은 상태"
+       style="animation-delay: 0.1s;">
+      <rect x="80" y="198" width="140" height="54" rx="12"
+            fill="#1a1a2e" stroke="#6366f1" stroke-width="2"/>
+      <text x="150" y="218" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="13" font-weight="bold">장바구니담김</text>
+      <text x="150" y="236" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">상품 선택 완료</text>
+    </g>
+
+    <!-- S2: 주문접수 -->
+    <g class="state-node normal" data-id="ordered" data-tooltip="주문이 시스템에 접수된 상태"
+       style="animation-delay: 0.15s;">
+      <rect x="300" y="198" width="120" height="54" rx="12"
+            fill="#1a1a2e" stroke="#6366f1" stroke-width="2"/>
+      <text x="360" y="218" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="13" font-weight="bold">주문접수</text>
+      <text x="360" y="236" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">주문 확인 대기</text>
+    </g>
+
+    <!-- S3: 결제대기 (Active) -->
+    <g class="state-node active" data-id="pay-wait" data-tooltip="결제 처리를 대기하는 상태"
+       style="animation-delay: 0.2s;">
+      <rect x="496" y="194" width="138" height="62" rx="14"
+            fill="none" stroke="#facc15" stroke-width="1" stroke-opacity="0.2">
+        <animate attributeName="stroke-opacity" values="0.2;0.05;0.2" dur="2s" repeatCount="indefinite"/>
+      </rect>
+      <rect class="main-rect" x="500" y="198" width="130" height="54" rx="12"
+            fill="#1a1a2e" stroke="#facc15" stroke-width="3"
+            filter="url(#glow-active)"/>
+      <rect x="549" y="190" width="32" height="14" rx="4" fill="#facc15"/>
+      <text x="565" y="197" text-anchor="middle" dominant-baseline="central"
+            fill="#0f0f1a" font-size="9" font-weight="bold">현재</text>
+      <text x="565" y="218" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="13" font-weight="bold">결제대기</text>
+      <text x="565" y="236" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">결제 진행 중</text>
+    </g>
+
+    <!-- S4: 결제완료 -->
+    <g class="state-node normal" data-id="paid" data-tooltip="결제가 성공적으로 완료된 상태"
+       style="animation-delay: 0.25s;">
+      <rect x="710" y="198" width="120" height="54" rx="12"
+            fill="#1a1a2e" stroke="#6366f1" stroke-width="2"/>
+      <text x="770" y="218" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="13" font-weight="bold">결제완료</text>
+      <text x="770" y="236" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">결제 확인됨</text>
+    </g>
+
+    <!-- S5: 배송준비 -->
+    <g class="state-node normal" data-id="ship-prep" data-tooltip="배송을 위해 상품을 준비하는 상태"
+       style="animation-delay: 0.3s;">
+      <rect x="910" y="198" width="120" height="54" rx="12"
+            fill="#1a1a2e" stroke="#10b981" stroke-width="2"/>
+      <text x="970" y="218" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="13" font-weight="bold">배송준비</text>
+      <text x="970" y="236" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">포장 및 검수</text>
+    </g>
+
+    <!-- S6: 배송중 -->
+    <g class="state-node normal" data-id="shipping" data-tooltip="상품이 배송 중인 상태"
+       style="animation-delay: 0.35s;">
+      <rect x="1060" y="198" width="100" height="54" rx="12"
+            fill="#1a1a2e" stroke="#10b981" stroke-width="2"/>
+      <text x="1110" y="218" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="13" font-weight="bold">배송중</text>
+      <text x="1110" y="236" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">택배 이동 중</text>
+    </g>
+
+    <!-- S7: 배송완료 -->
+    <g class="state-node normal" data-id="delivered" data-tooltip="상품이 성공적으로 배송 완료된 상태"
+       style="animation-delay: 0.4s;">
+      <rect x="1230" y="198" width="120" height="54" rx="12"
+            fill="#1a1a2e" stroke="#4ade80" stroke-width="2"/>
+      <text x="1290" y="218" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="13" font-weight="bold">배송완료</text>
+      <text x="1290" y="236" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">수령 확인됨</text>
+    </g>
+
+    <!-- S8: 주문취소 (Terminal Error) -->
+    <g class="state-node terminal-error" data-id="cancelled" data-tooltip="결제 실패 또는 시간 초과로 주문이 취소된 상태"
+       style="animation-delay: 0.45s;">
+      <g filter="url(#glow-error)">
+        <circle cx="530" cy="440" r="36" fill="#1a1a2e" stroke="#f87171" stroke-width="2.5"/>
+        <circle cx="530" cy="440" r="28" fill="none" stroke="#f87171" stroke-width="1" opacity="0.4"/>
+      </g>
+      <text x="530" y="436" text-anchor="middle" dominant-baseline="central"
+            fill="#f87171" font-size="13" font-weight="bold">주문취소</text>
+      <text x="530" y="454" text-anchor="middle" dominant-baseline="central"
+            fill="#f8717180" font-size="9">Terminal</text>
+    </g>
+
+    <!-- S9: 반품요청 -->
+    <g class="state-node normal" data-id="return-req" data-tooltip="고객이 반품을 요청한 상태 (배송 완료 후 7일 이내)"
+       style="animation-delay: 0.5s;">
+      <rect x="1040" y="435" width="120" height="54" rx="12"
+            fill="#1a1a2e" stroke="#f59e0b" stroke-width="2"/>
+      <text x="1100" y="455" text-anchor="middle" dominant-baseline="central"
+            fill="#e2e8f0" font-size="13" font-weight="bold">반품요청</text>
+      <text x="1100" y="473" text-anchor="middle" dominant-baseline="central"
+            fill="#888888" font-size="10">반품 심사 중</text>
+    </g>
+
+    <!-- S10: 반품완료 (Terminal Success) -->
+    <g class="state-node terminal" data-id="returned" data-tooltip="반품이 승인되어 처리가 완료된 상태"
+       style="animation-delay: 0.55s;">
+      <g filter="url(#glow-final)">
+        <circle cx="850" cy="462" r="36" fill="#1a1a2e" stroke="#4ade80" stroke-width="3"/>
+        <circle cx="850" cy="462" r="28" fill="none" stroke="#4ade80" stroke-width="1.5" opacity="0.5"/>
+      </g>
+      <text x="850" y="458" text-anchor="middle" dominant-baseline="central"
+            fill="#4ade80" font-size="13" font-weight="bold">반품완료</text>
+      <text x="850" y="476" text-anchor="middle" dominant-baseline="central"
+            fill="#4ade8080" font-size="9">Terminal</text>
+    </g>
+
+    <!-- ============ CURRENT STATE INFO BOX ============ -->
+    <g style="animation-delay: 1.4s; opacity: 0; animation: smFadeIn 0.4s ease-out forwards;">
+      <rect x="40" y="340" width="200" height="130" rx="10"
+            fill="#1a1a2e" stroke="#facc1525" stroke-width="1.5"/>
+      <rect x="40" y="340" width="200" height="5" rx="2" fill="#facc15" fill-opacity="0.3"/>
+      <text x="140" y="365" text-anchor="middle" fill="#facc15" font-size="11" font-weight="bold">현재 상태: 결제대기</text>
+      <line x1="60" y1="375" x2="220" y2="375" stroke="#2a2a4a" stroke-width="1"/>
+      <text x="140" y="392" text-anchor="middle" fill="#c0c0d0" font-size="10">가능한 전이:</text>
+      <text x="60" y="415" fill="#6366f1" font-size="10">&#8594; 결제완료 (결제성공)</text>
+      <text x="60" y="435" fill="#f87171" font-size="10">&#8594; 주문취소 (결제실패)</text>
+      <text x="60" y="455" fill="#f87171" font-size="10">&#8594; 주문취소 (시간초과)</text>
+    </g>
+
+    <!-- ============ LEGEND ============ -->
+    <g class="legend" transform="translate(1200, 520)" style="animation-delay: 1.5s;">
+      <rect x="0" y="0" width="180" height="175" rx="8"
+            fill="#0f0f1a" fill-opacity="0.9" stroke="#2a2a4a" stroke-width="1"/>
+      <text x="12" y="20" fill="#888888" font-size="10" font-weight="bold">범례</text>
+
+      <circle cx="20" cy="38" r="5" fill="#e2e8f0"/>
+      <text x="32" y="41" fill="#888888" font-size="10">초기 상태</text>
+
+      <rect x="12" y="52" width="16" height="10" rx="4" fill="#1a1a2e" stroke="#6366f1" stroke-width="1.5"/>
+      <text x="34" y="60" fill="#888888" font-size="10">일반 상태</text>
+
+      <rect x="12" y="68" width="16" height="10" rx="4" fill="#1a1a2e" stroke="#facc15" stroke-width="1.5"/>
+      <text x="34" y="76" fill="#888888" font-size="10">현재 상태</text>
+
+      <rect x="12" y="84" width="16" height="10" rx="4" fill="#1a1a2e" stroke="#4ade80" stroke-width="1"/>
+      <rect x="13" y="85" width="14" height="8" rx="3" fill="none" stroke="#4ade80" stroke-width="0.5"/>
+      <text x="34" y="92" fill="#888888" font-size="10">종료 상태</text>
+
+      <rect x="12" y="100" width="16" height="10" rx="4" fill="#1a1a2e" stroke="#ef4444" stroke-width="1"/>
+      <text x="34" y="108" fill="#888888" font-size="10">에러 상태</text>
+
+      <line x1="12" y1="126" x2="28" y2="126" stroke="#6366f1" stroke-width="2.5"/>
+      <text x="34" y="129" fill="#888888" font-size="10">주요 전이</text>
+
+      <line x1="12" y1="142" x2="28" y2="142" stroke="#888888" stroke-width="2" stroke-dasharray="8,4"/>
+      <text x="34" y="145" fill="#888888" font-size="10">부차 전이</text>
+
+      <line x1="12" y1="158" x2="28" y2="158" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="34" y="161" fill="#888888" font-size="10">에러 전이</text>
+    </g>
+
+  </svg>
+</div>
+
+<div class="sm-tooltip"></div>
+
+<script>
+const tooltip = document.querySelector('.sm-tooltip');
+const allTransitions = document.querySelectorAll('.sm-transition');
+const allStates = document.querySelectorAll('.state-node');
+
+allStates.forEach(state => {
+  const stateId = state.getAttribute('data-id');
+
+  state.addEventListener('mouseenter', e => {
+    const desc = state.getAttribute('data-tooltip');
+    let transText = '';
+    allTransitions.forEach(t => {
+      const from = t.getAttribute('data-from');
+      const to = t.getAttribute('data-to');
+      if (from === stateId) {
+        const label = t.querySelector('text')?.textContent || '';
+        transText += `<div class="tt-transition-item"><span style="color:#facc15;">&#8594;</span> ${to}: ${label}</div>`;
+        t.classList.add('highlighted'); t.classList.remove('dimmed');
+      } else if (to === stateId) {
+        const label = t.querySelector('text')?.textContent || '';
+        transText += `<div class="tt-transition-item"><span style="color:#94a3b8;">&#8592;</span> ${from}: ${label}</div>`;
+        t.classList.add('highlighted'); t.classList.remove('dimmed');
+      } else {
+        t.classList.add('dimmed'); t.classList.remove('highlighted');
+      }
+    });
+
+    tooltip.innerHTML = `<div style="font-weight:bold;margin-bottom:4px;">${desc}</div>
+      ${transText ? `<div class="tt-transitions">${transText}</div>` : ''}`;
+    tooltip.classList.add('visible');
+  });
+
+  state.addEventListener('mousemove', e => {
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY + 14) + 'px';
+  });
+
+  state.addEventListener('mouseleave', () => {
+    tooltip.classList.remove('visible');
+    allTransitions.forEach(t => t.classList.remove('highlighted', 'dimmed'));
+  });
+});
+</script>
+</body>
+</html>

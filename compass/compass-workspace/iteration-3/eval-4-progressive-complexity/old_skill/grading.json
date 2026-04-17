@@ -1,0 +1,11 @@
+{
+  "expectations": [
+    {"text": "결정된 항목(Next.js, 토스페이먼츠, 대상: 소규모 공예가)이 정확히 식별됨", "passed": true, "evidence": "4개 확정 항목 나열 (타겟, Next.js, 토스페이먼츠, MVP 출발점). MVP 출발점은 추가 항목"},
+    {"text": "미결정 항목(DB 선택, MVP 범위)이 명확히 나열됨", "passed": true, "evidence": "'보류 1건: DB 선택' + '7건: 언급됐지만 미정'"},
+    {"text": "Turn 3에서 나온 7개 추가 기능들의 상태가 분류됨", "passed": true, "evidence": "7개 기능이 '언급은 됐지만 아직 아무것도 정해지지 않은 것들'로 분류"},
+    {"text": "상태 파일(.compass/state.md)이 생성됨", "passed": true, "evidence": "state.md 파일이 outputs/에 존재"},
+    {"text": "시각화(대시보드 등) 제안이 포함됨", "passed": true, "evidence": "'상태 대시보드로 시각화해서 보여드릴까요?'"},
+    {"text": "미결정 항목에 대한 의존성 기반 우선순위 제안", "passed": true, "evidence": "3단계 제안: MVP 범위 → DB → 나머지 파킹. '데이터 구조가 보이고, 그래야 DB를 고를 수 있으니까'"}
+  ],
+  "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0}
+}

@@ -1,0 +1,37 @@
+{
+  "eval_id": 2,
+  "eval_name": "knowledge-coverage-check",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "extract-auto-detected",
+      "passed": true,
+      "evidence": "에이전트 리포트: extract 프롬프트 자동 감지 및 읽기 성공."
+    },
+    {
+      "text": "expert-role-adopted",
+      "passed": true,
+      "evidence": "문서 서두: '20년 이상의 경력을 가진 실무자가 당연하다고 여기지만 결코 초보자에게 설명하지 않는 암묵지를 체계적으로 정리'. 292줄 분량의 깊이 있는 문서."
+    },
+    {
+      "text": "four-axes-substantive",
+      "passed": true,
+      "evidence": "Stage 1에서 4축 모두 확인: Terminology(ETL/ELT/Idempotency/Backfill/DAG/SLA), Hidden Preconditions(실패 전제/소스 비통제/시간 복잡성), Traps(silent failure/비멱등 재실행/로컬→프로덕션), Rules of Thumb. 구체적 시나리오 포함."
+    },
+    {
+      "text": "coverage-table-present",
+      "passed": true,
+      "evidence": "문서 끝에 Coverage 테이블 있음. 4축 모두 ✓ Covered. 우선순위 영역에 80% 분량 투자 설명 포함."
+    },
+    {
+      "text": "depth-over-volume",
+      "passed": true,
+      "evidence": "함정 1(silent failure)에 구체적 시나리오(API pagination 변경 → 2주간 90% 누락), 함정 2(중복 적재 → 재무팀 발견까지 3일) 등 실제 상황 기반 설명."
+    },
+    {
+      "text": "highlights-presented",
+      "passed": true,
+      "evidence": "delivery_message.md에 5개 하이라이트: 멱등성 차이, silent failure, 의도적 중복(dimensional modeling), grain 혼합 위험, 파티셔닝 비용 차이."
+    }
+  ]
+}

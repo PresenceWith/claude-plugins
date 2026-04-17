@@ -1,0 +1,11 @@
+{
+  "expectations": [
+    {"text": "결정된 항목(Next.js, 토스페이먼츠, 대상: 소규모 공예가)이 정확히 식별됨", "passed": true, "evidence": "표에서 타겟(소규모 공예가 ~100명), Next.js, 토스페이먼츠 3개 확정 식별"},
+    {"text": "미결정 항목(DB 선택, MVP 범위)이 명확히 나열됨", "passed": true, "evidence": "'보류된 것 1개: DB 선택' + '아직 결정이 필요한 것 1개: MVP 범위'"},
+    {"text": "Turn 3에서 나온 7개 추가 기능들의 상태가 분류됨", "passed": true, "evidence": "7개 기능 번호 리스트로 명시: 판매자대시보드, 리뷰, 검색, 재고, 배송, 쿠폰, 정산"},
+    {"text": "상태 파일(.compass/state.md)이 생성됨", "passed": true, "evidence": "state.md 파일이 outputs/에 존재"},
+    {"text": "시각화(대시보드 등) 제안이 포함됨", "passed": true, "evidence": "'이 현황을 상태 대시보드로 시각화해서 보여드릴까요?'"},
+    {"text": "미결정 항목에 대한 의존성 기반 우선순위 제안", "passed": true, "evidence": "'가장 먼저 정할 것은 MVP 범위' + '처음에 말한 상품 등록 + 결제가 핵심이었는데' — 사용자의 원래 우선순위 앵커링"}
+  ],
+  "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0}
+}

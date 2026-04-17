@@ -1,0 +1,42 @@
+{
+  "eval_id": 5,
+  "eval_name": "eval-verify-data-analysis",
+  "prompt": "데이터 분석에 대해 학습한 내용을 검증하고 싶어요",
+  "assertions": [
+    {
+      "name": "scenario-based-challenges",
+      "type": "qualitative",
+      "description": "Challenges are realistic scenarios, not trivia questions. Each presents a practitioner situation requiring applied knowledge."
+    },
+    {
+      "name": "mixed-challenge-types",
+      "type": "qualitative",
+      "description": "Challenges mix at least 3 of 5 types: terminology-in-context, hidden-precondition, trap-recognition, rule-of-thumb, cross-area-connection"
+    },
+    {
+      "name": "correct-feedback-deepens",
+      "type": "qualitative",
+      "description": "For correct answers, feedback deepens understanding (asks 'why', presents edge cases) rather than just affirming"
+    },
+    {
+      "name": "incorrect-feedback-diagnoses",
+      "type": "qualitative",
+      "description": "For incorrect answers, feedback explains the mental model gap, names the specific knowledge axis (terminology/precondition/trap/heuristic)"
+    },
+    {
+      "name": "gap-analysis-present",
+      "type": "contains_section",
+      "description": "Output contains a structured gap analysis with Strong Areas, Gap Areas (mapped to specific knowledge axes), and Recommended Next Steps"
+    },
+    {
+      "name": "references-extract-content",
+      "type": "qualitative",
+      "description": "Challenges and feedback reference specific content from the domain-extract file, not just generic data analysis knowledge"
+    },
+    {
+      "name": "file-saved",
+      "type": "file_exists",
+      "description": "A domain-verify-*.md file is saved"
+    }
+  ]
+}

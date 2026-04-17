@@ -1,0 +1,40 @@
+{
+  "skill_name": "scaffold",
+  "evals": [
+    {
+      "id": 1,
+      "name": "ontology-terms-after-phase-a",
+      "prompt": "You are in a conversation where Claude just executed phase-a-structure and produced a long output about ObjectTypeDef[], LinkTypeDef[], and Property promotion/demotion results. The output included terms like 'ObjectType 승격 테스트 통과', 'LinkType: Manufacturing_Order --[triggers]--> Quality_Inspection', 'Property로 강등: batch_size (가시성 테스트 실패)'. The user (an AI app developer who knows programming but not ontology theory) says:\n\n\"잠깐, ObjectType이랑 LinkType이랑 Property가 어떻게 다른 건지, 승격/강등이 뭔지 이 개념들 자체를 잘 모르겠어. /scaffold\"",
+      "expected_output": "A layered, interactive scaffolding session that explains ontology concepts (ObjectType, LinkType, Property, promotion/demotion) through contextual storytelling, with visualizations, delivered layer-by-layer with pause points",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "graph-db-after-cypher-queries",
+      "prompt": "You are in a conversation where Claude just generated several Cypher queries for Neo4j, including:\n\n```cypher\nCREATE (m:ManufacturingOrder {id: 'MO-001', status: 'active'})\nCREATE (q:QualityInspection {id: 'QI-001'})\nCREATE (m)-[:TRIGGERS {priority: 'high'}]->(q)\n```\n\nAnd explained: 'Node 라벨을 ManufacturingOrder로 설정하고, TRIGGERS 관계의 방향성을 주의하세요. 인덱스는 :ManufacturingOrder(id)에 걸어야 조회 성능이 나옵니다. 트래버설 시 MATCH (m)-[:TRIGGERS*1..3]->(q) 패턴으로 다중 홉 탐색이 가능합니다.'\n\nThe user (who knows RDB well but has never used graph databases) says:\n\n\"Cypher 문법 전에 그래프 DB 자체가 뭔지부터 이해가 안 돼. 노드? 엣지? 트래버설? 이것들 좀. /scaffold\"",
+      "expected_output": "A scaffolding session that builds understanding of graph database concepts starting from the user's RDB knowledge, using the actual Cypher output as concrete examples, with visualizations comparing RDB and graph structures",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "k8s-yaml-after-deployment",
+      "prompt": "You are in a conversation where Claude just generated three Kubernetes YAML files:\n\n1. deployment.yaml (30 lines) — with spec.replicas, spec.template.spec.containers, readinessProbe, livenessProbe\n2. service.yaml (15 lines) — with spec.selector, spec.ports, type: ClusterIP\n3. ingress.yaml (20 lines) — with rules, host, paths, backend\n\nClaude explained: 'Deployment가 Pod의 ReplicaSet을 관리하고, Service가 ClusterIP로 Pod들을 로드밸런싱하며, Ingress가 외부 트래픽을 라우팅합니다. selector 라벨이 일치해야 Service가 올바른 Pod를 찾습니다.'\n\nThe user (who knows Docker but not Kubernetes) says:\n\n\"이 YAML들이 각각 뭘 하는 건지, 전체적으로 어떤 구조인지 모르겠어. Docker는 알아. /scaffold\"",
+      "expected_output": "A scaffolding session building from Docker knowledge to Kubernetes concepts, explaining the layered architecture (Pod→ReplicaSet→Deployment→Service→Ingress) through the story of why each layer exists",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "bioinformatics-after-blast-pipeline",
+      "prompt": "You are in a conversation where Claude just wrote a Python bioinformatics pipeline:\n\n```python\nfrom Bio import SeqIO, AlignIO\nfrom Bio.Blast import NCBIWWW, NCBIXML\n\ndef analyze_protein(fasta_path):\n    record = SeqIO.read(fasta_path, 'fasta')\n    # Run BLAST against nr database\n    result = NCBIWWW.qblast('blastp', 'nr', record.seq)\n    blast_records = NCBIXML.parse(result)\n    \n    for alignment in blast_record.alignments:\n        for hsp in alignment.hsps:\n            if hsp.expect < 1e-10:  # E-value threshold\n                identity = hsp.identities / hsp.align_length\n                # Check for conserved domains\n                if identity > 0.3:  # twilight zone threshold\n                    # Likely homolog — run MSA\n                    ...\n```\n\nClaude explained: 'E-value가 1e-10 미만인 히트만 필터링하고, identity 30% 이상이면 상동성(homology)이 있다고 판단합니다. twilight zone (20-35% identity)에서는 구조적 유사성을 추가 확인해야 합니다. 이 homolog들을 모아 ClustalW로 MSA를 수행하면 보존된 잔기(conserved residues)를 식별할 수 있습니다.'\n\nThe user (a software developer with no biology background) says:\n\n\"시퀀스 얼라인먼트가 뭔지도 모르는데 코드만 나왔어. 분자생물학 기초부터 필요해. /scaffold\"",
+      "expected_output": "A deep scaffolding session starting from DNA/protein basics, building up through sequence→similarity→alignment→BLAST→homology, with biological context (why this matters) woven into each layer, using visualizations of actual sequences",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "quant-finance-after-black-scholes",
+      "prompt": "You are in a conversation where Claude just implemented a Black-Scholes options pricing model:\n\n```python\nimport numpy as np\nfrom scipy.stats import norm\n\ndef black_scholes(S, K, T, r, sigma, option_type='call'):\n    d1 = (np.log(S/K) + (r + sigma**2/2)*T) / (sigma*np.sqrt(T))\n    d2 = d1 - sigma*np.sqrt(T)\n    if option_type == 'call':\n        return S*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)\n    return K*np.exp(-r*T)*norm.cdf(-d2) - S*norm.cdf(-d1)\n\ndef greeks(S, K, T, r, sigma):\n    d1 = (np.log(S/K) + (r + sigma**2/2)*T) / (sigma*np.sqrt(T))\n    delta = norm.cdf(d1)\n    gamma = norm.pdf(d1) / (S * sigma * np.sqrt(T))\n    theta = -(S*norm.pdf(d1)*sigma)/(2*np.sqrt(T)) - r*K*np.exp(-r*T)*norm.cdf(d1-sigma*np.sqrt(T))\n    vega = S * norm.pdf(d1) * np.sqrt(T)\n    return {'delta': delta, 'gamma': gamma, 'theta': theta, 'vega': vega}\n```\n\nClaude explained: '내재 변동성(implied volatility)은 시장 가격에서 역산하며, 변동성 곡면(volatility surface)은 행사가×만기 조합별 내재변동성을 3D로 표현합니다. Delta hedging은 포트폴리오의 delta를 0으로 유지하여 방향성 리스크를 제거하는 전략입니다. Gamma가 클수록 delta가 빠르게 변하므로 더 자주 리밸런싱해야 합니다.'\n\nThe user (a developer who roughly knows what options are but has no finance/math background) says:\n\n\"옵션이 뭔지는 대략 아는데, 이 코드의 수학적 배경이 전혀 이해가 안 돼. 변동성이 뭐고, 그릭스가 뭐고... /scaffold\"",
+      "expected_output": "A scaffolding session building from basic options understanding through uncertainty/volatility, then to how the Black-Scholes formula works intuitively (not just mathematically), then Greeks as sensitivity measures, with visualizations of payoff diagrams, volatility effects, and Greek behaviors",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "eval_id": 1,
+  "eval_name": "extract-auto-suggest",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "orient-auto-detected",
+      "passed": true,
+      "evidence": "에이전트 리포트: 'Found domain-orient-data-engineering.md in the outputs directory. Skipped the user interview as the orient map provides rich context.'"
+    },
+    {
+      "text": "template-structure-intact",
+      "passed": true,
+      "evidence": "[Context], [Scope], [Task], [Output Constraint] 모두 포함. 4축(Terminology, Hidden Preconditions, Beginner's Traps, Rules of Thumb) 명시."
+    },
+    {
+      "text": "domain-enriched-from-orient",
+      "passed": true,
+      "evidence": "DOMAIN이 orient 6개 영역 모두 반영 — pipeline design, storage architecture, workflow orchestration, data quality, stream processing, data modeling 각각의 구체적 키워드 포함."
+    },
+    {
+      "text": "scope-section-present",
+      "passed": true,
+      "evidence": "[Scope] 섹션 포함. 우선순위: 1. Pipeline Design, 2. Data Quality, 3. Storage Architecture, 4. Data Modeling. Orchestration/Stream Processing은 lighter level."
+    },
+    {
+      "text": "knowledge-execution-offered",
+      "passed": true,
+      "evidence": "delivery_message.md에 A/B 선택지 명시: A) '네, 바로 생성해주세요' → /domain-knowledge, B) '아니요, 프롬프트만 사용할게요' → 직접 사용."
+    },
+    {
+      "text": "prompt-in-english",
+      "passed": true,
+      "evidence": "extract 프롬프트 파일 전체가 영어로 작성됨. Response Language만 Korean으로 지정."
+    }
+  ]
+}

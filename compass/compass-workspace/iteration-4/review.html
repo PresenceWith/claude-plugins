@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "compass", "runs": [{"id": "eval-1-saas-planning-old_skill", "prompt": "\ub098\ub294 SaaS \uc81c\ud488\uc744 \ub9cc\ub4e4\ub824\uace0 \ud574. \ub300\uc0c1\uc740 \ud504\ub9ac\ub79c\uc11c \ub514\uc790\uc774\ub108\ub4e4\uc774\uace0, \ud3ec\ud2b8\ud3f4\ub9ac\uc624 \uad00\ub9ac + \ud074\ub77c\uc774\uc5b8\ud2b8 \uc18c\ud1b5 + \uacac\uc801\uc11c \ubc1c\ud589\uc744 \ud1b5\ud569\ud558\ub294 \ud50c\ub7ab\ud3fc\uc774\uc57c. \uae30\uc220 \uc2a4\ud0dd\uc740 \uc544\uc9c1 \uc815\ud558\uc9c0 \uc54a\uc558\uace0, \uc6b0\uc120 \uc804\uccb4\uc801\uc778 \uae30\ub2a5 \uad6c\uc870\uc640 MVP \ubc94\uc704\ub97c \uc7a1\uace0 \uc2f6\uc5b4. \uc5ec\ub7ec \uac00\uc9c0 \uc544\uc774\ub514\uc5b4\uac00 \uc788\ub294\ub370 \uc815\ub9ac\uac00 \uc548 \ub3fc\uc11c \ub3c4\uc6c0\uc774 \ud544\uc694\ud574.", "eval_id": 1, "outputs": [], "grading": null}, {"id": "eval-1-saas-planning-with_skill", "prompt": "\ub098\ub294 SaaS \uc81c\ud488\uc744 \ub9cc\ub4e4\ub824\uace0 \ud574. \ub300\uc0c1\uc740 \ud504\ub9ac\ub79c\uc11c \ub514\uc790\uc774\ub108\ub4e4\uc774\uace0, \ud3ec\ud2b8\ud3f4\ub9ac\uc624 \uad00\ub9ac + \ud074\ub77c\uc774\uc5b8\ud2b8 \uc18c\ud1b5 + \uacac\uc801\uc11c \ubc1c\ud589\uc744 \ud1b5\ud569\ud558\ub294 \ud50c\ub7ab\ud3fc\uc774\uc57c. \uae30\uc220 \uc2a4\ud0dd\uc740 \uc544\uc9c1 \uc815\ud558\uc9c0 \uc54a\uc558\uace0, \uc6b0\uc120 \uc804\uccb4\uc801\uc778 \uae30\ub2a5 \uad6c\uc870\uc640 MVP \ubc94\uc704\ub97c \uc7a1\uace0 \uc2f6\uc5b4. \uc5ec\ub7ec \uac00\uc9c0 \uc544\uc774\ub514\uc5b4\uac00 \uc788\ub294\ub370 \uc815\ub9ac\uac00 \uc548 \ub3fc\uc11c \ub3c4\uc6c0\uc774 \ud544\uc694\ud574.", "eval_id": 1, "outputs": [{"name": "response.md", "type": "text", "content": "\uc88b\uc740 \ucd9c\ubc1c\uc810\uc774\uc5d0\uc694. \uc774\ubbf8 \ud575\uc2ec\uc774 \uc7a1\ud600 \uc788\uc2b5\ub2c8\ub2e4 \u2014 \uc815\ub9ac\ud574 \ub4dc\ub9b4\uac8c\uc694.\n\n## \uc9c0\uae08 \uac00\uc9c0\uace0 \uacc4\uc2e0 \uac83\n\n\uc138 \uac1c\uc758 \uae30\ub2a5 \ucd95\uc774 \uba85\ud655\ud569\ub2c8\ub2e4:\n\n| \ucd95 | \ud575\uc2ec \uac00\uce58 | \ud504\ub9ac\ub79c\uc11c \ub514\uc790\uc774\ub108\uc5d0\uac8c \uc65c \ud544\uc694\ud55c\uac00 |\n|---|---|---|\n| **\ud3ec\ud2b8\ud3f4\ub9ac\uc624 \uad00\ub9ac** | \uc791\uc5c5\ubb3c\uc744 \ubcf4\uc5ec\uc8fc\uace0 \ud074\ub77c\uc774\uc5b8\ud2b8\ub97c \uc720\uce58 | \ub514\uc790\uc774\ub108\uc5d0\uac8c \ud3ec\ud2b8\ud3f4\ub9ac\uc624 = \uc601\uc5c5 \ub3c4\uad6c |\n| **\ud074\ub77c\uc774\uc5b8\ud2b8 \uc18c\ud1b5** | \ud53c\ub4dc\ubc31, \uc218\uc815\uc694\uccad, \uc9c4\ud589\uc0c1\ud669 \uacf5\uc720 | \uba54\uc77c/\uce74\ud1a1 \ud769\uc5b4\uc9d0 \u2192 \ud788\uc2a4\ud1a0\ub9ac \uc720\uc2e4 |\n| **\uacac\uc801\uc11c \ubc1c\ud589** | \uacac\uc801 \u2192 \uacc4\uc57d \u2192 \uc815\uc0b0 \ud750\ub984 | \uc5d1\uc140/\uc218\uc791\uc5c5 \u2192 \uc2e4\uc218, \uc2dc\uac04 \ub0ad\ube44 |\n\n\uc774 \uc138 \ucd95\uc774 **\ub530\ub85c \ub178\ub294 \uac8c \uc544\ub2c8\ub77c \uc5f0\uacb0\ub41c\ub2e4**\ub294 \uc810\uc774 \uc774 \uc81c\ud488\uc758 \ucc28\ubcc4\uc810\uc774 \ub420 \uc218 \uc788\uc5b4\uc694. \ud3ec\ud2b8\ud3f4\ub9ac\uc624\ub85c \ud074\ub77c\uc774\uc5b8\ud2b8\uac00 \ub4e4\uc5b4\uc624\uace0 \u2192 \uc18c\ud1b5 \ucc44\ub110\uc774 \uc5f4\ub9ac\uace0 \u2192 \uacac\uc801/\uc815\uc0b0\uc73c\ub85c \uc774\uc5b4\uc9c0\ub294 \ud750\ub984\uc774\uc8e0.\n\n## MVP \ubc94\uc704\ub97c \uc7a1\uae30 \uc704\ud55c \uc9c8\ubb38\n\n\uc804\uccb4 \uae30\ub2a5\uc744 \ud55c\uaebc\ubc88\uc5d0 \uc815\ub9ac\ud558\uae30\ubcf4\ub2e4, **MVP\uc5d0\uc11c \ubc18\ub4dc\uc2dc \ud544\uc694\ud55c \uac83\uacfc \ub098\uc911\uc5d0 \ud574\ub3c4 \ub418\ub294 \uac83**\uc744 \ub098\ub204\ub294 \uac8c \uc9c0\uae08 \ub2e8\uacc4\uc5d0\uc11c \uac00\uc7a5 \uc911\uc694\ud569\ub2c8\ub2e4.\n\n\uc774\uac78 \ub098\ub204\ub824\uba74 \ud558\ub098\uc758 \ud575\uc2ec \uc9c8\ubb38\uc5d0 \uba3c\uc800 \ub2f5\uc774 \ud544\uc694\ud569\ub2c8\ub2e4:\n\n> **\"\ud504\ub9ac\ub79c\uc11c \ub514\uc790\uc774\ub108\uac00 \uc774 \uc81c\ud488\uc744 \ucc98\uc74c \uc4f8 \ub54c \uac00\uc7a5 \uba3c\uc800 \ud574\uacb0\ud558\uace0 \uc2f6\uc740 \ubb38\uc81c\uac00 \ubb58\uae4c\uc694?\"**\n\n\uba87 \uac00\uc9c0 \uac00\ub2a5\ud55c \ub2f5\uc774 \uc788\ub294\ub370, \uc5b4\ub5a4 \ucabd\uc5d0 \uac00\uae4c\uc6b0\uc2e0\uc9c0 \uc54c\ub824\uc8fc\uc2dc\uba74 MVP \ubc94\uc704\uac00 \ud6e8\uc52c \uc120\uba85\ud574\uc9d1\ub2c8\ub2e4:\n\n1. **\"\ud3ec\ud2b8\ud3f4\ub9ac\uc624\ub97c \uc608\uc058\uac8c \ubcf4\uc5ec\uc8fc\uace0 \uc2f6\ub2e4\"** \u2192 MVP = \ud3ec\ud2b8\ud3f4\ub9ac\uc624 \uc911\uc2ec. \uc18c\ud1b5\uacfc \uacac\uc801\uc740 \uac04\ub2e8\ud55c \uc5f0\ub3d9.\n2. **\"\ud074\ub77c\uc774\uc5b8\ud2b8\uc640\uc758 \ucee4\ubba4\ub2c8\ucf00\uc774\uc158\uc774 \ub108\ubb34 \ubc88\uac70\ub86d\ub2e4\"** \u2192 MVP = \ud504\ub85c\uc81d\ud2b8\ubcc4 \uc18c\ud1b5 \ucc44\ub110 \uc911\uc2ec. \ud3ec\ud2b8\ud3f4\ub9ac\uc624\ub294 \uae30\ubcf8\ub9cc.\n3. **\"\uacac\uc801\uc11c/\uccad\uad6c\uc11c \uad00\ub9ac\uac00 \ub108\ubb34 \uadc0\ucc2e\ub2e4\"** \u2192 MVP = \uacac\uc801\u00b7\uc815\uc0b0 \uc911\uc2ec. \ub098\uba38\uc9c0\ub294 \ucd5c\uc18c\ud55c.\n\n\ubb3c\ub860 \uc138 \uac1c\ub97c \ub2e4 \ub123\uc744 \uc218\ub3c4 \uc788\uc9c0\ub9cc, \uadf8 \uacbd\uc6b0\uc5d0\ub3c4 **\uc5b4\ub514\uc5d0 \uac00\uc7a5 \uae4a\uc774\ub97c \uc904 \uac83\uc778\uc9c0**\uac00 \ub2ec\ub77c\uc9d1\ub2c8\ub2e4. \uc774\uac74 \uae30\uc220 \uc2a4\ud0dd\uc744 \uc815\ud558\uae30 \uc804\uc5d0 \uba3c\uc800 \uacb0\uc815\ud574\uc57c \ud560 \ubd80\ubd84\uc774\uc5d0\uc694.\n\n## \uc9c0\uae08\uc740 \ubcf4\ub958\ud574\ub3c4 \uad1c\ucc2e\uc740 \uac83\ub4e4\n\n\uc544\ub798\ub294 \uc911\uc694\ud558\uc9c0\ub9cc \uc9c0\uae08 \ub2f9\uc7a5 \uacb0\uc815\ud558\uc9c0 \uc54a\uc544\ub3c4 \ub418\ub294 \ud56d\ubaa9\ub4e4\uc785\ub2c8\ub2e4. \uc78a\uc9c0 \uc54a\uac8c \uae30\ub85d\ub9cc \ud574\ub450\uaca0\uc2b5\ub2c8\ub2e4:\n\n- **\uae30\uc220 \uc2a4\ud0dd** \u2014 MVP \ubc94\uc704\uac00 \uc7a1\ud78c \ud6c4\uc5d0 \uc815\ud558\ub294 \uac8c \ud6a8\uc728\uc801\n- **\uc218\uc775 \ubaa8\ub378** (\uad6c\ub3c5? \uac74\ub2f9 \uacfc\uae08? \ud504\ub9ac\ubbf8\uc5c4?) \u2014 \uae30\ub2a5 \uad6c\uc870\uc640 \ud568\uaed8 \uac00\uc9c0\ub9cc, 1\ucc28\ub85c\ub294 MVP \uae30\ub2a5\uc774 \uba3c\uc800\n- **\uacbd\uc7c1 \ucc28\ubcc4\ud654 \ud3ec\uc778\ud2b8** \u2014 \"\ud1b5\ud569\"\uc774\ub77c\ub294 \ucee8\uc149 \uc790\uccb4\uac00 \ucc28\ubcc4\uc810 \ud6c4\ubcf4. \uad6c\uccb4\ud654\ub294 \uae30\ub2a5 \uad6c\uc870 \uc774\ud6c4\n\n---\n\n\ud769\uc5b4\uc9c4 \uc544\uc774\ub514\uc5b4\ub4e4\uc774 \uc788\ub2e4\uace0 \ud558\uc168\ub294\ub370, \uc704\uc758 \uc138 \ucd95(\ud3ec\ud2b8\ud3f4\ub9ac\uc624 / \uc18c\ud1b5 / \uacac\uc801) \uc911 \uc5b4\ub514\uc5d0 \ud574\ub2f9\ud558\ub294 \uac83\ub4e4\uc778\uc9c0, \ub610\ub294 \uc544\uc608 \ub2e4\ub978 \uc601\uc5ed\uc778\uc9c0 \uacf5\uc720\ud574 \uc8fc\uc2dc\uba74 \uac19\uc774 \uc815\ub9ac\ud574 \ub4dc\ub9ac\uaca0\uc2b5\ub2c8\ub2e4.\n\n\uadf8\ub9ac\uace0 \uc704\uc758 \ud575\uc2ec \uc9c8\ubb38 \u2014 **\"\ub514\uc790\uc774\ub108\uac00 \uac00\uc7a5 \uba3c\uc800 \ud574\uacb0\ud558\uace0 \uc2f6\uc740 \ubb38\uc81c\"** \u2014 \uc5d0 \ub300\ud55c \uc0dd\uac01\uc744 \ub4e4\ub824\uc8fc\uc2dc\uba74 MVP \uc724\uacfd\uc744 \ubc14\ub85c \uc7a1\uc744 \uc218 \uc788\uc2b5\ub2c8\ub2e4.\n\n\uc774 \uad6c\uc870\ub97c \ub9c8\uc778\ub4dc\ub9f5\uc774\ub098 \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ud504\ub9ac\ub79c\uc11c \ub514\uc790\uc774\ub108\ub97c \uc704\ud55c SaaS \ud50c\ub7ab\ud3fc \uae30\ud68d \u2014 \ud3ec\ud2b8\ud3f4\ub9ac\uc624 \uad00\ub9ac + \ud074\ub77c\uc774\uc5b8\ud2b8 \uc18c\ud1b5 + \uacac\uc801\uc11c \ubc1c\ud589\uc744 \ud1b5\ud569. \ud604\uc7ac \ub2e8\uacc4: \uc804\uccb4 \uae30\ub2a5 \uad6c\uc870\uc640 MVP \ubc94\uc704 \uc124\uc815.\n\n# Elements\n- PortfolioManagement [type: feature]\n- ClientCommunication [type: feature]\n- QuoteInvoicing [type: feature]\n- FreelanceDesigner [type: concept]\n- TechStack [type: architecture]\n- MVPScope [type: constraint]\n- FeatureStructure [type: architecture]\n\n# Relations\n- PortfolioManagement \u2192core-pillar-of\u2192 FeatureStructure\n- ClientCommunication \u2192core-pillar-of\u2192 FeatureStructure\n- QuoteInvoicing \u2192core-pillar-of\u2192 FeatureStructure\n- FeatureStructure \u2192determines\u2192 MVPScope\n- MVPScope \u2192constrains\u2192 TechStack\n- FreelanceDesigner \u2192target-user-of\u2192 FeatureStructure\n\n# Decided\n- Target user: \ud504\ub9ac\ub79c\uc11c \ub514\uc790\uc774\ub108 (\uba85\uc2dc\uc801 \uc120\ud0dd)\n- Core pillars: \ud3ec\ud2b8\ud3f4\ub9ac\uc624 \uad00\ub9ac, \ud074\ub77c\uc774\uc5b8\ud2b8 \uc18c\ud1b5, \uacac\uc801\uc11c \ubc1c\ud589 (3\uac1c \ud575\uc2ec \uae30\ub2a5 \uc601\uc5ed)\n\n# Undecided\n- MVP \ubc94\uc704: [\uc5b4\ub5a4 \uae30\ub2a5\uc774 MVP\uc5d0 \ud3ec\ud568\ub418\ub294\uac00] (Related: FeatureStructure, MVPScope)\n- \uae30\uc220 \uc2a4\ud0dd: [\ubbf8\uc815] (Related: TechStack)\n- \uac01 \ud575\uc2ec \uae30\ub2a5\uc758 \uc138\ubd80 \uae30\ub2a5: [\ubbf8\uc815] (Related: PortfolioManagement, ClientCommunication, QuoteInvoicing)\n- \uc218\uc775 \ubaa8\ub378: [\ubbf8\uc815] (Related: FreelanceDesigner)\n- \uacbd\uc7c1 \ucc28\ubcc4\ud654 \ud3ec\uc778\ud2b8: [\ubbf8\uc815] (Related: FeatureStructure)\n\n# Active Discussion\n- \uc804\uccb4 \uae30\ub2a5 \uad6c\uc870 \uc7a1\uae30\n- MVP \ubc94\uc704 \uc124\uc815\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 1\n"}], "grading": {"expectations": [{"text": "\uc815\ubcf4 \uc81c\ud55c: 3-5\uac1c \ud575\uc2ec \ud56d\ubaa9\ub9cc \uba3c\uc800 \uc81c\uc2dc\ud558\uace0, \ub098\uba38\uc9c0\ub294 \ud655\uc7a5 \uac00\ub2a5\ud558\ub2e4\uace0 \uc548\ub0b4", "passed": true, "evidence": "3\uac1c \ucd95 \ud14c\uc774\ube14 + 1\uac1c \ud575\uc2ec \uc9c8\ubb38 + 3\uac1c MVP \ubc29\ud5a5. '\uc9c0\uae08\uc740 \ubcf4\ub958\ud574\ub3c4 \uad1c\ucc2e\uc740 \uac83\ub4e4' \uc139\uc158\uc73c\ub85c \ub098\uba38\uc9c0 \uc5f0\uae30"}, {"text": "\uc704\uce58 \uba85\uc2dc: \uc0c8\ub85c\uc6b4 \uac1c\ub150\uc744 \uae30\uc874 \ub9e5\ub77d\uc5d0 \uc5f0\uacb0\ud558\uc5ec \uc124\uba85", "passed": true, "evidence": "'\uc774 \uc138 \ucd95\uc774 \ub530\ub85c \ub178\ub294 \uac8c \uc544\ub2c8\ub77c \uc5f0\uacb0\ub41c\ub2e4' \u2014 \ud3ec\ud2b8\ud3f4\ub9ac\uc624\u2192\uc18c\ud1b5\u2192\uacac\uc801 \ud750\ub984 \uc124\uba85"}, {"text": "must-have vs nice-to-have \uad6c\ubd84\uc774 \uc874\uc7ac", "passed": true, "evidence": "'MVP\uc5d0\uc11c \ubc18\ub4dc\uc2dc \ud544\uc694\ud55c \uac83\uacfc \ub098\uc911\uc5d0 \ud574\ub3c4 \ub418\ub294 \uac83\uc744 \ub098\ub204\ub294 \uac8c \uc9c0\uae08 \ub2e8\uacc4\uc5d0\uc11c \uac00\uc7a5 \uc911\uc694' + \ubcf4\ub958 \ud56d\ubaa9 3\uac1c \uba85\uc2dc"}, {"text": "\uc0c1\ud0dc \ud30c\uc77c(.compass/state.md)\uc774 \uc0dd\uc131\ub428", "passed": true, "evidence": "state.md \ud30c\uc77c\uc774 outputs/\uc5d0 \uc874\uc7ac"}, {"text": "\uc751\ub2f5\uc774 \uad6c\uc870\uc801\uc774\uace0 \uc18c\ud654 \uac00\ub2a5\ud55c \ubd84\ub7c9", "passed": true, "evidence": "~45\uc904, \ud14c\uc774\ube14+\uc139\uc158\uc73c\ub85c \uc798 \uad6c\uc870\ud654, \uc2dc\uac01\ud654 \uc81c\uc548 \ud3ec\ud568"}], "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}}}, {"id": "eval-2-decision-cleanup-old_skill", "prompt": "\uc6b0\ub9ac \ud300\uc5d0\uc11c \ub0b4\ubd80 \ub3c4\uad6c\ub97c \ub9cc\ub4e4\uace0 \uc788\ub294\ub370, \uc694\uad6c\uc0ac\ud56d\uc774 \uacc4\uc18d \ubc14\ub00c\uace0 \uc788\uc5b4\uc11c \ubb50\uac00 \uacb0\uc815\ub41c \uac74\uc9c0 \ubb50\uac00 \uc544\uc9c1 \ub17c\uc758 \uc911\uc778\uc9c0 \ubaa8\ub974\uaca0\uc5b4. \uc9c0\uae08\uae4c\uc9c0 \ub098\uc628 \ub0b4\uc6a9 \uc880 \uc815\ub9ac\ud574\uc918.", "eval_id": 2, "outputs": [{"name": "response.md", "type": "text", "content": "\uc9c0\uae08\uae4c\uc9c0 \ub098\uc628 \ub0b4\uc6a9 \uc815\ub9ac\ud574\ub4dc\ub9b4\uac8c\uc694. \uacb0\uc815\ub41c \uac83\uacfc \uc544\uc9c1 \uc5f4\ub824 \uc788\ub294 \uac83\uc744 \ub098\ub220\uc11c \ubcf4\uba74 \uc0c1\ud669\uc774 \ud6e8\uc52c \uba85\ud655\ud574\uc9d1\ub2c8\ub2e4.\n\n---\n\n## \ud655\uc815\ub41c \uc0ac\ud56d (2\uac74)\n\n| \ud56d\ubaa9 | \uacb0\uc815 |\n|------|------|\n| **\uc0ac\uc6a9\uc790 \uc778\uc99d** | OAuth \ubc29\uc2dd\uc73c\ub85c \ud655\uc815 |\n| **\ud504\ub860\ud2b8\uc5d4\ub4dc** | React \ud655\uc815 |\n\n\uc774 \ub450 \uac00\uc9c0\ub294 \uc6c0\uc9c1\uc774\uc9c0 \uc54a\ub294 \uae30\ub465\uc774\uc5d0\uc694. \ub098\uba38\uc9c0 \uacb0\uc815\ub4e4\uc774 \uc5ec\uae30\uc5d0 \ub9de\ucdb0\uc11c \uc815\ud574\uc9c0\uba74 \ub429\ub2c8\ub2e4.\n\n---\n\n## \ubbf8\uacb0\uc815 \uc0ac\ud56d (5\uac74)\n\n| \ud56d\ubaa9 | \ud604\uc7ac \uc0c1\ud0dc | \uae34\uae09\ub3c4 |\n|------|-----------|--------|\n| **\ub370\uc774\ud130\ubca0\uc774\uc2a4** | PostgreSQL vs MongoDB \uace0\ubbfc \uc911 | \uc9c0\uae08 \uacb0\uc815 \ud544\uc694 \u2014 \ub2e4\ub978 \uacb0\uc815\ub4e4\uc774 \uc774\uac83\uc5d0 \uc758\uc874 |\n| **API \uad6c\uc870** | REST vs GraphQL \ubbf8\uacb0\uc815 | \uc9c0\uae08 \uacb0\uc815 \ud544\uc694 \u2014 \ud504\ub860\ud2b8\uc5d4\ub4dc \uc791\uc5c5 \ubc29\uc2dd\uc5d0 \uc9c1\uc811 \uc601\ud5a5 |\n| **CI/CD \ud30c\uc774\ud504\ub77c\uc778** | \uc544\uc9c1 \uc815\ud574\uc57c \ud568 | \ubc30\ud3ec \uc804\uc5d0 \ud544\uc694\ud558\uc9c0\ub9cc \uac1c\ubc1c \uc2dc\uc791\uacfc\ub294 \ub3c5\ub9bd\uc801 |\n| **\ubc30\ud3ec \uc804\ub7b5** | \ub17c\uc758 \uc2dc\uc791 \uc804 | CI/CD\uac00 \uc815\ud574\uc9c4 \ud6c4\uc5d0 \ub9de\ucdb0\uc11c \uacb0\uc815 \uac00\ub2a5 |\n| **\ubaa8\ub2c8\ud130\ub9c1** | \uac80\ud1a0 \ud544\uc694 | \ubc30\ud3ec \uc804\ub7b5\uc774 \uc815\ud574\uc9c4 \ud6c4\uc5d0 \uacb0\uc815\ud574\ub3c4 \ub428 |\n\n---\n\n## \uc5b4\ub514\uc11c\ubd80\ud130 \ud480\uc5b4\uc57c \ud558\ub098\n\n5\uac1c\uc758 \ubbf8\uacb0\uc815 \uc0ac\ud56d \uc911\uc5d0\uc11c **\ub370\uc774\ud130\ubca0\uc774\uc2a4 \uc120\ud0dd**\uc774 \uac00\uc7a5 \uba3c\uc800\uc785\ub2c8\ub2e4. API \uad6c\uc870(REST vs GraphQL)\ub3c4 DB \ud2b9\uc131\uc5d0 \ub530\ub77c \ubc29\ud5a5\uc774 \ub2ec\ub77c\uc9c8 \uc218 \uc788\uace0, \ub370\uc774\ud130 \ubaa8\ub378\ub9c1 \uc790\uccb4\uac00 \ud504\ub85c\uc81d\ud2b8\uc758 \uae30\ubc18\uc774 \ub418\uae30 \ub54c\ubb38\uc774\uc5d0\uc694.\n\n\uadf8 \ub2e4\uc74c\uc740 **API \uad6c\uc870**\ub97c \uc815\ud558\uba74 \ud504\ub860\ud2b8\uc5d4\ub4dc(React) \ucabd \uac1c\ubc1c\uc744 \ubc14\ub85c \uc2dc\uc791\ud560 \uc218 \uc788\ub294 \uc0c1\ud0dc\uac00 \ub429\ub2c8\ub2e4.\n\n\ub098\uba38\uc9c0 3\uac1c(CI/CD, \ubc30\ud3ec \uc804\ub7b5, \ubaa8\ub2c8\ud130\ub9c1)\ub294 \uac1c\ubc1c\uc774 \uc9c4\ud589\ub418\uba74\uc11c \uc815\ud574\ub3c4 \ub418\ub294 \ud56d\ubaa9\ub4e4\uc774\uc5d0\uc694. \uc9c0\uae08 \ub2f9\uc7a5 \ub9c9\ud788\uc9c0\ub294 \uc54a\uc2b5\ub2c8\ub2e4.\n\n**DB \uc120\ud0dd\ubd80\ud130 \uac19\uc774 \uc815\ub9ac\ud574\ubcfc\uae4c\uc694?** PostgreSQL\uacfc MongoDB \uc0ac\uc774\uc5d0\uc11c \uace0\ubbfc\ud558\ub294 \ud3ec\uc778\ud2b8\uac00 \ubb54\uc9c0 \uc54c\ub824\uc8fc\uc2dc\uba74 \ud310\ub2e8\uc5d0 \ub3c4\uc6c0\uc774 \ub420 \ub9cc\ud55c \uae30\uc900\uc744 \uc815\ub9ac\ud574\ub4dc\ub9b4\uac8c\uc694.\n\n---\n\n\uc774\uac78 \uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ub0b4\ubd80 \ub3c4\uad6c \uac1c\ubc1c \ud504\ub85c\uc81d\ud2b8\uc758 \uae30\uc220 \uc2a4\ud0dd\uacfc \uc544\ud0a4\ud14d\ucc98 \uacb0\uc815 \uc0ac\ud56d\uc744 \uc815\ub9ac\ud558\uace0, \uacb0\uc815\ub41c \uac83\uacfc \ubbf8\uacb0\uc815 \uc0ac\ud56d\uc744 \uba85\ud655\ud788 \uad6c\ubd84\ud55c\ub2e4.\n\n# Elements\n- UserAuth [type: architecture]\n- Database [type: data]\n- Frontend [type: architecture]\n- DeployStrategy [type: process]\n- APIStructure [type: architecture]\n- Monitoring [type: process]\n- CICD [type: process]\n\n# Relations\n- Frontend \u2192depends-on\u2192 APIStructure\n- APIStructure \u2192depends-on\u2192 Database\n- UserAuth \u2192communicates-with\u2192 APIStructure\n- DeployStrategy \u2192depends-on\u2192 CICD\n- Monitoring \u2192depends-on\u2192 DeployStrategy\n\n# Decided\n- \uc0ac\uc6a9\uc790 \uc778\uc99d: OAuth \ubc29\uc2dd \ucc44\ud0dd (\ud300 \ud569\uc758)\n- \ud504\ub860\ud2b8\uc5d4\ub4dc: React \ud655\uc815 (\ud300 \ud569\uc758)\n\n# Undecided\n- \ub370\uc774\ud130\ubca0\uc774\uc2a4: [PostgreSQL | MongoDB] (Related elements: Database, APIStructure)\n- API \uad6c\uc870: [REST | GraphQL] (Related elements: APIStructure, Frontend, UserAuth)\n- \ubc30\ud3ec \uc804\ub7b5: [\ubbf8\uc815 \u2014 \uc544\uc9c1 \ub17c\uc758 \uc2dc\uc791 \uc804] (Related elements: DeployStrategy, CICD)\n- \ubaa8\ub2c8\ud130\ub9c1: [\ubbf8\uc815 \u2014 \uac80\ud1a0 \ud544\uc694] (Related elements: Monitoring, DeployStrategy)\n- CI/CD \ud30c\uc774\ud504\ub77c\uc778: [\ubbf8\uc815 \u2014 \uc815\ud574\uc57c \ud568] (Related elements: CICD, DeployStrategy)\n\n# Active Discussion\n- \uc804\uccb4 \uae30\uc220 \uc2a4\ud0dd \ud604\ud669 \uc815\ub9ac \ubc0f \uc758\uc0ac\uacb0\uc815 \uc0c1\ud0dc \ud30c\uc545\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 1\n"}], "grading": {"expectations": [{"text": "\uacb0\uc815\ub428/\ubbf8\uacb0\uc815/\ubbf8\ub17c\uc758 \ud56d\ubaa9\uc774 \uba85\ud655\ud788 \ubd84\ub958\ub428", "passed": true, "evidence": "\ud655\uc815 2\uac74, \ubbf8\uacb0\uc815 5\uac74\uc73c\ub85c \ubd84\ub958. \uae34\uae09\ub3c4 \uceec\ub7fc\uc73c\ub85c '\uc9c0\uae08 \uacb0\uc815 \ud544\uc694' vs '\ub098\uc911' \uad6c\ubd84"}, {"text": "\uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc \uc2dc\uac01\ud654 \uc81c\uc548\uc774 \ud3ec\ud568\ub428", "passed": true, "evidence": "'\uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?'"}, {"text": "\uc0c1\ud0dc \ud30c\uc77c(.compass/state.md)\uc774 \uc0dd\uc131\ub428", "passed": true, "evidence": "state.md \ud30c\uc77c\uc774 outputs/\uc5d0 \uc874\uc7ac"}, {"text": "\ubbf8\uacb0\uc815 \ud56d\ubaa9\uc5d0 \ub300\ud55c \uc6b0\uc120\uc21c\uc704 \ub610\ub294 \uc758\uc874\uc131 \uae30\ubc18 \uc21c\uc11c \uc81c\uc548", "passed": true, "evidence": "DB \u2192 API \u2192 CI/CD \u2192 \ubc30\ud3ec \u2192 \ubaa8\ub2c8\ud130\ub9c1 \uc21c\uc11c \uc81c\uc548, \uc758\uc874\uc131 \uadfc\uac70 \uc124\uba85"}, {"text": "\uacb0\uc815\ub41c \ud56d\ubaa9(OAuth, React)\uc774 \uc815\ud655\ud788 \uc2dd\ubcc4\ub428", "passed": true, "evidence": "\ud45c\uc5d0\uc11c OAuth, React \ud655\uc815\uc73c\ub85c \uc815\ud655\ud788 \uc2dd\ubcc4"}], "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}}}, {"id": "eval-2-decision-cleanup-with_skill", "prompt": "\uc6b0\ub9ac \ud300\uc5d0\uc11c \ub0b4\ubd80 \ub3c4\uad6c\ub97c \ub9cc\ub4e4\uace0 \uc788\ub294\ub370, \uc694\uad6c\uc0ac\ud56d\uc774 \uacc4\uc18d \ubc14\ub00c\uace0 \uc788\uc5b4\uc11c \ubb50\uac00 \uacb0\uc815\ub41c \uac74\uc9c0 \ubb50\uac00 \uc544\uc9c1 \ub17c\uc758 \uc911\uc778\uc9c0 \ubaa8\ub974\uaca0\uc5b4. \uc9c0\uae08\uae4c\uc9c0 \ub098\uc628 \ub0b4\uc6a9 \uc880 \uc815\ub9ac\ud574\uc918.", "eval_id": 2, "outputs": [{"name": "response.md", "type": "text", "content": "\ub9d0\uc500\ud558\uc2e0 \ub0b4\uc6a9 \uc815\ub9ac\ud574\ubd24\uc2b5\ub2c8\ub2e4. \uc9c0\uae08 7\uac1c \ud56d\ubaa9\uc774 \ud14c\uc774\ube14 \uc704\uc5d0 \uc62c\ub77c\uc640 \uc788\ub294\ub370, \uc0c1\ud0dc\ubcc4\ub85c \ub098\ub204\uba74 \uc774\ub807\uc2b5\ub2c8\ub2e4:\n\n---\n\n**\ud655\uc815\ub41c \uac83 (2\uac74)**\n\n| \ud56d\ubaa9 | \uacb0\uc815 |\n|------|------|\n| \uc0ac\uc6a9\uc790 \uc778\uc99d | OAuth |\n| \ud504\ub860\ud2b8\uc5d4\ub4dc | React |\n\n\uc774 \ub450 \uac1c\ub294 \ud655\uc815\uc774\ub2c8\uae4c \ub354 \uc774\uc0c1 \uc5d0\ub108\uc9c0 \uc4f8 \ud544\uc694 \uc5c6\uc2b5\ub2c8\ub2e4.\n\n---\n\n**\uc120\ud0dd\uc9c0\uac00 \uc788\uace0 \uacb0\uc815\uc774 \ud544\uc694\ud55c \uac83 (2\uac74)**\n\n| \ud56d\ubaa9 | \ud6c4\ubcf4 |\n|------|------|\n| \ub370\uc774\ud130\ubca0\uc774\uc2a4 | PostgreSQL vs MongoDB |\n| API \uad6c\uc870 | REST vs GraphQL |\n\n---\n\n**\uc544\uc9c1 \ub17c\uc758 \uc790\uccb4\uac00 \uc2dc\uc791\ub418\uc9c0 \uc54a\uc740 \uac83 (3\uac74)**\n\n| \ud56d\ubaa9 | \uc0c1\ud0dc |\n|------|------|\n| \ubc30\ud3ec \uc804\ub7b5 | \ub17c\uc758 \uc804 |\n| \ubaa8\ub2c8\ud130\ub9c1 | \ub17c\uc758 \uc804 |\n| CI/CD \ud30c\uc774\ud504\ub77c\uc778 | \ub17c\uc758 \uc804 |\n\n---\n\n\ubbf8\uacb0\uc815 \ud56d\ubaa9\uc774 5\uac1c\uc785\ub2c8\ub2e4. \ud55c\uaebc\ubc88\uc5d0 \ub2e4 \uc7a1\uc73c\uba74 \ub610 \ud750\ub824\uc9c0\ub2c8\uae4c, \uc758\uc874 \uad00\uacc4\ub97c \ubcf4\uace0 \uc21c\uc11c\ub97c \uc81c\uc548\ub4dc\ub9ac\uba74:\n\n**DB \uc120\ud0dd\uc744 \uba3c\uc800 \ud558\ub294 \uac8c \uc88b\uaca0\uc2b5\ub2c8\ub2e4.** \uc774\uc720\ub294 API \uad6c\uc870(REST vs GraphQL) \uacb0\uc815\uc774 DB \ud2b9\uc131\uc5d0 \uc601\ud5a5\uc744 \ubc1b\uae30 \ub54c\ubb38\uc785\ub2c8\ub2e4. MongoDB\ucc98\ub7fc \ubb38\uc11c \uae30\ubc18\uc774\uba74 GraphQL\uacfc \uad81\ud569\uc774 \uc798 \ub9de\ub294 \uba74\uc774 \uc788\uace0, PostgreSQL\uc774\uba74 REST\ub85c\ub3c4 \ucda9\ubd84\ud788 \uae54\ub054\ud558\uac8c \uac08 \uc218 \uc788\uac70\ub4e0\uc694. DB\uac00 \uc815\ud574\uc9c0\uba74 API \uad6c\uc870\ub3c4 \ud6e8\uc52c \ud310\ub2e8\ud558\uae30 \uc26c\uc6cc\uc9d1\ub2c8\ub2e4.\n\n\ubc30\ud3ec/\ubaa8\ub2c8\ud130\ub9c1/CI/CD\ub294 \uc774 \ub450 \uac1c\uac00 \uc815\ub9ac\ub41c \ub4a4\uc5d0 \uc7a1\uc544\ub3c4 \ub2a6\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4 -- \uac1c\ubc1c \ucd08\uae30\uc5d0\ub294 \ucf54\uc5b4 \uc2a4\ud0dd\ubd80\ud130 \ud655\uc815\ud558\ub294 \uac8c \uc6b0\uc120\uc774\ub2c8\uae4c\uc694.\n\n\uba87 \uac00\uc9c0 \ud655\uc778\ud558\uace0 \uc2f6\uc740 \uac8c \uc788\uc2b5\ub2c8\ub2e4:\n\n- DB \uc120\ud0dd\uc5d0\uc11c \ud300\uc774 \uace0\ubbfc\ud558\ub294 \ud575\uc2ec \uae30\uc900\uc774 \ubb54\uac00\uc694? \uc608\ub97c \ub4e4\uc5b4, \ub370\uc774\ud130 \uad6c\uc870\uac00 \uc790\uc8fc \ubc14\ub014 \uac83 \uac19\uc544\uc11c MongoDB\ub97c \uace0\ub824\ud558\ub294 \uac74\uc9c0, \uc544\ub2c8\uba74 \ud2b8\ub79c\uc7ad\uc158\uc774\ub098 \uad00\uacc4\ud615 \ucffc\ub9ac\uac00 \uc911\uc694\ud574\uc11c PostgreSQL \ucabd\uc774 \ub04c\ub9ac\ub294 \uac74\uc9c0 -- \uc774 \ub9e5\ub77d\uc744 \uc54c\uba74 \uc815\ub9ac\uac00 \ud6e8\uc52c \uc218\uc6d4\ud569\ub2c8\ub2e4.\n\n\uc774\uac78 \uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ub0b4\ubd80 \ub3c4\uad6c \uac1c\ubc1c \ud504\ub85c\uc81d\ud2b8\uc758 \uae30\uc220 \uc2a4\ud0dd\uacfc \uc544\ud0a4\ud14d\ucc98 \uacb0\uc815 \uc0ac\ud56d\uc744 \uc815\ub9ac\ud558\uace0, \uacb0\uc815\ub41c \uac83\uacfc \ubbf8\uacb0\uc815 \uc0ac\ud56d\uc744 \uba85\ud655\ud788 \uad6c\ubd84\ud55c\ub2e4.\n\n# Elements\n- \uc0ac\uc6a9\uc790\uc778\uc99d [type: architecture]\n- \ub370\uc774\ud130\ubca0\uc774\uc2a4 [type: data]\n- \ud504\ub860\ud2b8\uc5d4\ub4dc [type: architecture]\n- \ubc30\ud3ec\uc804\ub7b5 [type: process]\n- API\uad6c\uc870 [type: architecture]\n- \ubaa8\ub2c8\ud130\ub9c1 [type: process]\n- CI/CD\ud30c\uc774\ud504\ub77c\uc778 [type: process]\n\n# Relations\n- \ud504\ub860\ud2b8\uc5d4\ub4dc \u2192communicates-with\u2192 API\uad6c\uc870\n- API\uad6c\uc870 \u2192depends-on\u2192 \ub370\uc774\ud130\ubca0\uc774\uc2a4\n- \uc0ac\uc6a9\uc790\uc778\uc99d \u2192depends-on\u2192 API\uad6c\uc870\n- \ubc30\ud3ec\uc804\ub7b5 \u2192depends-on\u2192 CI/CD\ud30c\uc774\ud504\ub77c\uc778\n- \ubaa8\ub2c8\ud130\ub9c1 \u2192depends-on\u2192 \ubc30\ud3ec\uc804\ub7b5\n\n# Decided\n- \uc0ac\uc6a9\uc790\uc778\uc99d: OAuth \ubc29\uc2dd \ucc44\ud0dd (\ud300 \ud569\uc758)\n- \ud504\ub860\ud2b8\uc5d4\ub4dc: React \ud655\uc815 (\ud300 \ud569\uc758)\n\n# Undecided\n- \ub370\uc774\ud130\ubca0\uc774\uc2a4: [PostgreSQL | MongoDB] (Related elements: API\uad6c\uc870, \uc0ac\uc6a9\uc790\uc778\uc99d)\n- API\uad6c\uc870: [REST | GraphQL] (Related elements: \ud504\ub860\ud2b8\uc5d4\ub4dc, \ub370\uc774\ud130\ubca0\uc774\uc2a4, \uc0ac\uc6a9\uc790\uc778\uc99d)\n- \ubc30\ud3ec\uc804\ub7b5: \uc544\uc9c1 \ub17c\uc758 \uc2dc\uc791 \uc548 \ud568 (Related elements: CI/CD\ud30c\uc774\ud504\ub77c\uc778, \ubaa8\ub2c8\ud130\ub9c1)\n- \ubaa8\ub2c8\ud130\ub9c1: \uc544\uc9c1 \uad6c\uccb4\uc801 \ub17c\uc758 \uc5c6\uc74c (Related elements: \ubc30\ud3ec\uc804\ub7b5)\n- CI/CD\ud30c\uc774\ud504\ub77c\uc778: \uc544\uc9c1 \uad6c\uccb4\uc801 \ub17c\uc758 \uc5c6\uc74c (Related elements: \ubc30\ud3ec\uc804\ub7b5)\n\n# Active Discussion\n- \uae30\uc220 \uc2a4\ud0dd \uacb0\uc815 \uc0ac\ud56d \uc804\uccb4 \uc815\ub9ac\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 1\n"}], "grading": {"expectations": [{"text": "\uacb0\uc815\ub428/\ubbf8\uacb0\uc815/\ubbf8\ub17c\uc758 \ud56d\ubaa9\uc774 \uba85\ud655\ud788 \ubd84\ub958\ub428", "passed": true, "evidence": "\ud655\uc815 2\uac74, \uc120\ud0dd\uc9c0 \uc788\ub294 \ubbf8\uacb0\uc815 2\uac74, \ub17c\uc758 \uc804 3\uac74\uc73c\ub85c 3\ub2e8\uacc4 \ubd84\ub958"}, {"text": "\uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc \uc2dc\uac01\ud654 \uc81c\uc548\uc774 \ud3ec\ud568\ub428", "passed": true, "evidence": "'\uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?'"}, {"text": "\uc0c1\ud0dc \ud30c\uc77c(.compass/state.md)\uc774 \uc0dd\uc131\ub428", "passed": true, "evidence": "state.md \ud30c\uc77c\uc774 outputs/\uc5d0 \uc874\uc7ac"}, {"text": "\ubbf8\uacb0\uc815 \ud56d\ubaa9\uc5d0 \ub300\ud55c \uc6b0\uc120\uc21c\uc704 \ub610\ub294 \uc758\uc874\uc131 \uae30\ubc18 \uc21c\uc11c \uc81c\uc548", "passed": true, "evidence": "'DB \uc120\ud0dd\uc744 \uba3c\uc800... API \uad6c\uc870 \uacb0\uc815\uc774 DB \ud2b9\uc131\uc5d0 \uc601\ud5a5\uc744 \ubc1b\uae30 \ub54c\ubb38' \u2014 \uc758\uc874\uc131 \uae30\ubc18 \uc21c\uc11c \uc81c\uc548"}, {"text": "\uacb0\uc815\ub41c \ud56d\ubaa9(OAuth, React)\uc774 \uc815\ud655\ud788 \uc2dd\ubcc4\ub428", "passed": true, "evidence": "\ud45c\uc5d0\uc11c OAuth, React \ud655\uc815\uc73c\ub85c \uc815\ud655\ud788 \uc2dd\ubcc4"}], "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}}}, {"id": "eval-3-feature-overload-old_skill", "prompt": "\ubaa8\ubc14\uc77c \uc571\uc744 \uae30\ud68d\ud558\uace0 \uc788\uc5b4. \ud53c\ud2b8\ub2c8\uc2a4 \ud2b8\ub798\ud0b9\uc778\ub370, \uc6b4\ub3d9 \uae30\ub85d, \uc2dd\ub2e8 \uad00\ub9ac, \uc18c\uc15c \uae30\ub2a5, \ucc4c\ub9b0\uc9c0, \ucf54\uce6d AI, \uc6e8\uc5b4\ub7ec\ube14 \uc5f0\ub3d9\uae4c\uc9c0 \uc0dd\uac01 \uc911\uc774\uc57c. \uadf8\ub9ac\uace0 \uacb0\uc81c\ub3c4 \ud544\uc694\ud558\uace0 \uc624\ud504\ub77c\uc778 \ubaa8\ub4dc\ub3c4 \uc9c0\uc6d0\ud574\uc57c \ud558\uace0... \uc544 \uadf8\ub9ac\uace0 \ub2e4\uad6d\uc5b4\ub3c4. \uc194\uc9c1\ud788 \ubb50\ubd80\ud130 \ud574\uc57c \ud560\uc9c0 \ubaa8\ub974\uaca0\uc5b4.", "eval_id": 3, "outputs": [], "grading": null}, {"id": "eval-3-feature-overload-with_skill", "prompt": "\ubaa8\ubc14\uc77c \uc571\uc744 \uae30\ud68d\ud558\uace0 \uc788\uc5b4. \ud53c\ud2b8\ub2c8\uc2a4 \ud2b8\ub798\ud0b9\uc778\ub370, \uc6b4\ub3d9 \uae30\ub85d, \uc2dd\ub2e8 \uad00\ub9ac, \uc18c\uc15c \uae30\ub2a5, \ucc4c\ub9b0\uc9c0, \ucf54\uce6d AI, \uc6e8\uc5b4\ub7ec\ube14 \uc5f0\ub3d9\uae4c\uc9c0 \uc0dd\uac01 \uc911\uc774\uc57c. \uadf8\ub9ac\uace0 \uacb0\uc81c\ub3c4 \ud544\uc694\ud558\uace0 \uc624\ud504\ub77c\uc778 \ubaa8\ub4dc\ub3c4 \uc9c0\uc6d0\ud574\uc57c \ud558\uace0... \uc544 \uadf8\ub9ac\uace0 \ub2e4\uad6d\uc5b4\ub3c4. \uc194\uc9c1\ud788 \ubb50\ubd80\ud130 \ud574\uc57c \ud560\uc9c0 \ubaa8\ub974\uaca0\uc5b4.", "eval_id": 3, "outputs": [{"name": "response.md", "type": "text", "content": "\uc88b\uc544\uc694, \uae30\ub2a5 \ubaa9\ub85d\uc744 \ubcf4\ub2c8 \ube44\uc804\uc774 \uaf64 \ud06c\ub124\uc694. \uadf8\ub7f0\ub370 9\uac1c \uae30\ub2a5\uc744 \ub3d9\uc2dc\uc5d0 \uc0dd\uac01\ud558\uba74 \ub2f9\uc5f0\ud788 \ub9c9\ud790 \uc218\ubc16\uc5d0 \uc5c6\uc5b4\uc694. \ud55c \ubc88\uc5d0 \ub2e4 \uacb0\uc815\ud560 \ud544\uc694 \uc5c6\uc73c\ub2c8\uae4c, \uba3c\uc800 \uad6c\uc870\ub97c \uc7a1\uc544\ubcfc\uac8c\uc694.\n\n\ub9d0\uc500\ud558\uc2e0 \uac83\ub4e4\uc744 \uc815\ub9ac\ud558\uba74 \ud06c\uac8c **\uc138 \uce35\uc704**\ub85c \ub098\ub269\ub2c8\ub2e4:\n\n---\n\n**1. \ud575\uc2ec \uae30\ub2a5 (\uc571\uc758 \uc874\uc7ac \uc774\uc720)**\n- **\uc6b4\ub3d9 \uae30\ub85d** \u2014 \ud53c\ud2b8\ub2c8\uc2a4 \uc571\uc758 \uadfc\ubcf8. \uc774\uac8c \uc5c6\uc73c\uba74 \uc571 \uc790\uccb4\uac00 \uc131\ub9bd\ud558\uc9c0 \uc54a\uc74c\n- **\uc2dd\ub2e8 \uad00\ub9ac** \u2014 \uc6b4\ub3d9\uacfc \uc9dd\uc73c\ub85c \uc6c0\uc9c1\uc774\ub294 \uae30\ub2a5. \uc0ac\uc6a9\uc790 \uc785\uc7a5\uc5d0\uc11c \"\uc6b4\ub3d9+\uc2dd\ub2e8\"\uc774 \ud558\ub098\uc758 \uac00\uce58\n\n**2. \ucc28\ubcc4\ud654 \uae30\ub2a5 (\uc65c \uc774 \uc571\uc774\uc5b4\uc57c \ud558\ub294\uac00)**\n- **\ucf54\uce6d AI** \u2014 \ub2e8\uc21c \uae30\ub85d\uc774 \uc544\ub2c8\ub77c \"\uac00\uc774\ub4dc\"\ub97c \uc81c\uacf5\ud558\ub294 \uac83. \uc6b4\ub3d9 \uae30\ub85d\uacfc \uc2dd\ub2e8 \ub370\uc774\ud130\uac00 \uc788\uc5b4\uc57c \uc758\ubbf8 \uc788\uc74c\n- **\ucc4c\ub9b0\uc9c0 + \uc18c\uc15c** \u2014 \uc720\uc9c0\uc728\uc744 \uc62c\ub9ac\ub294 \ub3d9\ub825. \ud558\uc9c0\ub9cc \uc6b4\ub3d9 \uae30\ub85d\uc774 \uba3c\uc800 \uc788\uc5b4\uc57c \ucc4c\ub9b0\uc9c0\uac00 \ub3cc\uc544\uac10\n- **\uc6e8\uc5b4\ub7ec\ube14 \uc5f0\ub3d9** \u2014 \uc790\ub3d9 \uae30\ub85d\uc758 \ud3b8\uc758\uc131. \uc5ed\uc2dc \uc6b4\ub3d9 \uae30\ub85d \uc704\uc5d0 \uc5b9\uc5b4\uc9c0\ub294 \uae30\ub2a5\n\n**3. \uc778\ud504\ub77c/\uc9c0\uc6d0 \uae30\ub2a5 (\uae30\ub2a5\uc740 \uc544\ub2c8\uc9c0\ub9cc \ubc18\ub4dc\uc2dc \ud544\uc694)**\n- \uacb0\uc81c, \uc624\ud504\ub77c\uc778 \ubaa8\ub4dc, \ub2e4\uad6d\uc5b4\n\n---\n\n\uc5ec\uae30\uc11c \ud575\uc2ec \ud3ec\uc778\ud2b8 \ud558\ub098: **1\uce35(\uc6b4\ub3d9 \uae30\ub85d + \uc2dd\ub2e8)\uc774 \ub2e4\ub978 \ubaa8\ub4e0 \uac83\uc758 \uae30\ubc18**\uc774\uc5d0\uc694. \ucf54\uce6d AI\ub3c4, \ucc4c\ub9b0\uc9c0\ub3c4, \uc6e8\uc5b4\ub7ec\ube14\ub3c4 \uc804\ubd80 \uc6b4\ub3d9 \uae30\ub85d \ub370\uc774\ud130\uc5d0 \uc758\uc874\ud569\ub2c8\ub2e4. \uadf8\ub798\uc11c \uc774\uac74 \"\ubb50\ubd80\ud130\"\uc5d0 \ub300\ud55c \ub2f5\uc774 \ube44\uad50\uc801 \uba85\ud655\ud574\uc694.\n\n\ub2e4\ub9cc \uadf8 \uc804\uc5d0 \uba3c\uc800 \uacb0\uc815\ud574\uc57c \ud560 \uac8c \ud558\ub098 \uc788\uc5b4\uc694:\n\n> **\ud0c0\uac9f \uc0ac\uc6a9\uc790\uac00 \ub204\uad6c\uc778\uac00?**\n>\n> \ucd08\ubcf4\uc790(\uc6b4\ub3d9 \uc2dc\uc791\ud558\ub294 \uc0ac\ub78c), \uc911\uae09\uc790(\uc774\ubbf8 \ub8e8\ud2f4\uc774 \uc788\ub294 \uc0ac\ub78c), \uc804\ubb38\uac00(PT/\uc120\uc218\uae09) \u2014 \ub204\uad6c\ub97c \uc8fc \ud0c0\uac9f\uc73c\ub85c \uc7a1\ub290\ub0d0\uc5d0 \ub530\ub77c \ud575\uc2ec \uae30\ub2a5\uc758 \uad6c\uccb4\uc801\uc778 \ud615\ud0dc\uac00 \uc644\uc804\ud788 \ub2ec\ub77c\uc838\uc694. \uc608\ub97c \ub4e4\uc5b4 \ucd08\ubcf4\uc790\ub77c\uba74 \ucf54\uce6d AI\uac00 \ud575\uc2ec \uac00\uce58\uac00 \ub418\uace0, \uc911\uae09\uc790 \uc774\uc0c1\uc774\uba74 \uc6e8\uc5b4\ub7ec\ube14 \uc5f0\ub3d9\uacfc \uc0c1\uc138 \ub370\uc774\ud130 \ubd84\uc11d\uc774 \ub354 \uc911\uc694\ud558\uc8e0.\n\n\uc774\uac8c \uc815\ud574\uc9c0\uba74 MVP \ubc94\uc704\ub97c \uc7a1\uc744 \uc218 \uc788\uace0, \uac70\uae30\uc11c\ubd80\ud130 \uae30\uc220 \uc2a4\ud0dd\uc774\ub098 \uc218\uc775 \ubaa8\ub378 \uac19\uc740 \uac83\ub4e4\ub3c4 \uc21c\uc11c\ub300\ub85c \ud480\ub824\uc694.\n\n\uae30\uc220 \uc2a4\ud0dd, AI \uad6c\ud604 \ubc29\uc2dd, \uc624\ud504\ub77c\uc778 \uc804\ub7b5, \uc218\uc775 \ubaa8\ub378 \u2014 \uc774\ub7f0 \uac83\ub4e4\ub3c4 \ub17c\uc758\uac00 \ud544\uc694\ud55c\ub370 \uc9c0\uae08 \ub2e4 \uaebc\ub0b4\uba74 \ub610 \ub9c9\ud788\ub2c8\uae4c, \ud0c0\uac9f \uc0ac\uc6a9\uc790\ubd80\ud130 \uc7a1\uc544\ubcfc\uae4c\uc694?\n\n\uc774 \uad6c\uc870\ub97c \uc2dc\uac01\ud654\ud574\uc11c \ub300\uc2dc\ubcf4\ub4dc\ub098 \ub9c8\uc778\ub4dc\ub9f5\uc73c\ub85c \ubcf4\uc5ec\ub4dc\ub9b4 \uc218\ub3c4 \uc788\uc5b4\uc694 \u2014 \ud544\uc694\ud558\uba74 \ub9d0\uc500\ud574\uc8fc\uc138\uc694.\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ud53c\ud2b8\ub2c8\uc2a4 \ud2b8\ub798\ud0b9 \ubaa8\ubc14\uc77c \uc571 \uae30\ud68d \u2014 \ubb50\ubd80\ud130 \ud574\uc57c \ud560\uc9c0 \ubc29\ud5a5 \uc7a1\uae30\n\n# Elements\n- FitnessApp [type: product]\n- \uc6b4\ub3d9\uae30\ub85d [type: feature]\n- \uc2dd\ub2e8\uad00\ub9ac [type: feature]\n- \uc18c\uc15c\uae30\ub2a5 [type: feature]\n- \ucc4c\ub9b0\uc9c0 [type: feature]\n- \ucf54\uce6dAI [type: feature]\n- \uc6e8\uc5b4\ub7ec\ube14\uc5f0\ub3d9 [type: feature]\n- \uacb0\uc81c [type: feature]\n- \uc624\ud504\ub77c\uc778\ubaa8\ub4dc [type: constraint]\n- \ub2e4\uad6d\uc5b4 [type: constraint]\n\n# Relations\n- FitnessApp \u2192contains\u2192 \uc6b4\ub3d9\uae30\ub85d\n- FitnessApp \u2192contains\u2192 \uc2dd\ub2e8\uad00\ub9ac\n- FitnessApp \u2192contains\u2192 \uc18c\uc15c\uae30\ub2a5\n- FitnessApp \u2192contains\u2192 \ucc4c\ub9b0\uc9c0\n- FitnessApp \u2192contains\u2192 \ucf54\uce6dAI\n- FitnessApp \u2192contains\u2192 \uc6e8\uc5b4\ub7ec\ube14\uc5f0\ub3d9\n- FitnessApp \u2192contains\u2192 \uacb0\uc81c\n- FitnessApp \u2192contains\u2192 \uc624\ud504\ub77c\uc778\ubaa8\ub4dc\n- FitnessApp \u2192contains\u2192 \ub2e4\uad6d\uc5b4\n- \uc18c\uc15c\uae30\ub2a5 \u2192depends-on\u2192 \uc6b4\ub3d9\uae30\ub85d\n- \ucc4c\ub9b0\uc9c0 \u2192depends-on\u2192 \uc6b4\ub3d9\uae30\ub85d\n- \ucc4c\ub9b0\uc9c0 \u2192depends-on\u2192 \uc18c\uc15c\uae30\ub2a5\n- \ucf54\uce6dAI \u2192depends-on\u2192 \uc6b4\ub3d9\uae30\ub85d\n- \ucf54\uce6dAI \u2192depends-on\u2192 \uc2dd\ub2e8\uad00\ub9ac\n- \uacb0\uc81c \u2192depends-on\u2192 \ucc4c\ub9b0\uc9c0\n- \uc6e8\uc5b4\ub7ec\ube14\uc5f0\ub3d9 \u2192depends-on\u2192 \uc6b4\ub3d9\uae30\ub85d\n\n# Decided\n(none yet)\n\n# Undecided\n- MVP \ubc94\uc704: [\uc5b4\ub5a4 \uae30\ub2a5\uc744 1\ucc28\uc5d0 \ub123\uc744 \uac83\uc778\uac00] (Related: \uc804\uccb4 \uae30\ub2a5)\n- \uae30\uc220 \uc2a4\ud0dd: [\ub124\uc774\ud2f0\ube0c | \ud06c\ub85c\uc2a4\ud50c\ub7ab\ud3fc | \ud558\uc774\ube0c\ub9ac\ub4dc] (Related: \uc624\ud504\ub77c\uc778\ubaa8\ub4dc, \uc6e8\uc5b4\ub7ec\ube14\uc5f0\ub3d9)\n- \uc218\uc775 \ubaa8\ub378: [\uad6c\ub3c5 | \ud504\ub9ac\ubbf8\uc5c4 | \uad11\uace0 | \ud558\uc774\ube0c\ub9ac\ub4dc] (Related: \uacb0\uc81c)\n- \ud0c0\uac9f \uc0ac\uc6a9\uc790: [\ucd08\ubcf4\uc790 | \uc911\uae09\uc790 | \uc804\ubb38\uac00 | \uc804\uccb4] (Related: \ucf54\uce6dAI, \ucc4c\ub9b0\uc9c0)\n- \uc624\ud504\ub77c\uc778 \ubc94\uc704: [\uc804\uccb4 \uc624\ud504\ub77c\uc778 | \ubd80\ubd84 \uc624\ud504\ub77c\uc778] (Related: \uc624\ud504\ub77c\uc778\ubaa8\ub4dc)\n- AI \uad6c\ud604 \ubc29\uc2dd: [\uc790\uccb4 \ubaa8\ub378 | \uc678\ubd80 API | \uaddc\uce59 \uae30\ubc18] (Related: \ucf54\uce6dAI)\n- \ub2e4\uad6d\uc5b4 \ubc94\uc704: [\ucd08\uae30 \uc9c0\uc6d0 \uc5b8\uc5b4 \uc218] (Related: \ub2e4\uad6d\uc5b4)\n\n# Active Discussion\n- MVP \ubc94\uc704 \uc124\uc815 \ubc0f \uc6b0\uc120\uc21c\uc704 \uc815\ub9ac\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 1\n"}], "grading": {"expectations": [{"text": "\uc815\ubcf4 \uc81c\ud55c: 3-5\uac1c \ud575\uc2ec \uae30\ub2a5\uc744 \uba3c\uc800 \uc81c\uc2dc", "passed": true, "evidence": "9\uac1c \uae30\ub2a5\uc744 3\uac1c \uce35\uc704(\ud575\uc2ec/\ucc28\ubcc4\ud654/\uc778\ud504\ub77c)\ub85c \uad6c\uc870\ud654. \ud575\uc2ec 2\uac1c\uc5d0 \uc9d1\uc911 \uad8c\uc720"}, {"text": "\ucd08\uc810 \uc881\ud788\uae30 \uac1c\uc785\uc774 \uc791\ub3d9", "passed": true, "evidence": "'\ud0c0\uac9f \uc0ac\uc6a9\uc790\ubd80\ud130 \uc7a1\uc544\ubcfc\uae4c\uc694?' \u2014 \ud558\ub098\uc758 \uc9c8\ubb38\uc73c\ub85c \ucd08\uc810 \uc881\ud798"}, {"text": "\uc6b0\uc120\uc21c\uc704 \ub9e4\ud2b8\ub9ad\uc2a4 \ub610\ub294 \ub9c8\uc778\ub4dc\ub9f5 \uc2dc\uac01\ud654 \uc81c\uc548", "passed": true, "evidence": "'\ub300\uc2dc\ubcf4\ub4dc\ub098 \ub9c8\uc778\ub4dc\ub9f5\uc73c\ub85c \ubcf4\uc5ec\ub4dc\ub9b4 \uc218\ub3c4 \uc788\uc5b4\uc694'"}, {"text": "\ub098\uba38\uc9c0 \uae30\ub2a5\uc740 \ud655\uc7a5 \uac00\ub2a5\ud558\ub2e4\uace0 \uc548\ub0b4", "passed": true, "evidence": "'\uc9c0\uae08 \ub2e4 \uaebc\ub0b4\uba74 \ub610 \ub9c9\ud788\ub2c8\uae4c, \ud0c0\uac9f \uc0ac\uc6a9\uc790\ubd80\ud130 \uc7a1\uc544\ubcfc\uae4c\uc694?'"}, {"text": "\uc0ac\uc6a9\uc790\uc5d0\uac8c \uc6b0\uc120\uc21c\uc704 \uc120\ud0dd \uae30\ud68c \uc81c\uacf5", "passed": true, "evidence": "\ud0c0\uac9f \uc0ac\uc6a9\uc790 \uc9c8\ubb38\uc73c\ub85c \uc6b0\uc120\uc21c\uc704 \uadfc\uac70 \ud655\ubcf4 + '\uc774\uac8c \uc815\ud574\uc9c0\uba74 MVP \ubc94\uc704\ub97c \uc7a1\uc744 \uc218 \uc788\uace0'"}], "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}}}, {"id": "eval-4-progressive-complexity-old_skill", "prompt": "[\uba40\ud2f0\ud134] \uc774\ucee4\uba38\uc2a4 \ud50c\ub7ab\ud3fc \uae30\ud68d 4\ud134 \ub300\ud654 \ud6c4 '\ubb50\uac00 \uacb0\uc815\ub41c \uac70\uc57c? \uc880 \uc815\ub9ac\ud574\uc918.'", "eval_id": 4, "outputs": [{"name": "response.md", "type": "text", "content": "\uc88b\uc544\uc694, 3\ubc88\uc758 \ub300\ud654\uc5d0\uc11c \ub098\uc628 \uac78 \uc815\ub9ac\ud574\ubcfc\uac8c\uc694.\n\n---\n\n**\uacb0\uc815\ub41c \uac83\ub4e4**\n\n- \ud0c0\uac9f: \uc18c\uaddc\ubaa8 \uacf5\uc608\uac00(\ud310\ub9e4\uc790), \uc57d 100\uba85 \uaddc\ubaa8\ub85c \uc2dc\uc791\n- \uae30\uc220 \uc2a4\ud0dd: Next.js (\ud504\ub860\ud2b8 + \ubc31\uc5d4\ub4dc)\n- \uacb0\uc81c: \ud1a0\uc2a4\ud398\uc774\uba3c\uce20 \uc5f0\ub3d9\n- MVP \ucd9c\ubc1c\uc810: \uc0c1\ud488 \ub4f1\ub85d + \uacb0\uc81c\n\n\uc774 4\uac00\uc9c0\ub294 \ud655\uc815\uc774\uc5d0\uc694. \uc5ec\uae30\uc5d0 \ub300\ud574\uc11c\ub294 \ub354 \uace0\ubbfc\ud560 \ud544\uc694 \uc5c6\uc5b4\uc694.\n\n---\n\n**\ubcf4\ub958\ub41c \uac83 (1\uac74)**\n\n- DB \uc120\ud0dd (PostgreSQL vs MongoDB) \u2014 \"\ub098\uc911\uc5d0 \uc0dd\uac01\ud574\ubcfc\uac8c\"\ub85c \ubcf4\ub958\ud588\ub294\ub370, \uc0c1\ud488 \ub4f1\ub85d\uacfc \uacb0\uc81c \uae30\ub2a5\uc744 \ub9cc\ub4e4\ub824\uba74 DB\uac00 \uba3c\uc800 \uc815\ud574\uc838\uc57c \ud574\uc694. \uc774\uac74 \ub098\uc911\uc774 \uc544\ub2c8\ub77c **MVP \uc2dc\uc791 \uc804\uc5d0 \uacb0\uc815\uc774 \ud544\uc694\ud55c \ud56d\ubaa9**\uc774\uc5d0\uc694.\n\n---\n\n**\uc5b8\uae09\uc740 \ub410\uc9c0\ub9cc \uc544\uc9c1 \uc544\ubb34\uac83\ub3c4 \uc815\ud574\uc9c0\uc9c0 \uc54a\uc740 \uac83\ub4e4 (7\uac74)**\n\n\ud310\ub9e4\uc790 \ub300\uc2dc\ubcf4\ub4dc, \ub9ac\ubdf0 \uc2dc\uc2a4\ud15c, \uac80\uc0c9 \uae30\ub2a5, \uc7ac\uace0 \uad00\ub9ac, \ubc30\uc1a1 \ucd94\uc801, \ucfe0\ud3f0/\ud560\uc778, \uc815\uc0b0 \uc2dc\uc2a4\ud15c \u2014 \uc804\ubd80 \"\ud544\uc694\ud558\ub2e4\"\uae4c\uc9c0\ub9cc \uc774\uc57c\uae30\ub410\uace0, \ubc94\uc704\ub3c4 \uc6b0\uc120\uc21c\uc704\ub3c4 \uc815\ud574\uc9c4 \uac8c \uc5c6\uc5b4\uc694.\n\n7\uac1c\ub97c \ud55c\uaebc\ubc88\uc5d0 \ub17c\uc758\ud558\uba74 \uc544\ubb34\uac83\ub3c4 \uacb0\uc815\uc774 \uc548 \ub420 \uac70\uc608\uc694. \uc81c\uc548\ud558\uc790\uba74:\n\n1. **\uba3c\uc800 MVP \ubc94\uc704\ub97c \uc815\ud558\uae30** \u2014 \uc774 7\uac1c \uc911 \uccab \ucd9c\uc2dc\uc5d0 \ubc18\ub4dc\uc2dc \uc788\uc5b4\uc57c \ud558\ub294 \uac8c \ubb54\uc9c0\n2. **\uadf8 \ub2e4\uc74c \ubcf4\ub958\ub41c DB \uacb0\uc815\ud558\uae30** \u2014 MVP \ubc94\uc704\uac00 \uc815\ud574\uc838\uc57c \ub370\uc774\ud130 \uad6c\uc870\uac00 \ubcf4\uc774\uace0, \uadf8\ub798\uc57c DB\ub97c \uace0\ub97c \uc218 \uc788\uc73c\ub2c8\uae4c\n3. **\ub098\uba38\uc9c0\ub294 MVP \uc774\ud6c4\ub85c \ud30c\ud0b9** \u2014 \uc78a\uc5b4\ubc84\ub9ac\ub294 \uac8c \uc544\ub2c8\ub77c \uc758\ub3c4\uc801\uc73c\ub85c \ubbf8\ub904\ub450\ub294 \uac70\n\n\uc5b4\ub5a4 \uae30\ub2a5\uc774 MVP\uc5d0 \uaf2d \ub4e4\uc5b4\uac00\uc57c \ud55c\ub2e4\uace0 \uc0dd\uac01\ud574\uc694? \ud558\ub098\uc529 \uc774\uc57c\uae30\ud574\ubd10\uc694.\n\n---\n\n\uc774\uac78 \ud55c\ub208\uc5d0 \ubcfc \uc218 \uc788\uac8c \uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\uc218\uc81c \uacf5\uc608\ud488 \uc804\ubb38 \uc774\ucee4\uba38\uc2a4 \ud50c\ub7ab\ud3fc \uad6c\ucd95. \uc0c1\ud488 \ub4f1\ub85d\uacfc \uacb0\uc81c \uae30\ub2a5\ubd80\ud130 \uc2dc\uc791.\n\n# Elements\n- EcommercePlatform [type: architecture]\n- ProductRegistration [type: feature]\n- PaymentSystem [type: feature]\n- SellerDashboard [type: feature]\n- ReviewSystem [type: feature]\n- SearchFunction [type: feature]\n- InventoryManagement [type: feature]\n- ShippingTracking [type: feature]\n- CouponDiscount [type: feature]\n- SettlementSystem [type: feature]\n- NextJS [type: architecture]\n- TossPayments [type: constraint]\n- Database [type: architecture]\n\n# Relations\n- EcommercePlatform \u2192contains\u2192 ProductRegistration\n- EcommercePlatform \u2192contains\u2192 PaymentSystem\n- EcommercePlatform \u2192contains\u2192 SellerDashboard\n- EcommercePlatform \u2192contains\u2192 ReviewSystem\n- EcommercePlatform \u2192contains\u2192 SearchFunction\n- EcommercePlatform \u2192contains\u2192 InventoryManagement\n- EcommercePlatform \u2192contains\u2192 ShippingTracking\n- EcommercePlatform \u2192contains\u2192 CouponDiscount\n- EcommercePlatform \u2192contains\u2192 SettlementSystem\n- PaymentSystem \u2192depends-on\u2192 TossPayments\n- PaymentSystem \u2192depends-on\u2192 Database\n- ProductRegistration \u2192depends-on\u2192 Database\n- SellerDashboard \u2192depends-on\u2192 ProductRegistration\n- SellerDashboard \u2192depends-on\u2192 InventoryManagement\n- ReviewSystem \u2192depends-on\u2192 ProductRegistration\n- ShippingTracking \u2192depends-on\u2192 PaymentSystem\n- SettlementSystem \u2192depends-on\u2192 PaymentSystem\n- CouponDiscount \u2192depends-on\u2192 PaymentSystem\n- InventoryManagement \u2192depends-on\u2192 ProductRegistration\n\n# Decided\n- \ud0c0\uac9f \uc0ac\uc6a9\uc790: \uc18c\uaddc\ubaa8 \uacf5\uc608\uac00(\ud310\ub9e4\uc790) \uc57d 100\uba85 \uaddc\ubaa8\ub85c \uc2dc\uc791 (\uc0ac\uc6a9\uc790 \uc9c1\uc811 \uba85\uc2dc)\n- \ud504\ub860\ud2b8/\ubc31\uc5d4\ub4dc \ud504\ub808\uc784\uc6cc\ud06c: Next.js (\uc0ac\uc6a9\uc790 \uc120\ud0dd)\n- \uacb0\uc81c \uc2dc\uc2a4\ud15c: \ud1a0\uc2a4\ud398\uc774\uba3c\uce20 \uc5f0\ub3d9 (\uc0ac\uc6a9\uc790 \uc120\ud0dd)\n- MVP \uc2dc\uc791 \uae30\ub2a5: \uc0c1\ud488 \ub4f1\ub85d + \uacb0\uc81c (\uc0ac\uc6a9\uc790 \uba85\uc2dc)\n\n# Undecided\n- DB \uc120\ud0dd: [PostgreSQL | MongoDB] (\uc0ac\uc6a9\uc790\uac00 \"\ub098\uc911\uc5d0 \uc0dd\uac01\ud574\ubcfc\uac8c\"\ub85c \ubcf4\ub958)\n- \ud310\ub9e4\uc790 \ub300\uc2dc\ubcf4\ub4dc \ubc94\uc704: [\ubbf8\uc815] (\uc5b8\uae09\ub9cc \ub428, \uad6c\uccb4\uc801 \ub17c\uc758 \uc5c6\uc74c)\n- \ub9ac\ubdf0 \uc2dc\uc2a4\ud15c \uc124\uacc4: [\ubbf8\uc815] (\uc5b8\uae09\ub9cc \ub428)\n- \uac80\uc0c9 \uae30\ub2a5 \ubc94\uc704: [\ubbf8\uc815] (\uc5b8\uae09\ub9cc \ub428)\n- \uc7ac\uace0 \uad00\ub9ac \ubc29\uc2dd: [\ubbf8\uc815] (\uc0ac\uc6a9\uc790\uac00 \"\uc5b4\ub5bb\uac8c \ud558\uc9c0?\"\ub85c \uc9c8\ubb38)\n- \ubc30\uc1a1 \ucd94\uc801 \ubc29\uc2dd: [\ubbf8\uc815] (\uc5b8\uae09\ub9cc \ub428)\n- \ucfe0\ud3f0/\ud560\uc778 \uc2dc\uc2a4\ud15c: [\ubbf8\uc815] (\uc5b8\uae09\ub9cc \ub428)\n- \uc815\uc0b0 \uc2dc\uc2a4\ud15c \uc124\uacc4: [\ubbf8\uc815] (\uc5b8\uae09\ub9cc \ub428)\n\n# Active Discussion\n- \uae30\ub2a5 \ubc94\uc704 \uc815\uc758 \ubc0f MVP \uc6b0\uc120\uc21c\uc704 \uacb0\uc815 \ud544\uc694\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 4\n"}], "grading": {"expectations": [{"text": "\uacb0\uc815\ub41c \ud56d\ubaa9(Next.js, \ud1a0\uc2a4\ud398\uc774\uba3c\uce20, \ub300\uc0c1: \uc18c\uaddc\ubaa8 \uacf5\uc608\uac00)\uc774 \uc815\ud655\ud788 \uc2dd\ubcc4\ub428", "passed": true, "evidence": "4\uac1c \ud655\uc815 \ud56d\ubaa9 \ub098\uc5f4 (\ud0c0\uac9f, Next.js, \ud1a0\uc2a4\ud398\uc774\uba3c\uce20, MVP \ucd9c\ubc1c\uc810). MVP \ucd9c\ubc1c\uc810\uc740 \ucd94\uac00 \ud56d\ubaa9"}, {"text": "\ubbf8\uacb0\uc815 \ud56d\ubaa9(DB \uc120\ud0dd, MVP \ubc94\uc704)\uc774 \uba85\ud655\ud788 \ub098\uc5f4\ub428", "passed": true, "evidence": "'\ubcf4\ub958 1\uac74: DB \uc120\ud0dd' + '7\uac74: \uc5b8\uae09\ub410\uc9c0\ub9cc \ubbf8\uc815'"}, {"text": "Turn 3\uc5d0\uc11c \ub098\uc628 7\uac1c \ucd94\uac00 \uae30\ub2a5\ub4e4\uc758 \uc0c1\ud0dc\uac00 \ubd84\ub958\ub428", "passed": true, "evidence": "7\uac1c \uae30\ub2a5\uc774 '\uc5b8\uae09\uc740 \ub410\uc9c0\ub9cc \uc544\uc9c1 \uc544\ubb34\uac83\ub3c4 \uc815\ud574\uc9c0\uc9c0 \uc54a\uc740 \uac83\ub4e4'\ub85c \ubd84\ub958"}, {"text": "\uc0c1\ud0dc \ud30c\uc77c(.compass/state.md)\uc774 \uc0dd\uc131\ub428", "passed": true, "evidence": "state.md \ud30c\uc77c\uc774 outputs/\uc5d0 \uc874\uc7ac"}, {"text": "\uc2dc\uac01\ud654(\ub300\uc2dc\ubcf4\ub4dc \ub4f1) \uc81c\uc548\uc774 \ud3ec\ud568\ub428", "passed": true, "evidence": "'\uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?'"}, {"text": "\ubbf8\uacb0\uc815 \ud56d\ubaa9\uc5d0 \ub300\ud55c \uc758\uc874\uc131 \uae30\ubc18 \uc6b0\uc120\uc21c\uc704 \uc81c\uc548", "passed": true, "evidence": "3\ub2e8\uacc4 \uc81c\uc548: MVP \ubc94\uc704 \u2192 DB \u2192 \ub098\uba38\uc9c0 \ud30c\ud0b9. '\ub370\uc774\ud130 \uad6c\uc870\uac00 \ubcf4\uc774\uace0, \uadf8\ub798\uc57c DB\ub97c \uace0\ub97c \uc218 \uc788\uc73c\ub2c8\uae4c'"}], "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0}}}, {"id": "eval-4-progressive-complexity-with_skill", "prompt": "[\uba40\ud2f0\ud134] \uc774\ucee4\uba38\uc2a4 \ud50c\ub7ab\ud3fc \uae30\ud68d 4\ud134 \ub300\ud654 \ud6c4 '\ubb50\uac00 \uacb0\uc815\ub41c \uac70\uc57c? \uc880 \uc815\ub9ac\ud574\uc918.'", "eval_id": 4, "outputs": [{"name": "response.md", "type": "text", "content": "\uc88b\uc544\uc694, 4\ud134 \ub3d9\uc548 \ub098\uc628 \uac83\ub4e4 \uc815\ub9ac\ud569\ub2c8\ub2e4.\n\n## \ud655\uc815\ub41c \uac83 (3\uac1c)\n\n| \ud56d\ubaa9 | \uacb0\uc815 | \uadfc\uac70 |\n|------|------|------|\n| \ud0c0\uac9f | \uc18c\uaddc\ubaa8 \uacf5\uc608\uac00 ~100\uba85\uc73c\ub85c \uc2dc\uc791 | \uc9c1\uc811 \uc9c0\uc815 |\n| \ud504\ub860\ud2b8/\ubc31\uc5d4\ub4dc | Next.js | \uc9c1\uc811 \uc120\ud0dd |\n| \uacb0\uc81c | \ud1a0\uc2a4\ud398\uc774\uba3c\uce20 \uc5f0\ub3d9 | \uc9c1\uc811 \uc120\ud0dd |\n\n## \ubcf4\ub958\ub41c \uac83 (1\uac1c)\n\n- **DB \uc120\ud0dd (PostgreSQL vs MongoDB)** -- \"\ub098\uc911\uc5d0 \uc0dd\uac01\ud574\ubcfc\uac8c\"\ub85c \ubcf4\ub958\ud568. \ub2e8, \uc774 \uacb0\uc815\uc774 \uc0c1\ud488 \ub4f1\ub85d \uae30\ub2a5\uc758 \ub370\uc774\ud130 \ubaa8\ub378\uc5d0 \uc9c1\uc811 \uc601\ud5a5\uc744 \uc8fc\uae30 \ub54c\ubb38\uc5d0, \uac1c\ubc1c \ucc29\uc218 \uc804\uc5d0\ub294 \uc815\ud574\uc57c \ud569\ub2c8\ub2e4.\n\n## \uc544\uc9c1 \uacb0\uc815\uc774 \ud544\uc694\ud55c \uac83 (1\uac1c, \ud070 \uac83)\n\n- **MVP \ubc94\uc704** -- Turn 3\uc5d0\uc11c 7\uac1c \uae30\ub2a5\uc774 \ud55c\uaebc\ubc88\uc5d0 \ub098\uc654\uc2b5\ub2c8\ub2e4:\n  1. \ud310\ub9e4\uc790 \ub300\uc2dc\ubcf4\ub4dc\n  2. \ub9ac\ubdf0 \uc2dc\uc2a4\ud15c\n  3. \uac80\uc0c9 \uae30\ub2a5\n  4. \uc7ac\uace0 \uad00\ub9ac\n  5. \ubc30\uc1a1 \ucd94\uc801\n  6. \ucfe0\ud3f0/\ud560\uc778\n  7. \uc815\uc0b0 \uc2dc\uc2a4\ud15c\n\n  \uc774 7\uac1c \uac01\uac01\uc758 \uc0c1\uc138 \uc2a4\ud399\uc740 \uc544\uc9c1 \ub17c\uc758\ud558\uc9c0 \uc54a\uc558\uace0, \uc774 \uc911 \ubb58 MVP\uc5d0 \ub123\uace0 \ubb58 \ub4a4\ub85c \ubbf8\ub8f0\uc9c0\ub3c4 \uc815\ud574\uc9c0\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4.\n\n---\n\n\uc194\uc9c1\ud788 \ub9d0\ud558\uba74, \uc9c0\uae08 \uc5f4\ub824 \uc788\ub294 \ubb38\uc774 \ub108\ubb34 \ub9ce\uc2b5\ub2c8\ub2e4. 7\uac1c \uae30\ub2a5 + DB \uc120\ud0dd\uae4c\uc9c0 8\uac1c\uac00 \ubbf8\uacb0\uc815 \uc0c1\ud0dc\uc608\uc694.\n\n**\uc81c\uc548:** \ud55c \uac00\uc9c0\uc529 \uac00\uc8e0. \uac00\uc7a5 \uba3c\uc800 \uc815\ud560 \uac83\uc740 MVP \ubc94\uc704\uc785\ub2c8\ub2e4. 7\uac1c \uae30\ub2a5 \uc911\uc5d0\uc11c \"\uc774\uac83 \uc5c6\uc73c\uba74 \ub7f0\uce6d \ubabb \ud55c\ub2e4\"\ub294 \uac83\uacfc \"\uc788\uc73c\uba74 \uc88b\uc9c0\ub9cc \ub098\uc911\uc5d0 \ucd94\uac00\ud574\ub3c4 \ub41c\ub2e4\"\ub97c \ub098\ub220\uc57c \ub2e4\uc74c \ub2e8\uacc4\ub85c \uac08 \uc218 \uc788\uc5b4\uc694.\n\n\ucc98\uc74c\uc5d0 \ub9d0\ud55c \"\uc0c1\ud488 \ub4f1\ub85d + \uacb0\uc81c\"\uac00 \ud575\uc2ec\uc774\uc5c8\ub294\ub370, \uac70\uae30\uc5d0 \uaf2d \ubd99\uc5b4\uc57c \ud558\ub294 \uac8c \ubb50\ub77c\uace0 \uc0dd\uac01\ud558\uc138\uc694?\n\n---\n\n\uc774 \ud604\ud669\uc744 \uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\uc218\uc81c \uacf5\uc608\ud488 \uc804\ubb38 \uc774\ucee4\uba38\uc2a4 \ud50c\ub7ab\ud3fc \uad6c\ucd95. \uc18c\uaddc\ubaa8 \uacf5\uc608\uac00(\ud310\ub9e4\uc790) \ub300\uc0c1, \uc0c1\ud488 \ub4f1\ub85d\uacfc \uacb0\uc81c \uae30\ub2a5\ubd80\ud130 \uc2dc\uc791.\n\n# Elements\n- EcommercePlatform [type: architecture]\n- ProductRegistration [type: feature]\n- PaymentSystem [type: feature]\n- TossPayments [type: constraint]\n- NextJS [type: architecture]\n- Database [type: architecture]\n- SellerDashboard [type: feature]\n- ReviewSystem [type: feature]\n- SearchFunction [type: feature]\n- InventoryManagement [type: feature]\n- ShippingTracking [type: feature]\n- CouponDiscount [type: feature]\n- SettlementSystem [type: feature]\n\n# Relations\n- EcommercePlatform \u2192contains\u2192 ProductRegistration\n- EcommercePlatform \u2192contains\u2192 PaymentSystem\n- PaymentSystem \u2192depends-on\u2192 TossPayments\n- EcommercePlatform \u2192depends-on\u2192 NextJS\n- EcommercePlatform \u2192depends-on\u2192 Database\n- SellerDashboard \u2192depends-on\u2192 InventoryManagement\n- SellerDashboard \u2192depends-on\u2192 SettlementSystem\n- ShippingTracking \u2192depends-on\u2192 PaymentSystem\n- SettlementSystem \u2192depends-on\u2192 PaymentSystem\n- CouponDiscount \u2192depends-on\u2192 PaymentSystem\n- ReviewSystem \u2192depends-on\u2192 ProductRegistration\n- SearchFunction \u2192depends-on\u2192 ProductRegistration\n\n# Decided\n- \ud0c0\uac9f \uc0ac\uc6a9\uc790: \uc18c\uaddc\ubaa8 \uacf5\uc608\uac00 ~100\uba85\uc73c\ub85c \uc2dc\uc791 (\uc0ac\uc6a9\uc790 \uc9c0\uc815)\n- \ud504\ub860\ud2b8\uc5d4\ub4dc/\ubc31\uc5d4\ub4dc: Next.js (\uc0ac\uc6a9\uc790 \uc120\ud0dd)\n- \uacb0\uc81c \uc5f0\ub3d9: \ud1a0\uc2a4\ud398\uc774\uba3c\uce20 (\uc0ac\uc6a9\uc790 \uc120\ud0dd)\n\n# Undecided\n- DB \uc120\ud0dd: PostgreSQL | MongoDB (\uc0ac\uc6a9\uc790\uac00 \"\ub098\uc911\uc5d0 \uc0dd\uac01\ud574\ubcfc\uac8c\"\ub85c \ubcf4\ub958)\n- MVP \ubc94\uc704: 7\uac1c \uae30\ub2a5 \uc911 \uc6b0\uc120\uc21c\uc704 \ubbf8\uc815 (Related: SellerDashboard, ReviewSystem, SearchFunction, InventoryManagement, ShippingTracking, CouponDiscount, SettlementSystem)\n- \ud310\ub9e4\uc790 \ub300\uc2dc\ubcf4\ub4dc \uc0c1\uc138 \uae30\ub2a5: \ubbf8\uc815 (Related: SellerDashboard)\n- \ub9ac\ubdf0 \uc2dc\uc2a4\ud15c \uad6c\uc870: \ubbf8\uc815 (Related: ReviewSystem)\n- \uac80\uc0c9 \uae30\ub2a5 \ubc94\uc704: \ubbf8\uc815 (Related: SearchFunction)\n- \uc7ac\uace0 \uad00\ub9ac \ubc29\uc2dd: \ubbf8\uc815 (Related: InventoryManagement)\n- \ubc30\uc1a1 \ucd94\uc801 \uc5f0\ub3d9 \ubc29\uc2dd: \ubbf8\uc815 (Related: ShippingTracking)\n\n# Active Discussion\n- \uc804\uccb4 \ud604\ud669 \uc815\ub9ac \uc694\uccad (\uc0ac\uc6a9\uc790: \"\ubb50\uac00 \uacb0\uc815\ub41c \uac70\uc57c? \uc880 \uc815\ub9ac\ud574\uc918\")\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 4\n"}], "grading": {"expectations": [{"text": "\uacb0\uc815\ub41c \ud56d\ubaa9(Next.js, \ud1a0\uc2a4\ud398\uc774\uba3c\uce20, \ub300\uc0c1: \uc18c\uaddc\ubaa8 \uacf5\uc608\uac00)\uc774 \uc815\ud655\ud788 \uc2dd\ubcc4\ub428", "passed": true, "evidence": "\ud45c\uc5d0\uc11c \ud0c0\uac9f(\uc18c\uaddc\ubaa8 \uacf5\uc608\uac00 ~100\uba85), Next.js, \ud1a0\uc2a4\ud398\uc774\uba3c\uce20 3\uac1c \ud655\uc815 \uc2dd\ubcc4"}, {"text": "\ubbf8\uacb0\uc815 \ud56d\ubaa9(DB \uc120\ud0dd, MVP \ubc94\uc704)\uc774 \uba85\ud655\ud788 \ub098\uc5f4\ub428", "passed": true, "evidence": "'\ubcf4\ub958\ub41c \uac83 1\uac1c: DB \uc120\ud0dd' + '\uc544\uc9c1 \uacb0\uc815\uc774 \ud544\uc694\ud55c \uac83 1\uac1c: MVP \ubc94\uc704'"}, {"text": "Turn 3\uc5d0\uc11c \ub098\uc628 7\uac1c \ucd94\uac00 \uae30\ub2a5\ub4e4\uc758 \uc0c1\ud0dc\uac00 \ubd84\ub958\ub428", "passed": true, "evidence": "7\uac1c \uae30\ub2a5 \ubc88\ud638 \ub9ac\uc2a4\ud2b8\ub85c \uba85\uc2dc: \ud310\ub9e4\uc790\ub300\uc2dc\ubcf4\ub4dc, \ub9ac\ubdf0, \uac80\uc0c9, \uc7ac\uace0, \ubc30\uc1a1, \ucfe0\ud3f0, \uc815\uc0b0"}, {"text": "\uc0c1\ud0dc \ud30c\uc77c(.compass/state.md)\uc774 \uc0dd\uc131\ub428", "passed": true, "evidence": "state.md \ud30c\uc77c\uc774 outputs/\uc5d0 \uc874\uc7ac"}, {"text": "\uc2dc\uac01\ud654(\ub300\uc2dc\ubcf4\ub4dc \ub4f1) \uc81c\uc548\uc774 \ud3ec\ud568\ub428", "passed": true, "evidence": "'\uc774 \ud604\ud669\uc744 \uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?'"}, {"text": "\ubbf8\uacb0\uc815 \ud56d\ubaa9\uc5d0 \ub300\ud55c \uc758\uc874\uc131 \uae30\ubc18 \uc6b0\uc120\uc21c\uc704 \uc81c\uc548", "passed": true, "evidence": "'\uac00\uc7a5 \uba3c\uc800 \uc815\ud560 \uac83\uc740 MVP \ubc94\uc704' + '\ucc98\uc74c\uc5d0 \ub9d0\ud55c \uc0c1\ud488 \ub4f1\ub85d + \uacb0\uc81c\uac00 \ud575\uc2ec\uc774\uc5c8\ub294\ub370' \u2014 \uc0ac\uc6a9\uc790\uc758 \uc6d0\ub798 \uc6b0\uc120\uc21c\uc704 \uc575\ucee4\ub9c1"}], "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0}}}, {"id": "eval-5-agency-return-old_skill", "prompt": "[\uba40\ud2f0\ud134] \uad50\uc721 \ud50c\ub7ab\ud3fc \uae30\ud68d 5\ud134 \ub300\ud654. Turn 3\ubd80\ud130 \uc0ac\uc6a9\uc790 \uc751\ub2f5\uc774 \uc810\uc810 \uc9e7\uc544\uc9d0 ('\ub124 \uc88b\uc544\uc694' \u2192 '\uadf8\uac78\ub85c \ud558\uc8e0' \u2192 '\ub124'). Agency return \uac1c\uc785 \ubc1c\ub3d9 \uc5ec\ubd80 \ud14c\uc2a4\ud2b8.", "eval_id": 5, "outputs": [{"name": "response.md", "type": "text", "content": "\uc7a0\uae50, \uc81c\uac00 \ud55c \ubc88\uc5d0 \ub108\ubb34 \ub9ce\uc740 \uac78 \uc3df\uc544\ub0c8\ub124\uc694. \ud55c \ubc1c \ubb3c\ub7ec\uc11c \ubcfc\uac8c\uc694.\n\n\uc9c0\uae08\uae4c\uc9c0 \ud655\uc2e4\ud788 \uc815\ud574\uc9c4 \uac74 \uc774\uac70\uc608\uc694:\n- **\uc5d0\ub514\ud130**: Monaco\n- **\ucf54\ub4dc \uc2e4\ud589**: Docker \ucee8\ud14c\uc774\ub108\n- **\uc778\ud504\ub77c**: AWS ECS Fargate\n- **\ud504\ub860\ud2b8\uc5d4\ub4dc**: React + WebSocket\n\n\ub098\uba38\uc9c0 \u2014 DB \uad6c\uc131, \uc778\uc99d \ubc29\uc2dd, \uacb0\uc81c \ubaa8\ub378, \uacfc\uc815 \uad6c\uc870, \uc790\ub3d9 \ucc44\uc810 \u2014 \uc774\uac74 \uc544\uc9c1 \uc5f4\ub824\uc788\ub294 \uc0c1\ud0dc\uace0, \ud55c\uaebc\ubc88\uc5d0 \ub2e4 \uc815\ud560 \ud544\uc694 \uc5c6\uc5b4\uc694.\n\n\uc9c0\uae08 \uc5b4\ub5bb\uac8c \ud558\uace0 \uc2f6\uc73c\uc138\uc694?\n\n**(A)** \uac00\uc7a5 \uad81\uae08\ud558\uac70\ub098 \uba3c\uc800 \uc815\ud558\uace0 \uc2f6\uc740 \ubd80\ubd84 \ud558\ub098\ub97c \uace8\ub77c\uc11c \uae4a\uc774 \ud30c\uae30\n**(B)** \uc9c0\uae08\uae4c\uc9c0 \uc815\ud55c \uac83\ub4e4\ub9cc \uac00\uc9c0\uace0 \uac04\ub2e8\ud55c MVP \ubc94\uc704\ub97c \uc7a1\uae30\n**(C)** \uc544\uc608 \ub2e4\ub978 \uad00\uc810 \u2014 \uc608\ub97c \ub4e4\uc5b4 \ud559\uc0dd \uc785\uc7a5\uc5d0\uc11c\uc758 \uccab \ud559\uc2b5 \uacbd\ud5d8 \ud750\ub984\ubd80\ud130 \uc124\uacc4\ud558\uae30\n\n\uc5b4\ub5a4 \uac8c \ub04c\ub9ac\uc138\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ube44\uc804\uacf5\uc790\ub97c \uc704\ud55c \ube0c\ub77c\uc6b0\uc800 \uae30\ubc18 \uc628\ub77c\uc778 \ucf54\ub529 \uad50\uc721 \ud50c\ub7ab\ud3fc \uad6c\ucd95 (\ud30c\uc774\uc36c \uae30\ucd08 \uacfc\uc815\ubd80\ud130 \uc2dc\uc791, \ub2e4\uc911 \uc5b8\uc5b4 \ud655\uc7a5 \uc608\uc815)\n\n# Elements\n- CodeEditor [type: component] \u2014 Monaco Editor\n- CodeExecutionEnv [type: architecture] \u2014 Docker \ucee8\ud14c\uc774\ub108 \uae30\ubc18 \ucf54\ub4dc \uc2e4\ud589\n- CourseMgmt [type: feature] \u2014 \ucee4\ub9ac\ud058\ub7fc/\uacfc\uc815 \uad00\ub9ac\n- AutoGrading [type: feature] \u2014 \uc790\ub3d9 \ucc44\uc810 \uc2dc\uc2a4\ud15c\n- Frontend [type: architecture] \u2014 React + Monaco + WebSocket\n- Backend [type: architecture] \u2014 \uacfc\uc815 \uad00\ub9ac API, \ucf54\ub4dc \uc2e4\ud589 \uc11c\ube44\uc2a4\n- Infra [type: architecture] \u2014 AWS ECS Fargate\n- Database [type: data] \u2014 DB \uad6c\uc131\n- Auth [type: feature] \u2014 \uc778\uc99d \uc2dc\uc2a4\ud15c\n- Payment [type: feature] \u2014 \uacb0\uc81c \uc2dc\uc2a4\ud15c\n- CourseStructure [type: concept] \u2014 \uacfc\uc815 \uad6c\uc870 (\ubaa8\ub4c8\uc2dd/\ud504\ub85c\uc81d\ud2b8/\ud63c\ud569)\n\n# Relations\n- CodeEditor \u2192communicates-with\u2192 Backend\n- Backend \u2192depends-on\u2192 CodeExecutionEnv\n- CodeExecutionEnv \u2192depends-on\u2192 Infra\n- AutoGrading \u2192depends-on\u2192 CodeExecutionEnv\n- CourseMgmt \u2192depends-on\u2192 Database\n- Auth \u2192depends-on\u2192 Database\n- Payment \u2192depends-on\u2192 Auth\n\n# Decided\n- CodeEditor: Monaco Editor (\uc790\ub3d9\uc644\uc131 \ub4f1 \uae30\ub2a5\uc774 \ud48d\ubd80)\n- CodeExecutionEnv: Docker \ucee8\ud14c\uc774\ub108 (\ub2e4\uc911 \uc5b8\uc5b4 \ud655\uc7a5 \uac00\ub2a5\uc131)\n- Infra: AWS ECS Fargate (\uc18c\uaddc\ubaa8 \ud300\uc5d0 \uc801\ud569 \u2014 \ud300 \uaddc\ubaa8 \ubbf8\ud655\uc778\uc774\ub098 \uc0ac\uc6a9\uc790\uac00 \ub3d9\uc758)\n- Frontend: React + Monaco Editor + WebSocket\n\n# Undecided\n- CourseStructure: [\ubaa8\ub4c8\uc2dd | \ud504\ub85c\uc81d\ud2b8 \uae30\ubc18 | \ud63c\ud569\ud615] (Related: CourseMgmt)\n- Database: [PostgreSQL+DynamoDB+Redis \uad6c\uc131] (Related: CourseMgmt, Auth) \u2014 \uc81c\uc548\ub428, \ud655\uc778 \ubd88\uba85\ud655\n- Auth: [\uc18c\uc15c \ub85c\uadf8\uc778 | \uc790\uccb4 \uc774\uba54\uc77c | \ub458 \ub2e4] (Related: Auth)\n- Payment: [\uad6c\ub3c5\uc81c | \uacfc\uc815\ubcc4 \uad6c\ub9e4 | \ubb34\ub8cc \uccb4\ud5d8 | \ud658\ubd88 \uc815\ucc45] (Related: Payment)\n- AutoGrading: [\ud14c\uc2a4\ud2b8 \ucf00\uc774\uc2a4 \uae30\ubc18, \ucf54\ub4dc \uc2a4\ud0c0\uc77c \uac80\uc0ac, \uc2e4\ud589 \uc81c\ud55c] \u2014 \uc138\ubd80 \uc124\uacc4 \ubbf8\uc815\n- TeamSize: \ud300 \uaddc\ubaa8 \ubbf8\ud655\uc778 (ECS \uc120\ud0dd \uadfc\uac70\uc640 \uc5f0\uad00)\n\n# Active Discussion\n- \uc0ac\uc6a9\uc790\uac00 \"\ub124\"\ub85c\ub9cc \uc751\ub2f5 \u2014 \ubb34\uc5c7\uc5d0 \ub3d9\uc758\ud558\ub294\uc9c0 \ubd88\uba85\ud655 (DB? \uc778\uc99d? \uacb0\uc81c? \uc804\ubd80?)\n- \uc0ac\uc6a9\uc790 \uc5d0\uc774\uc804\uc2dc \uc800\ud558 \uac10\uc9c0: Turn 3\ubd80\ud130 \uc9e7\uc740 \uc218\ub3d9\uc801 \uc751\ub2f5 \ud328\ud134\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 5\n"}], "grading": {"expectations": [{"text": "\uc0c8\ub85c\uc6b4 \uae30\uc220\uc801 \uc635\uc158\uc774\ub098 \uacb0\uc815\uc0ac\ud56d\uc744 \uc81c\uc2dc\ud558\uc9c0 \uc54a\uc74c (push-mode \uc911\ub2e8)", "passed": true, "evidence": "\uc0c8\ub85c\uc6b4 \uae30\uc220 \uc635\uc158 \uc5c6\uc774, \uc815\ub9ac\uc640 \uc120\ud0dd\uc9c0 \uc81c\uc2dc\uc5d0 \uc9d1\uc911"}, {"text": "\uc0ac\uc6a9\uc790\uc758 \uc218\ub3d9\uc801 \uc751\ub2f5 \ud328\ud134\uc744 \uc778\uc2dd\ud55c \ubc18\uc751 (\uba85\uc2dc\uc801 \ub610\ub294 \uc554\ubb35\uc801)", "passed": true, "evidence": "'\uc7a0\uae50, \uc81c\uac00 \ud55c \ubc88\uc5d0 \ub108\ubb34 \ub9ce\uc740 \uac78 \uc3df\uc544\ub0c8\ub124\uc694. \ud55c \ubc1c \ubb3c\ub7ec\uc11c \ubcfc\uac8c\uc694.' \u2014 \uba85\uc2dc\uc801 \uc778\uc2dd"}, {"text": "\uad6c\uccb4\uc801\uc774\uace0 \uc81c\ud55c\ub41c \uc120\ud0dd\uc9c0(A/B/C \ud615\uc2dd \ub4f1)\ub97c \uc81c\uc2dc\ud558\uc5ec \uc8fc\ub3c4\uad8c \ud658\uc6d0", "passed": true, "evidence": "(A) \uba3c\uc800 \uc815\ud558\uace0 \uc2f6\uc740 \ubd80\ubd84 \ud558\ub098 \uace8\ub77c\uc11c \uae4a\uc774 \ud30c\uae30, (B) MVP \ubc94\uc704 \uc7a1\uae30, (C) \ud559\uc0dd \uacbd\ud5d8 \ud750\ub984 \uc124\uacc4 \u2014 3\uac1c \uc120\ud0dd\uc9c0"}, {"text": "\uc9c0\uae08\uae4c\uc9c0 \uacb0\uc815\ub41c \uc0ac\ud56d\uc744 \uac04\ub7b5\ud788 \uc815\ub9ac", "passed": true, "evidence": "Monaco, Docker, ECS Fargate, React + WebSocket 4\uac1c \ud56d\ubaa9 \uac04\ub7b5 \uc815\ub9ac"}, {"text": "\ub300\ud654 \ud1a4\uc774 push\uc5d0\uc11c pull\ub85c \uc804\ud658\ub428", "passed": true, "evidence": "'\uc5b4\ub5a4 \uac8c \ub04c\ub9ac\uc138\uc694?' \u2014 \uc0ac\uc6a9\uc790\uc5d0\uac8c \uc8fc\ub3c4\uad8c \uc774\uc804"}], "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}}}, {"id": "eval-5-agency-return-with_skill", "prompt": "[\uba40\ud2f0\ud134] \uad50\uc721 \ud50c\ub7ab\ud3fc \uae30\ud68d 5\ud134 \ub300\ud654. Turn 3\ubd80\ud130 \uc0ac\uc6a9\uc790 \uc751\ub2f5\uc774 \uc810\uc810 \uc9e7\uc544\uc9d0 ('\ub124 \uc88b\uc544\uc694' \u2192 '\uadf8\uac78\ub85c \ud558\uc8e0' \u2192 '\ub124'). Agency return \uac1c\uc785 \ubc1c\ub3d9 \uc5ec\ubd80 \ud14c\uc2a4\ud2b8.", "eval_id": 5, "outputs": [{"name": "response.md", "type": "text", "content": "\uc7a0\uae50, \uc81c\uac00 \ud55c \ubc88\uc5d0 \ub108\ubb34 \ub9ce\uc774 \ub358\uc9c4 \uac83 \uac19\uc544\uc694. DB, \uc778\uc99d, \uacb0\uc81c\uae4c\uc9c0 \ud55c\uaebc\ubc88\uc5d0 \ubb3c\uc5b4\ubd24\ub294\ub370 \u2014 \uc544\uc9c1 \uadf8 \ub2e8\uacc4\uac00 \uc544\ub2d0 \uc218\ub3c4 \uc788\uac70\ub4e0\uc694.\n\n\uc9c0\uae08\uae4c\uc9c0 \ud655\uc2e4\ud788 \uc815\ud574\uc9c4 \uac74 \uc774\uac70\uc608\uc694:\n- **Monaco \uc5d0\ub514\ud130 + Docker \ucee8\ud14c\uc774\ub108 + ECS Fargate** \u2014 \uae30\uc220 \uc2a4\ud0dd\uc758 \ud070 \ubf08\ub300\ub294 \uc7a1\ud614\uc5b4\uc694\n- **\ube44\uc804\uacf5\uc790 \ub300\uc0c1 \ud30c\uc774\uc36c \uae30\ucd08 \uacfc\uc815** \u2014 \ubc29\ud5a5\ub3c4 \uba85\ud655\ud558\uace0\uc694\n\n\uc544\uc9c1 \uc5f4\ub824 \uc788\ub294 \uac8c 7\uac1c \uc815\ub3c4 \ub418\ub294\ub370, \ud55c\uaebc\ubc88\uc5d0 \ub2e4 \uc815\ud560 \ud544\uc694\ub294 \uc5c6\uc5b4\uc694.\n\n\uc9c0\uae08 \uac00\uc7a5 \uad81\uae08\ud55c \uac8c \ubb54\uac00\uc694? \uc608\ub97c \ub4e4\uba74:\n- **(A)** \ud559\uc0dd\uc774 \uc2e4\uc81c\ub85c \uacbd\ud5d8\ud558\ub294 \ud750\ub984 \u2014 \uac00\uc785\ud558\uace0, \uacfc\uc815 \uace0\ub974\uace0, \ucf54\ub4dc \uce58\uace0, \ucc44\uc810\ubc1b\ub294 \uacfc\uc815\uc744 \uad6c\uccb4\ud654\ud558\uae30\n- **(B)** \uae30\uc220\uc801\uc73c\ub85c \uc81c\uc77c \uba3c\uc800 \ub9cc\ub4e4\uc5b4\uc57c \ud560 \uac83 \u2014 MVP\uc5d0 \ubb58 \ub123\uace0 \ubb58 \ube84\uc9c0 \uc815\ud558\uae30\n- **(C)** \uc544\ub2c8\uba74 \uc81c\uac00 \ub108\ubb34 \uc55e\uc11c\ub098\uac04 \ubd80\ubd84\uc774 \uc788\uc73c\uba74 \uac70\uae30\ubd80\ud130 \ub2e4\uc2dc \uc598\uae30\ud558\uae30\n\n\uc5b4\ub514\uc11c\ubd80\ud130 \uac00\uace0 \uc2f6\uc73c\uc138\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ube44\uc804\uacf5\uc790 \ub300\uc0c1 \uc628\ub77c\uc778 \ucf54\ub529 \uad50\uc721 \ud50c\ub7ab\ud3fc \uad6c\ucd95 (\ud30c\uc774\uc36c \uae30\ucd08\ubd80\ud130, \ube0c\ub77c\uc6b0\uc800\uc5d0\uc11c \ucf54\ub4dc \uc2e4\ud589)\n\n# Elements\n- CodeEditor [type: component] \u2014 Monaco Editor \uc120\ud0dd\ub428\n- CodeExecutionEnv [type: architecture] \u2014 Docker \ucee8\ud14c\uc774\ub108 \uae30\ubc18\n- CourseMgmt [type: feature] \u2014 \ucee4\ub9ac\ud058\ub7fc \uad6c\uc870, \uc9c4\ub3c4 \ucd94\uc801\n- AutoGrading [type: feature] \u2014 \ucf54\ub4dc \uc81c\ucd9c + \uc790\ub3d9 \ucc44\uc810\n- Frontend [type: architecture] \u2014 React + Monaco + WebSocket\n- Backend [type: architecture] \u2014 \uacfc\uc815 \uad00\ub9ac API, \ucf54\ub4dc \uc2e4\ud589 \uc11c\ube44\uc2a4\n- Infra [type: architecture] \u2014 AWS ECS Fargate\n- DB [type: data] \u2014 PostgreSQL, DynamoDB/S3, Redis \uc81c\uc548\ub428\n- Auth [type: feature] \u2014 \uc18c\uc15c/\uc790\uccb4 \uc774\uba54\uc77c \ubbf8\uacb0\uc815\n- Payment [type: feature] \u2014 \uad6c\ub3c5\uc81c/\uacfc\uc815\ubcc4 \ubbf8\uacb0\uc815\n\n# Relations\n- Frontend \u2192depends-on\u2192 CodeEditor\n- Frontend \u2192communicates-with\u2192 Backend\n- Backend \u2192depends-on\u2192 CodeExecutionEnv\n- CodeExecutionEnv \u2192depends-on\u2192 Infra\n- AutoGrading \u2192depends-on\u2192 CodeExecutionEnv\n- CourseMgmt \u2192contains\u2192 AutoGrading\n- Backend \u2192depends-on\u2192 DB\n- Auth \u2192depends-on\u2192 DB\n\n# Decided\n- \ucf54\ub4dc \uc5d0\ub514\ud130: Monaco Editor (\uc790\ub3d9\uc644\uc131 \uc6b0\uc218)\n- \ucf54\ub4dc \uc2e4\ud589 \ud658\uacbd: Docker \ucee8\ud14c\uc774\ub108 (\ub2e4\uc911 \uc5b8\uc5b4 \ud655\uc7a5 \uace0\ub824)\n- \uc778\ud504\ub77c: AWS ECS Fargate (\uc18c\uaddc\ubaa8 \ud300 \uc801\ud569 \u2014 \ub2e8, \ud300 \uaddc\ubaa8 \ud655\uc778 \uc548 \ub428)\n- \ub300\uc0c1 \uc0ac\uc6a9\uc790: \ube44\uc804\uacf5\uc790 \uc785\ubb38\uc790\n- \uccab \uacfc\uc815: \ud30c\uc774\uc36c \uae30\ucd08\n\n# Undecided\n- \uacfc\uc815 \uad6c\uc870: \ubaa8\ub4c8\uc2dd | \ud504\ub85c\uc81d\ud2b8 \uae30\ubc18 | \ud63c\ud569\ud615 (Related: CourseMgmt)\n- DB \uc120\ud0dd: PostgreSQL+DynamoDB+Redis \uc870\ud569 \ud655\uc815 \uc5ec\ubd80 (Related: DB, Backend)\n- \uc778\uc99d \ubc29\uc2dd: \uc18c\uc15c \ub85c\uadf8\uc778 | \uc790\uccb4 \uc774\uba54\uc77c | \ub458 \ub2e4 (Related: Auth)\n- \uacb0\uc81c \ubaa8\ub378: \uad6c\ub3c5\uc81c | \uacfc\uc815\ubcc4 \uad6c\ub9e4 (Related: Payment)\n- \ud300 \uaddc\ubaa8: \ubbf8\ud655\uc778 (Related: Infra)\n- \uc790\ub3d9 \ucc44\uc810 \uc124\uacc4: \ud14c\uc2a4\ud2b8 \ucf00\uc774\uc2a4/\ucf54\ub4dc \uc2a4\ud0c0\uc77c/\ub9ac\uc18c\uc2a4 \uc81c\ud55c \uc138\ubd80 \uc0ac\ud56d (Related: AutoGrading)\n- \ucee8\ud14c\uc774\ub108 \ubcf4\uc548 \uc815\ucc45: \uaca9\ub9ac, \uc2dc\uac04 \uc81c\ud55c \uc138\ubd80 \uc0ac\ud56d (Related: CodeExecutionEnv)\n\n# Active Discussion\n- Turn 4\uc5d0\uc11c \uc5ec\ub7ec \uc8fc\uc81c \ub3d9\uc2dc \uc81c\uc2dc\ub428 (DB, \uc778\uc99d, \uacb0\uc81c) \u2014 \uc0ac\uc6a9\uc790\uac00 \"\ub124\"\ub85c\ub9cc \uc751\ub2f5\n- Agency Return \uac1c\uc785 \ud544\uc694: Turn 3\ubd80\ud130 \uc751\ub2f5\uc774 \uc810\uc810 \uc9e7\uc544\uc9c0\uace0 \uc218\ub3d9\uc801\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 5\n"}], "grading": {"expectations": [{"text": "\uc0c8\ub85c\uc6b4 \uae30\uc220\uc801 \uc635\uc158\uc774\ub098 \uacb0\uc815\uc0ac\ud56d\uc744 \uc81c\uc2dc\ud558\uc9c0 \uc54a\uc74c (push-mode \uc911\ub2e8)", "passed": true, "evidence": "DB, \uc778\uc99d, \uacb0\uc81c \ub4f1 \uc774\uc804 \ud134\uc5d0\uc11c \ub358\uc9c4 \uc0c8 \uc635\uc158\uc744 \uc774\uc5b4\uac00\uc9c0 \uc54a\uace0 \uc644\uc804\ud788 \uba48\ucda4"}, {"text": "\uc0ac\uc6a9\uc790\uc758 \uc218\ub3d9\uc801 \uc751\ub2f5 \ud328\ud134\uc744 \uc778\uc2dd\ud55c \ubc18\uc751 (\uba85\uc2dc\uc801 \ub610\ub294 \uc554\ubb35\uc801)", "passed": true, "evidence": "'\uc7a0\uae50, \uc81c\uac00 \ud55c \ubc88\uc5d0 \ub108\ubb34 \ub9ce\uc774 \ub358\uc9c4 \uac83 \uac19\uc544\uc694. DB, \uc778\uc99d, \uacb0\uc81c\uae4c\uc9c0 \ud55c\uaebc\ubc88\uc5d0 \ubb3c\uc5b4\ubd24\ub294\ub370 \u2014 \uc544\uc9c1 \uadf8 \ub2e8\uacc4\uac00 \uc544\ub2d0 \uc218\ub3c4 \uc788\uac70\ub4e0\uc694.' \u2014 \uba85\uc2dc\uc801 \uc778\uc2dd"}, {"text": "\uad6c\uccb4\uc801\uc774\uace0 \uc81c\ud55c\ub41c \uc120\ud0dd\uc9c0(A/B/C \ud615\uc2dd \ub4f1)\ub97c \uc81c\uc2dc\ud558\uc5ec \uc8fc\ub3c4\uad8c \ud658\uc6d0", "passed": true, "evidence": "(A) \ud559\uc0dd \uacbd\ud5d8 \ud750\ub984 \uad6c\uccb4\ud654, (B) MVP \ubc94\uc704 \uc815\ud558\uae30, (C) \uc55e\uc11c\ub098\uac04 \ubd80\ubd84 \ub2e4\uc2dc \uc598\uae30 \u2014 3\uac1c \uc120\ud0dd\uc9c0"}, {"text": "\uc9c0\uae08\uae4c\uc9c0 \uacb0\uc815\ub41c \uc0ac\ud56d\uc744 \uac04\ub7b5\ud788 \uc815\ub9ac", "passed": true, "evidence": "'Monaco \uc5d0\ub514\ud130 + Docker \ucee8\ud14c\uc774\ub108 + ECS Fargate \u2014 \uae30\uc220 \uc2a4\ud0dd\uc758 \ud070 \ubf08\ub300\ub294 \uc7a1\ud614\uc5b4\uc694'"}, {"text": "\ub300\ud654 \ud1a4\uc774 push\uc5d0\uc11c pull\ub85c \uc804\ud658\ub428", "passed": true, "evidence": "'\uc5b4\ub514\uc11c\ubd80\ud130 \uac00\uace0 \uc2f6\uc73c\uc138\uc694?' \u2014 \uc0ac\uc6a9\uc790\uc5d0\uac8c \ubc29\ud5a5 \uacb0\uc815\uad8c \uc644\uc804 \uc774\uc804"}], "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}}}, {"id": "eval-6-focus-narrowing-old_skill", "prompt": "[\uba40\ud2f0\ud134] SaaS \uc54c\ub9bc \uc2dc\uc2a4\ud15c \uc124\uacc4 2\ud134 \ub300\ud654. Turn 2\uc5d0\uc11c \uc0ac\uc6a9\uc790\uac00 5+ \ud1a0\ud53d\uc744 \ub3d9\uc2dc\uc5d0 \uaebc\ub0c4. Focus narrowing \uac1c\uc785 \ubc1c\ub3d9 \uc5ec\ubd80 \ud14c\uc2a4\ud2b8.", "eval_id": 6, "outputs": [{"name": "response.md", "type": "text", "content": "\uc88b\uc740 \uace0\ubbfc\ub4e4\uc774\uc5d0\uc694. \ud55c \ubc88\uc5d0 \ub9ce\uc740 \uac78 \uaebc\ub0b4\uc8fc\uc168\ub294\ub370, \uc9c0\uae08 \ub3d9\uc2dc\uc5d0 \ub3cc\uc544\uac00\ub294 \uc2a4\ub808\ub4dc\uac00 \uaf64 \ub9ce\uc544\uc694. \uc815\ub9ac\ud574 \ubcf4\uba74 \uc774\ub7f0 \uac83\ub4e4\uc774 \uc5f4\ub824 \uc788\uc5b4\uc694:\n\n1. **\uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c \uc544\ud0a4\ud14d\ucc98** \u2014 \uc774\ubca4\ud2b8 \uc18c\uc2f1 vs pub/sub. \uc544\uc9c1 \ud0d0\uc0c9 \ub2e8\uacc4.\n2. **\uc2e4\uc2dc\uac04 \uc54c\ub9bc \uc778\ud504\ub77c** \u2014 WebSocket \ud544\uc694 \uc5ec\ubd80, \uc778\ud504\ub77c \uc9c0\uc6d0 \ud655\uc778 \ud544\uc694.\n3. **\uc54c\ub9bc \uc2a4\ucf00\uc904\ub9c1** \u2014 \ub9c8\uac10 3\uc77c \uc804/1\uc77c \uc804/\ub2f9\uc77c \uac19\uc740 \uc2dc\uac04 \uae30\ubc18 \uc54c\ub9bc.\n4. **\uc54c\ub9bc \uadf8\ub8f9\ud551/\ubc30\uce58** \u2014 \ub2e4\ub7c9 \uc54c\ub9bc\uc744 \ubb36\uc5b4\uc11c \ubcf4\ub0b4\ub294 \uc804\ub7b5.\n5. **\uc54c\ub9bc \ud15c\ud50c\ub9bf \uc2dc\uc2a4\ud15c** \u2014 \ucc44\ub110\ubcc4 \ud15c\ud50c\ub9bf \uad00\ub9ac.\n6. **\uc54c\ub9bc \uc124\uc815 UI** \u2014 \uc0ac\uc6a9\uc790\uac00 \uc54c\ub9bc\uc744 \ucee4\uc2a4\ud130\ub9c8\uc774\uc988\ud558\ub294 \ud654\uba74.\n\n\uc774 \uc911\uc5d0\uc11c \uc5b4\ub514\ubd80\ud130 \uc9d1\uc911\ud558\uba74 \uc88b\uc744\uae4c\uc694?\n\n\uc81c\uac00 \ubcf4\uae30\uc5d0 **\uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c \uc544\ud0a4\ud14d\ucc98**\uac00 \uac00\uc7a5 \uc120\ud589\ub3fc\uc57c \ud560 \uac83 \uac19\uc740 \uac8c, \uc774\uac8c \uacb0\uc815\ub3fc\uc57c \uc54c\ub9bc \uc2a4\ucf00\uc904\ub9c1\uc774\ub098 \uadf8\ub8f9\ud551 \uac19\uc740 \ub098\uba38\uc9c0 \uc124\uacc4\uac00 \uadf8 \uc704\uc5d0 \uc62c\ub77c\uac08 \uc218 \uc788\uac70\ub4e0\uc694. \uc774\ubca4\ud2b8 \uc18c\uc2f1\uacfc pub/sub\uc740 \uc4f0\uc784\uc0c8\uac00 \ub2e4\ub978\ub370, \uc5b4\ub5a4 \uac78 \uace0\ub824\ud558\uace0 \uacc4\uc2e0\uc9c0 \uc880 \ub354 \uc774\uc57c\uae30\ud574 \ubcfc\uae4c\uc694? \uc544\ub2c8\uba74 \ub2e4\ub978 \uc2a4\ub808\ub4dc\ubd80\ud130 \uc7a1\uace0 \uc2f6\uc73c\uc2dc\uba74 \uadf8\uac83\ub3c4 \uad1c\ucc2e\uc544\uc694.\n\n\ub098\uba38\uc9c0 \uc8fc\uc81c\ub4e4\uc740 \uc0ac\ub77c\uc9c0\ub294 \uac8c \uc544\ub2c8\ub77c \uc21c\uc11c\ub300\ub85c \ub2e4\ub8f0 \uac70\uc608\uc694.\n"}, {"name": "state.md", "type": "text", "content": "# Goal\nSaaS \ud504\ub85c\uc81d\ud2b8 \uad00\ub9ac \ub3c4\uad6c\uc758 \uc54c\ub9bc \uc2dc\uc2a4\ud15c \uc124\uacc4\n\n# Elements\n- NotificationSystem [type: architecture]\n- EventSystem [type: architecture]\n- EmailChannel [type: feature]\n- SlackChannel [type: feature]\n- InAppChannel [type: feature]\n- NotificationSettingsUI [type: feature]\n- NotificationTemplates [type: component]\n- NotificationScheduling [type: feature]\n- WebSocket [type: architecture]\n- NotificationGrouping [type: feature]\n\n# Relations\n- NotificationSystem \u2192depends-on\u2192 EventSystem\n- NotificationSystem \u2192contains\u2192 EmailChannel\n- NotificationSystem \u2192contains\u2192 SlackChannel\n- NotificationSystem \u2192contains\u2192 InAppChannel\n- InAppChannel \u2192depends-on\u2192 WebSocket\n- NotificationSystem \u2192contains\u2192 NotificationTemplates\n- NotificationSystem \u2192contains\u2192 NotificationScheduling\n- NotificationSystem \u2192contains\u2192 NotificationGrouping\n- NotificationSettingsUI \u2192depends-on\u2192 NotificationSystem\n\n# Decided\n- \uc54c\ub9bc \ucc44\ub110: \uc774\uba54\uc77c, \uc2ac\ub799, \uc778\uc571 \uc138 \uac00\uc9c0 (\uc0ac\uc6a9\uc790\uac00 \uba85\uc2dc\uc801\uc73c\ub85c \uacb0\uc815)\n\n# Undecided\n- \uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c \uc544\ud0a4\ud14d\ucc98: [\uc774\ubca4\ud2b8 \uc18c\uc2f1 | \ub2e8\uc21c pub/sub] (Related: EventSystem, NotificationSystem)\n- \uc2e4\uc2dc\uac04 \uc778\ud504\ub77c: [WebSocket \ub3c4\uc785 \uc5ec\ubd80] (Related: WebSocket, InAppChannel)\n- \uc54c\ub9bc \uc2a4\ucf00\uc904\ub9c1 \ubc29\uc2dd: [\uad6c\uccb4\uc801 \ubc29\uc2dd \ubbf8\uc815] (Related: NotificationScheduling)\n- \uc54c\ub9bc \uadf8\ub8f9\ud551/\ubc30\uce58 \uc804\ub7b5: [\uad6c\uccb4\uc801 \ubc29\uc2dd \ubbf8\uc815] (Related: NotificationGrouping)\n- \uc54c\ub9bc \ud15c\ud50c\ub9bf \uc2dc\uc2a4\ud15c: [\uad6c\uccb4\uc801 \ubc29\uc2dd \ubbf8\uc815] (Related: NotificationTemplates)\n- \uc54c\ub9bc \uc124\uc815 UI: [\uad6c\uccb4\uc801 \ubc29\uc2dd \ubbf8\uc815] (Related: NotificationSettingsUI)\n\n# Active Discussion\n- \uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c \uc544\ud0a4\ud14d\ucc98\n- \uc54c\ub9bc \uc2a4\ucf00\uc904\ub9c1\n- \uc54c\ub9bc \uadf8\ub8f9\ud551/\ubc30\uce58\n- \uc2e4\uc2dc\uac04 \uc54c\ub9bc \uc778\ud504\ub77c\n- \uc54c\ub9bc \ud15c\ud50c\ub9bf \uc2dc\uc2a4\ud15c\n- \uc54c\ub9bc \uc124\uc815 UI\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 2\n"}], "grading": {"expectations": [{"text": "3\uac1c \uc774\uc0c1\uc758 \ubcd1\ub82c \ub17c\uc758 \uc2a4\ub808\ub4dc\ub97c \uba85\uc2dc\uc801\uc73c\ub85c \uc2dd\ubcc4\ud558\uace0 \uc774\ub984 \ubd99\uc784", "passed": true, "evidence": "6\uac1c \uc2a4\ub808\ub4dc \ubc88\ud638 \ub9ac\uc2a4\ud2b8: \uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c \uc544\ud0a4\ud14d\ucc98, \uc2e4\uc2dc\uac04 \uc54c\ub9bc \uc778\ud504\ub77c, \uc54c\ub9bc \uc2a4\ucf00\uc904\ub9c1, \uc54c\ub9bc \uadf8\ub8f9\ud551/\ubc30\uce58, \uc54c\ub9bc \ud15c\ud50c\ub9bf \uc2dc\uc2a4\ud15c, \uc54c\ub9bc \uc124\uc815 UI"}, {"text": "\uac01 \uc2a4\ub808\ub4dc\uc758 \uac04\ub7b5\ud55c \uc0c1\ud0dc(\ucd08\uae30 \ud0d0\uc0c9, \ubbf8\uacb0\uc815 \ub4f1)\ub97c \ud45c\uc2dc", "passed": true, "evidence": "'\ud0d0\uc0c9 \ub2e8\uacc4' \uba85\uc2dc"}, {"text": "\uc0ac\uc6a9\uc790\uc5d0\uac8c \uc5b4\ub5a4 \uc2a4\ub808\ub4dc\ubd80\ud130 \uc9d1\uc911\ud560\uc9c0 \uc120\ud0dd\uc744 \uc694\uccad", "passed": true, "evidence": "'\uc544\ub2c8\uba74 \ub2e4\ub978 \uc2a4\ub808\ub4dc\ubd80\ud130 \uc7a1\uace0 \uc2f6\uc73c\uc2dc\uba74 \uadf8\uac83\ub3c4 \uad1c\ucc2e\uc544\uc694'"}, {"text": "\ubaa8\ub4e0 \uc2a4\ub808\ub4dc\ub97c \ud55c\uaebc\ubc88\uc5d0 \ud574\uacb0\ud558\ub824 \ud558\uc9c0 \uc54a\uc74c", "passed": true, "evidence": "\uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c\uc5d0\ub9cc \uc9d1\uc911, '\ub098\uba38\uc9c0 \uc8fc\uc81c\ub4e4\uc740 \uc21c\uc11c\ub300\ub85c \ub2e4\ub8f0 \uac70\uc608\uc694'"}, {"text": "\uc758\uc874\uc131 \uae30\ubc18 \uc21c\uc11c \uc81c\uc548 (\uc608: \uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c\uc774 \uc54c\ub9bc\ubcf4\ub2e4 \uc120\ud589)", "passed": true, "evidence": "'\uc774\uac8c \uacb0\uc815\ub3fc\uc57c \uc54c\ub9bc \uc2a4\ucf00\uc904\ub9c1\uc774\ub098 \uadf8\ub8f9\ud551 \uac19\uc740 \ub098\uba38\uc9c0 \uc124\uacc4\uac00 \uadf8 \uc704\uc5d0 \uc62c\ub77c\uac08 \uc218 \uc788\uac70\ub4e0\uc694'"}], "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}}}, {"id": "eval-6-focus-narrowing-with_skill", "prompt": "[\uba40\ud2f0\ud134] SaaS \uc54c\ub9bc \uc2dc\uc2a4\ud15c \uc124\uacc4 2\ud134 \ub300\ud654. Turn 2\uc5d0\uc11c \uc0ac\uc6a9\uc790\uac00 5+ \ud1a0\ud53d\uc744 \ub3d9\uc2dc\uc5d0 \uaebc\ub0c4. Focus narrowing \uac1c\uc785 \ubc1c\ub3d9 \uc5ec\ubd80 \ud14c\uc2a4\ud2b8.", "eval_id": 6, "outputs": [{"name": "response.md", "type": "text", "content": "\uc88b\uc544\uc694, \uc911\uc694\ud55c \uc8fc\uc81c\ub4e4\uc744 \ud55c\uaebc\ubc88\uc5d0 \uaebc\ub0b4\uc8fc\uc168\ub124\uc694. \uc815\ub9ac\ud574\ubcf4\uba74 \uc9c0\uae08 \ub3d9\uc2dc\uc5d0 \uc5f4\ub9b0 \uc904\uae30\uac00 6\uac1c\uc785\ub2c8\ub2e4:\n\n1. **\uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c \uc124\uacc4** \u2014 \uc774\ubca4\ud2b8 \uc18c\uc2f1 vs Pub/Sub (\uc544\uc9c1 \ud0d0\uc0c9 \ub2e8\uacc4)\n2. **\uc54c\ub9bc \uc2a4\ucf00\uc904\ub9c1** \u2014 \ub9c8\uac10 \uae30\uc900 3\uc77c/1\uc77c/\ub2f9\uc77c \ubc1c\uc1a1 (\uc544\uc774\ub514\uc5b4\ub294 \uc788\uc9c0\ub9cc \uad6c\uc870 \ubbf8\uc815)\n3. **\uc54c\ub9bc \uadf8\ub8f9\ud551/\ubc30\uce58** \u2014 \ud3ed\uc8fc \ubc29\uc9c0 (\uc544\uc774\ub514\uc5b4 \ub2e8\uacc4)\n4. **\uc2e4\uc2dc\uac04 \uc54c\ub9bc \uc778\ud504\ub77c** \u2014 WebSocket \uc9c0\uc6d0 \ud655\uc778 \ud544\uc694 (\uc678\ubd80 \ud655\uc778 \ud544\uc694)\n5. **\uc54c\ub9bc \ud15c\ud50c\ub9bf \uc2dc\uc2a4\ud15c** \u2014 \uad6c\uc870 \ubbf8\uc815\n6. **\uc54c\ub9bc \uc124\uc815 UI** \u2014 \uad6c\uc870 \ubbf8\uc815\n\n\uc774 \uc911\uc5d0\uc11c \uc9c1\uc811 \ub9d0\uc500\ud558\uc2e0 \uac83\ucc98\ub7fc **\uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c\uc774 \ub098\uba38\uc9c0 \ub300\ubd80\ubd84\uc758 \uae30\ubc18**\uc785\ub2c8\ub2e4. \uc2a4\ucf00\uc904\ub9c1, \uadf8\ub8f9\ud551, \uc2e4\uc2dc\uac04 \uc54c\ub9bc \uc804\ubd80 \uc774\ubca4\ud2b8\uac00 \uc5b4\ub5bb\uac8c \ubc1c\ud589\ub418\uace0 \uc18c\ube44\ub418\ub294\uc9c0\uc5d0 \uc758\uc874\ud558\ub2c8\uae4c\uc694. \ud15c\ud50c\ub9bf\uacfc \uc124\uc815 UI\ub294 \uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c\uacfc \ub3c5\ub9bd\uc801\uc774\ub77c \ub098\uc911\uc5d0 \uc7a1\uc544\ub3c4 \ub429\ub2c8\ub2e4.\n\n**\uc5b4\ub514\ubd80\ud130 \uc7a1\uc744\uae4c\uc694?**\n\n\uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c \ud328\ud134(\uc774\ubca4\ud2b8 \uc18c\uc2f1 vs Pub/Sub)\uc744 \uba3c\uc800 \uacb0\uc815\ud558\uba74 \uc2a4\ucf00\uc904\ub9c1, \uadf8\ub8f9\ud551, \uc2e4\uc2dc\uac04 \uc54c\ub9bc \uc124\uacc4\uac00 \ud6e8\uc52c \uad6c\uccb4\uc801\uc73c\ub85c \uc9c4\ud589\ub420 \uc218 \uc788\uc2b5\ub2c8\ub2e4. \ub098\uba38\uc9c0 \uc8fc\uc81c\ub294 \uc0ac\ub77c\uc9c0\ub294 \uac8c \uc544\ub2c8\ub77c, \uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c\uc774 \uc7a1\ud78c \ub4a4\uc5d0 \ud558\ub098\uc529 \ubd99\uc774\uba74 \ub429\ub2c8\ub2e4.\n\n\uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c\ubd80\ud130 \ub4e4\uc5b4\uac08\uae4c\uc694, \uc544\ub2c8\uba74 \uba3c\uc800 \ub2e4\ub8e8\uace0 \uc2f6\uc740 \ub2e4\ub978 \uc8fc\uc81c\uac00 \uc788\uc73c\uc138\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\nSaaS \ud504\ub85c\uc81d\ud2b8 \uad00\ub9ac \ub3c4\uad6c\uc758 \uc54c\ub9bc \uc2dc\uc2a4\ud15c \uc124\uacc4\n\n# Elements\n- NotificationSystem [type: architecture]\n- EmailChannel [type: channel]\n- SlackChannel [type: channel]\n- InAppChannel [type: channel]\n- EventSystem [type: architecture]\n- NotificationSettings [type: feature]\n- NotificationTemplates [type: feature]\n- NotificationScheduling [type: feature]\n- NotificationGrouping [type: feature]\n- WebSocket [type: infrastructure]\n\n# Relations\n- NotificationSystem \u2192contains\u2192 EmailChannel\n- NotificationSystem \u2192contains\u2192 SlackChannel\n- NotificationSystem \u2192contains\u2192 InAppChannel\n- NotificationSystem \u2192depends-on\u2192 EventSystem\n- InAppChannel \u2192depends-on\u2192 WebSocket\n- NotificationScheduling \u2192depends-on\u2192 EventSystem\n- NotificationGrouping \u2192relates-to\u2192 NotificationScheduling\n\n# Decided\n- [\uc54c\ub9bc \ucc44\ub110]: \uc774\uba54\uc77c, \uc2ac\ub799, \uc778\uc571 3\uac00\uc9c0 (\uc0ac\uc6a9\uc790\uac00 \uc9c1\uc811 \uc120\ud0dd)\n\n# Undecided\n- [\uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c \ud328\ud134]: \uc774\ubca4\ud2b8 \uc18c\uc2f1 | Pub/Sub (Related: EventSystem, NotificationSystem)\n- [\uc54c\ub9bc \uc124\uc815 UI]: \uad6c\uccb4\uc801 \uc124\uacc4 \ubbf8\uc815 (Related: NotificationSettings)\n- [\uc54c\ub9bc \ud15c\ud50c\ub9bf \uc2dc\uc2a4\ud15c]: \uad6c\uc870 \ubbf8\uc815 (Related: NotificationTemplates)\n- [\uc54c\ub9bc \uc2a4\ucf00\uc904\ub9c1 \ubc29\uc2dd]: \ub9c8\uac10 \uae30\uc900 \uc2a4\ucf00\uc904\ub9c1 \uad6c\uc870 \ubbf8\uc815 (Related: NotificationScheduling)\n- [\uc2e4\uc2dc\uac04 \uc54c\ub9bc \uc778\ud504\ub77c]: WebSocket \uc9c0\uc6d0 \uc5ec\ubd80 \ubbf8\ud655\uc778 (Related: WebSocket, InAppChannel)\n- [\uc54c\ub9bc \uadf8\ub8f9\ud551/\ubc30\uce58]: \uadf8\ub8f9\ud551 \uc804\ub7b5 \ubbf8\uc815 (Related: NotificationGrouping)\n\n# Active Discussion\n- \uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c \ud328\ud134 \uc120\ud0dd\n- \uc54c\ub9bc \uc124\uc815 UI\n- \uc54c\ub9bc \ud15c\ud50c\ub9bf \uc2dc\uc2a4\ud15c\n- \uc54c\ub9bc \uc2a4\ucf00\uc904\ub9c1\n- \uc2e4\uc2dc\uac04 \uc54c\ub9bc \uc778\ud504\ub77c\n- \uc54c\ub9bc \uadf8\ub8f9\ud551/\ubc30\uce58\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 10:00\n- Conversation turns since last sync: 2\n"}], "grading": {"expectations": [{"text": "3\uac1c \uc774\uc0c1\uc758 \ubcd1\ub82c \ub17c\uc758 \uc2a4\ub808\ub4dc\ub97c \uba85\uc2dc\uc801\uc73c\ub85c \uc2dd\ubcc4\ud558\uace0 \uc774\ub984 \ubd99\uc784", "passed": true, "evidence": "6\uac1c \uc2a4\ub808\ub4dc\ub97c \ubc88\ud638 \ub9ac\uc2a4\ud2b8\ub85c \uba85\uba85: \uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c, \uc54c\ub9bc \uc2a4\ucf00\uc904\ub9c1, \uc54c\ub9bc \uadf8\ub8f9\ud551/\ubc30\uce58, \uc2e4\uc2dc\uac04 \uc54c\ub9bc \uc778\ud504\ub77c, \uc54c\ub9bc \ud15c\ud50c\ub9bf, \uc54c\ub9bc \uc124\uc815 UI"}, {"text": "\uac01 \uc2a4\ub808\ub4dc\uc758 \uac04\ub7b5\ud55c \uc0c1\ud0dc(\ucd08\uae30 \ud0d0\uc0c9, \ubbf8\uacb0\uc815 \ub4f1)\ub97c \ud45c\uc2dc", "passed": true, "evidence": "\uac01 \uc2a4\ub808\ub4dc\uc5d0 \uc0c1\ud0dc \ud45c\uc2dc: '\ud0d0\uc0c9 \ub2e8\uacc4', '\uc544\uc774\ub514\uc5b4\ub294 \uc788\uc9c0\ub9cc \uad6c\uc870 \ubbf8\uc815', '\uc678\ubd80 \ud655\uc778 \ud544\uc694' \ub4f1"}, {"text": "\uc0ac\uc6a9\uc790\uc5d0\uac8c \uc5b4\ub5a4 \uc2a4\ub808\ub4dc\ubd80\ud130 \uc9d1\uc911\ud560\uc9c0 \uc120\ud0dd\uc744 \uc694\uccad", "passed": true, "evidence": "'\uc5b4\ub514\ubd80\ud130 \uc7a1\uc744\uae4c\uc694?' + '\uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c\ubd80\ud130 \ub4e4\uc5b4\uac08\uae4c\uc694, \uc544\ub2c8\uba74 \uba3c\uc800 \ub2e4\ub8e8\uace0 \uc2f6\uc740 \ub2e4\ub978 \uc8fc\uc81c\uac00 \uc788\uc73c\uc138\uc694?'"}, {"text": "\ubaa8\ub4e0 \uc2a4\ub808\ub4dc\ub97c \ud55c\uaebc\ubc88\uc5d0 \ud574\uacb0\ud558\ub824 \ud558\uc9c0 \uc54a\uc74c", "passed": true, "evidence": "\uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c \ud558\ub098\uc5d0\ub9cc \uc9d1\uc911 \uc81c\uc548, \ub098\uba38\uc9c0\ub294 '\uc0ac\ub77c\uc9c0\ub294 \uac8c \uc544\ub2c8\ub77c, \uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c\uc774 \uc7a1\ud78c \ub4a4\uc5d0 \ud558\ub098\uc529 \ubd99\uc774\uba74 \ub429\ub2c8\ub2e4'"}, {"text": "\uc758\uc874\uc131 \uae30\ubc18 \uc21c\uc11c \uc81c\uc548 (\uc608: \uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c\uc774 \uc54c\ub9bc\ubcf4\ub2e4 \uc120\ud589)", "passed": true, "evidence": "'\uc774\ubca4\ud2b8 \uc2dc\uc2a4\ud15c\uc774 \ub098\uba38\uc9c0 \ub300\ubd80\ubd84\uc758 \uae30\ubc18\uc785\ub2c8\ub2e4. \uc2a4\ucf00\uc904\ub9c1, \uadf8\ub8f9\ud551, \uc2e4\uc2dc\uac04 \uc54c\ub9bc \uc804\ubd80 \uc774\ubca4\ud2b8\uac00 \uc5b4\ub5bb\uac8c \ubc1c\ud589\ub418\uace0 \uc18c\ube44\ub418\ub294\uc9c0\uc5d0 \uc758\uc874'"}], "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}}}], "previous_feedback": {}, "previous_outputs": {"eval-1-saas-planning-old_skill": [{"name": "response.md", "type": "text", "content": "\uc88b\uc740 \uc544\uc774\ub514\uc5b4\ub124\uc694. \ud504\ub9ac\ub79c\uc11c \ub514\uc790\uc774\ub108\ub97c \uc704\ud55c \ud1b5\ud569 \ud50c\ub7ab\ud3fc \u2014 \ud3ec\ud2b8\ud3f4\ub9ac\uc624, \ud074\ub77c\uc774\uc5b8\ud2b8 \uc18c\ud1b5, \uacac\uc801\uc11c\ub97c \ud558\ub098\ub85c \ubb36\ub294 \uac74 \uc2e4\uc81c\ub85c \uc2dc\uc7a5\uc5d0\uc11c \uc774 \uc138 \uac00\uc9c0\uac00 \uac01\uac01 \ub2e4\ub978 \ub3c4\uad6c\ub85c \ubd84\uc0b0\ub418\uc5b4 \uc788\uc5b4\uc11c \ud1b5\ud569\uc758 \uac00\uce58\uac00 \ubd84\uba85\ud569\ub2c8\ub2e4.\n\n\uc544\uc774\ub514\uc5b4\uac00 \ub9ce\uc544\uc11c \uc815\ub9ac\uac00 \uc548 \ub41c\ub2e4\uace0 \ud558\uc168\uc73c\ub2c8, \ud55c\uaebc\ubc88\uc5d0 \ubaa8\ub4e0 \uac78 \ud3bc\uce58\uc9c0 \uc54a\uace0 \ub2e8\uacc4\uc801\uc73c\ub85c \uad6c\uc870\ub97c \uc7a1\uc544\uac00\uaca0\uc2b5\ub2c8\ub2e4. \uba3c\uc800 \uac00\uc7a5 \uc911\uc694\ud55c \uac83\ubd80\ud130 \uc2dc\uc791\ud560\uac8c\uc694.\n\n---\n\n## \ud50c\ub7ab\ud3fc\uc758 3\uac1c \ud575\uc2ec \uae30\ub465\n\n\ub9d0\uc500\ud558\uc2e0 \ub0b4\uc6a9\uc744 \uc815\ub9ac\ud558\uba74, \uc774 \ud50c\ub7ab\ud3fc\uc740 \uc138 \uac00\uc9c0 \ud575\uc2ec \uae30\ub2a5 \uc601\uc5ed\uc744 \uac00\uc9d1\ub2c8\ub2e4:\n\n1. **\ud3ec\ud2b8\ud3f4\ub9ac\uc624 \uad00\ub9ac** \u2014 \ub514\uc790\uc774\ub108\uac00 \uc790\uc2e0\uc758 \uc791\uc5c5\ubb3c\uc744 \uc815\ub9ac\ud558\uace0 \uc678\ubd80\uc5d0 \ubcf4\uc5ec\uc8fc\ub294 \uae30\ub2a5\n2. **\ud074\ub77c\uc774\uc5b8\ud2b8 \uc18c\ud1b5** \u2014 \ud504\ub85c\uc81d\ud2b8 \ub2e8\uc704\ub85c \ud074\ub77c\uc774\uc5b8\ud2b8\uc640 \ucee4\ubba4\ub2c8\ucf00\uc774\uc158\ud558\ub294 \uae30\ub2a5\n3. **\uacac\uc801\uc11c \ubc1c\ud589** \u2014 \ud504\ub85c\uc81d\ud2b8 \ubc94\uc704\uc640 \ube44\uc6a9\uc744 \ubb38\uc11c\ud654\ud558\uace0 \uc804\ub2ec\ud558\ub294 \uae30\ub2a5\n\n\uc774 \uc138 \uae30\ub465 \uc0ac\uc774\uc758 \ud575\uc2ec \uc5f0\uacb0\uace0\ub9ac\ub294 **\"\ud504\ub85c\uc81d\ud2b8\"**\uc785\ub2c8\ub2e4. \ud074\ub77c\uc774\uc5b8\ud2b8\uac00 \ud3ec\ud2b8\ud3f4\ub9ac\uc624\ub97c \ubcf4\uace0 \u2192 \ubb38\uc758\uac00 \uc624\uace0 \u2192 \uacac\uc801\uc11c\ub97c \ubcf4\ub0b4\uace0 \u2192 \ud504\ub85c\uc81d\ud2b8\uac00 \uc9c4\ud589\ub418\ub294 \ud750\ub984\uc774 \uc790\uc5f0\uc2a4\ub7fd\uac8c \ub9cc\ub4e4\uc5b4\uc9c0\uc8e0.\n\n---\n\n## MVP\ub97c \uc7a1\uae30 \uc804\uc5d0 \uba3c\uc800 \uacb0\uc815\ud574\uc57c \ud560 \uac83\n\n\uae30\ub2a5\uc744 \ub098\uc5f4\ud558\uae30 \uc804\uc5d0, MVP \ubc94\uc704\ub97c \uacb0\uc815\ud558\ub294 \uae30\uc900\uc774 \ub418\ub294 \uc9c8\ubb38\uc774 \ud558\ub098 \uc788\uc2b5\ub2c8\ub2e4:\n\n**\uc774 \ud50c\ub7ab\ud3fc\uc758 \ud575\uc2ec \uac00\uce58\ub294 \"\ud1b5\ud569\" \uc790\uccb4\uc778\uac00\uc694, \uc544\ub2c8\uba74 \uc138 \uc601\uc5ed \uc911 \ud558\ub098\uac00 \ud2b9\ubcc4\ud788 \ub6f0\uc5b4\ub09c \uac83\uc778\uac00\uc694?**\n\n\uc774\uac8c \uc911\uc694\ud55c \uc774\uc720:\n- **\ud1b5\ud569\uc774 \ud575\uc2ec**\uc774\ub77c\uba74 \u2192 MVP\uc5d0 \uc138 \uae30\ub465 \ubaa8\ub450 \ub4e4\uc5b4\uac00\uc57c \ud558\uc9c0\ub9cc, \uac01\uac01\uc740 \ucd5c\uc18c \uae30\ub2a5\ub9cc \uac00\uc9d0\n- **\ud55c \uc601\uc5ed\uc774 \ud575\uc2ec**\uc774\ub77c\uba74 \u2192 MVP\uc5d0 \uadf8 \uc601\uc5ed\uc744 \uae4a\uac8c \ub9cc\ub4e4\uace0, \ub098\uba38\uc9c0\ub294 \ub098\uc911\uc5d0 \uc5f0\uacb0\n\n\uc608\ub97c \ub4e4\uc5b4:\n- Behance, Dribbble\uc740 \ud3ec\ud2b8\ud3f4\ub9ac\uc624\uc5d0 \uc9d1\uc911\n- Bonsai, HoneyBook\uc740 \uacac\uc801/\uacc4\uc57d\uc5d0 \uc9d1\uc911\n- \uc774 \ud50c\ub7ab\ud3fc\uc774 \"\uc774 \uc14b\uc774 \uc5f0\uacb0\ub418\uc5b4 \uc788\uc5b4\uc11c \ud3b8\ud558\ub2e4\"\uac00 \ud575\uc2ec\uc774\uba74 \uc804\ub7b5\uc774 \ub2e4\ub985\ub2c8\ub2e4\n\n\uc774\uac83\uc744 \uba3c\uc800 \uc815\ud574\uc57c \uc774\ud6c4 \ubaa8\ub4e0 \uae30\ub2a5 \ubc94\uc704 \uacb0\uc815\uc774 \uc218\uc6d4\ud574\uc9d1\ub2c8\ub2e4.\n\n---\n\n\ub098\uba38\uc9c0 \uc544\uc774\ub514\uc5b4\ub4e4(\uc138\ubd80 \uae30\ub2a5, \uae30\uc220 \uc2a4\ud0dd, \uc218\uc775 \ubaa8\ub378 \ub4f1)\ub3c4 \uc815\ub9ac\ud560 \uc900\ube44\uac00 \ub418\uc5b4 \uc788\ub294\ub370, \uc704 \uc9c8\ubb38\uc5d0 \ub300\ud55c \uc0dd\uac01\uc744 \uba3c\uc800 \ub4e4\ub824\uc8fc\uc2dc\uaca0\uc5b4\uc694? \uadf8\ub798\uc57c \uae30\ub2a5 \uad6c\uc870\ub97c \ud574\ub2f9 \ubc29\ud5a5\uc5d0 \ub9de\ucdb0\uc11c \uc7a1\uc744 \uc218 \uc788\uc2b5\ub2c8\ub2e4.\n\n\ucc38\uace0\ub85c, \uc9c0\uae08\uae4c\uc9c0 \ub098\uc628 \ub0b4\uc6a9\uc744 \ub9c8\uc778\ub4dc\ub9f5\uc774\ub098 \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4 \uc218\ub3c4 \uc788\uc5b4\uc694 \u2014 \ud544\uc694\ud558\uc2dc\uba74 \ub9d0\uc500\ud574 \uc8fc\uc138\uc694.\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ud504\ub9ac\ub79c\uc11c \ub514\uc790\uc774\ub108 \ub300\uc0c1 SaaS \ud50c\ub7ab\ud3fc \u2014 \ud3ec\ud2b8\ud3f4\ub9ac\uc624 \uad00\ub9ac + \ud074\ub77c\uc774\uc5b8\ud2b8 \uc18c\ud1b5 + \uacac\uc801\uc11c \ubc1c\ud589 \ud1b5\ud569. \uc804\uccb4 \uae30\ub2a5 \uad6c\uc870\uc640 MVP \ubc94\uc704\ub97c \uc815\uc758\ud558\ub294 \uac83\uc774 \ubaa9\ud45c.\n\n# Elements\n- PortfolioManagement [type: feature]\n- ClientCommunication [type: feature]\n- QuoteInvoicing [type: feature]\n- FreelanceDesigners [type: constraint]\n- MVPScope [type: decision]\n- TechStack [type: undecided]\n\n# Relations\n- PortfolioManagement \u2192core-pillar\u2192 Platform\n- ClientCommunication \u2192core-pillar\u2192 Platform\n- QuoteInvoicing \u2192core-pillar\u2192 Platform\n- FreelanceDesigners \u2192constrains\u2192 Platform\n- TechStack \u2192depends-on\u2192 MVPScope\n\n# Decided\n(none yet)\n\n# Undecided\n- MVP \ubc94\uc704: [\uc5b4\ub5a4 \uae30\ub2a5\uc744 1\ucc28\uc5d0 \ud3ec\ud568\ud560\uc9c0] (Related: PortfolioManagement, ClientCommunication, QuoteInvoicing)\n- \uae30\uc220 \uc2a4\ud0dd: [\ubbf8\uc815] (Related: TechStack, MVPScope)\n- \ud575\uc2ec \ucc28\ubcc4\uc810: [\uae30\uc874 \uc194\ub8e8\uc158 \ub300\ube44 \uc5b4\ub5a4 \uac00\uce58\ub97c \uc81c\uacf5\ud560\uc9c0] (Related: FreelanceDesigners)\n\n# Active Discussion\n- \uc804\uccb4 \uae30\ub2a5 \uad6c\uc870 \uc815\ub9ac\n- MVP \ubc94\uc704 \uc124\uc815\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 0\n"}], "eval-1-saas-planning-with_skill": [{"name": "response.md", "type": "text", "content": "\uc88b\uc740 \ubc29\ud5a5\uc774\uc5d0\uc694. \ud504\ub9ac\ub79c\uc11c \ub514\uc790\uc774\ub108\uac00 \uc77c\ud558\uba74\uc11c \uacaa\ub294 \ud575\uc2ec \ud398\uc778\ud3ec\uc778\ud2b8 \uc138 \uac00\uc9c0 \u2014 \ud3ec\ud2b8\ud3f4\ub9ac\uc624 \uad00\ub9ac, \ud074\ub77c\uc774\uc5b8\ud2b8 \uc18c\ud1b5, \uacac\uc801\uc11c \ubc1c\ud589 \u2014 \ub97c \ud558\ub098\uc758 \ud50c\ub7ab\ud3fc\uc73c\ub85c \ubb36\uaca0\ub2e4\ub294 \uac70\uc8e0. \uc774 \uc138 \uc601\uc5ed\uc774 \uc2e4\uc81c\ub85c \ub514\uc790\uc774\ub108\uc758 \uc5c5\ubb34 \ud750\ub984\uc5d0\uc11c \uc5f0\uacb0\ub418\uc5b4 \uc788\uae30 \ub54c\ubb38\uc5d0, \ud1b5\ud569\ud560 \ub54c\uc758 \uac00\uce58\uac00 \ubd84\uba85\ud569\ub2c8\ub2e4.\n\n\uae30\ub2a5 \uad6c\uc870\uc640 MVP \ubc94\uc704\ub97c \uc7a1\uae30 \uc804\uc5d0, \uc9c0\uae08 \uba38\ub9bf\uc18d\uc5d0 \uc788\ub294 \uac83\ub4e4\uc744 \uc880 \ub354 \uaebc\ub0b4\ubcf4\uba74 \uc88b\uaca0\uc5b4\uc694. \uba87 \uac00\uc9c0 \uc5ec\ucb64\ubcfc\uac8c\uc694:\n\n**\uc138 \uc601\uc5ed \uc911 \uc5b4\ub514\uac00 \uac00\uc7a5 \ub9c9\ud788\uc138\uc694?** \uc608\ub97c \ub4e4\uc5b4:\n- \ud3ec\ud2b8\ud3f4\ub9ac\uc624 \ucabd\uc740 \uc774\ubbf8 \uad6c\uccb4\uc801\uc778 \uc544\uc774\ub514\uc5b4\uac00 \uc788\ub294\ub370, \uacac\uc801\uc11c \ucabd\uc740 \uc5b4\ub5bb\uac8c \uc811\uadfc\ud560\uc9c0 \uac10\uc774 \uc548 \uc624\ub294 \uac74\uc9c0\n- \uc544\ub2c8\uba74 \uac01\uac01\uc758 \uae30\ub2a5\uc740 \ub5a0\uc624\ub974\ub294\ub370, \uc138 \uc601\uc5ed\uc744 \uc5b4\ub5a4 \uad6c\uc870\ub85c \uc5f0\uacb0\ud574\uc57c \ud560\uc9c0\uac00 \ubd88\uba85\ud655\ud55c \uac74\uc9c0\n- \ud639\uc740 \uae30\ub2a5\uc740 \ub108\ubb34 \ub9ce\uc774 \ub5a0\uc624\ub974\ub294\ub370, \ubb58 \uba3c\uc800 \ub9cc\ub4e4\uc5b4\uc57c \ud560\uc9c0 \uc6b0\uc120\uc21c\uc704\uac00 \uc548 \uc7a1\ud788\ub294 \uac74\uc9c0\n\n\uc774\uac78 \uc54c\uba74, \uac00\uc7a5 \ub9c9\ud78c \ubd80\ubd84\ubd80\ud130 \ud480\uc5b4\uac08 \uc218 \uc788\uc5b4\uc694. \uc774\ubbf8 \uc815\ub9ac\ud574\ub454 \uc544\uc774\ub514\uc5b4 \u2014 \uae30\ub2a5 \ubaa9\ub85d\uc774\ub4e0, \ucc38\uace0\ud558\ub294 \uc11c\ube44\uc2a4\ub4e0, \uc2a4\ucf00\uce58\ub4e0 \u2014 \uc788\uc73c\uba74 \uadf8\uac83\ub3c4 \uac19\uc774 \uacf5\uc720\ud574\uc8fc\uc138\uc694.\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ud504\ub9ac\ub79c\uc11c \ub514\uc790\uc774\ub108 \ub300\uc0c1 SaaS \ud50c\ub7ab\ud3fc \uae30\ud68d \u2014 \ud3ec\ud2b8\ud3f4\ub9ac\uc624 \uad00\ub9ac, \ud074\ub77c\uc774\uc5b8\ud2b8 \uc18c\ud1b5, \uacac\uc801\uc11c \ubc1c\ud589\uc744 \ud1b5\ud569\ud558\ub294 \uc81c\ud488\uc758 \uc804\uccb4 \uae30\ub2a5 \uad6c\uc870\uc640 MVP \ubc94\uc704\ub97c \uc7a1\ub294 \uac83.\n\n# Elements\n- Platform [type: concept] \u2014 \ud504\ub9ac\ub79c\uc11c \ub514\uc790\uc774\ub108\ub97c \uc704\ud55c \ud1b5\ud569 SaaS\n- PortfolioManagement [type: feature] \u2014 \ud3ec\ud2b8\ud3f4\ub9ac\uc624 \uad00\ub9ac \uae30\ub2a5\n- ClientCommunication [type: feature] \u2014 \ud074\ub77c\uc774\uc5b8\ud2b8 \uc18c\ud1b5 \uae30\ub2a5\n- QuoteInvoicing [type: feature] \u2014 \uacac\uc801\uc11c \ubc1c\ud589 \uae30\ub2a5\n- TechStack [type: architecture] \u2014 \uae30\uc220 \uc2a4\ud0dd (\ubbf8\uc815)\n- MVPScope [type: constraint] \u2014 MVP \ubc94\uc704 (\ubbf8\uc815)\n- FeatureStructure [type: architecture] \u2014 \uc804\uccb4 \uae30\ub2a5 \uad6c\uc870 (\ubbf8\uc815)\n\n# Relations\n- Platform \u2192contains\u2192 PortfolioManagement\n- Platform \u2192contains\u2192 ClientCommunication\n- Platform \u2192contains\u2192 QuoteInvoicing\n- MVPScope \u2192depends-on\u2192 FeatureStructure\n- TechStack \u2192depends-on\u2192 MVPScope\n\n# Decided\n- TargetUser: \ud504\ub9ac\ub79c\uc11c \ub514\uc790\uc774\ub108 (\uc0ac\uc6a9\uc790\uac00 \uc9c1\uc811 \uba85\uc2dc)\n- ProductType: SaaS \ud50c\ub7ab\ud3fc (\uc0ac\uc6a9\uc790\uac00 \uc9c1\uc811 \uba85\uc2dc)\n- CoreDomains: \ud3ec\ud2b8\ud3f4\ub9ac\uc624 + \ud074\ub77c\uc774\uc5b8\ud2b8 \uc18c\ud1b5 + \uacac\uc801\uc11c \u2014 3\uac1c \uc601\uc5ed \ud1b5\ud569 (\uc0ac\uc6a9\uc790\uac00 \uc9c1\uc811 \uba85\uc2dc)\n\n# Undecided\n- TechStack: [\ubbf8\uc815] (\uc0ac\uc6a9\uc790\uac00 \uc544\uc9c1 \uc815\ud558\uc9c0 \uc54a\uc558\ub2e4\uace0 \uba85\uc2dc)\n- MVPScope: [\ubbf8\uc815] (\uc804\uccb4 \uae30\ub2a5 \uc911 MVP\uc5d0 \ud3ec\ud568\ud560 \ubc94\uc704)\n- FeatureStructure: [\ubbf8\uc815] (\uac01 \uc601\uc5ed\uc758 \uc138\ubd80 \uae30\ub2a5 \uad6c\uc870)\n- FeaturePriority: [\ubbf8\uc815] (\uae30\ub2a5 \uac04 \uc6b0\uc120\uc21c\uc704)\n- UserWorkflow: [\ubbf8\uc815] (\ub514\uc790\uc774\ub108\uc758 \uc2e4\uc81c \uc5c5\ubb34 \ud750\ub984\uc5d0\uc11c \uae30\ub2a5 \uac04 \uc5f0\uacb0)\n\n# Active Discussion\n- \uccab \ud134: \uc0ac\uc6a9\uc790\uc758 \uae30\uc874 \uc544\uc774\ub514\uc5b4\uc640 \uc81c\uc57d \uc870\uac74 \ud30c\uc545 \ub2e8\uacc4\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 0\n"}], "eval-2-decision-cleanup-old_skill": [{"name": "response.md", "type": "text", "content": "\uc9c0\uae08\uae4c\uc9c0 \ub098\uc628 \ub0b4\uc6a9 \uc815\ub9ac\ud574\ub4dc\ub9b4\uac8c\uc694. \uacb0\uc815\ub41c \uac83\uacfc \uc544\uc9c1 \uc5f4\ub824 \uc788\ub294 \uac83\uc744 \ub098\ub220\uc11c \ubcf4\uba74 \uc0c1\ud669\uc774 \ud6e8\uc52c \uba85\ud655\ud574\uc9d1\ub2c8\ub2e4.\n\n---\n\n## \ud655\uc815\ub41c \uc0ac\ud56d (2\uac74)\n\n| \ud56d\ubaa9 | \uacb0\uc815 |\n|------|------|\n| **\uc0ac\uc6a9\uc790 \uc778\uc99d** | OAuth \ubc29\uc2dd\uc73c\ub85c \ud655\uc815 |\n| **\ud504\ub860\ud2b8\uc5d4\ub4dc** | React \ud655\uc815 |\n\n\uc774 \ub450 \uac00\uc9c0\ub294 \uc6c0\uc9c1\uc774\uc9c0 \uc54a\ub294 \uae30\ub465\uc774\uc5d0\uc694. \ub098\uba38\uc9c0 \uacb0\uc815\ub4e4\uc774 \uc5ec\uae30\uc5d0 \ub9de\ucdb0\uc11c \uc815\ud574\uc9c0\uba74 \ub429\ub2c8\ub2e4.\n\n---\n\n## \ubbf8\uacb0\uc815 \uc0ac\ud56d (5\uac74)\n\n| \ud56d\ubaa9 | \ud604\uc7ac \uc0c1\ud0dc | \uae34\uae09\ub3c4 |\n|------|-----------|--------|\n| **\ub370\uc774\ud130\ubca0\uc774\uc2a4** | PostgreSQL vs MongoDB \uace0\ubbfc \uc911 | \uc9c0\uae08 \uacb0\uc815 \ud544\uc694 \u2014 \ub2e4\ub978 \uacb0\uc815\ub4e4\uc774 \uc774\uac83\uc5d0 \uc758\uc874 |\n| **API \uad6c\uc870** | REST vs GraphQL \ubbf8\uacb0\uc815 | \uc9c0\uae08 \uacb0\uc815 \ud544\uc694 \u2014 \ud504\ub860\ud2b8\uc5d4\ub4dc \uc791\uc5c5 \ubc29\uc2dd\uc5d0 \uc9c1\uc811 \uc601\ud5a5 |\n| **CI/CD \ud30c\uc774\ud504\ub77c\uc778** | \uc544\uc9c1 \uc815\ud574\uc57c \ud568 | \ubc30\ud3ec \uc804\uc5d0 \ud544\uc694\ud558\uc9c0\ub9cc \uac1c\ubc1c \uc2dc\uc791\uacfc\ub294 \ub3c5\ub9bd\uc801 |\n| **\ubc30\ud3ec \uc804\ub7b5** | \ub17c\uc758 \uc2dc\uc791 \uc804 | CI/CD\uac00 \uc815\ud574\uc9c4 \ud6c4\uc5d0 \ub9de\ucdb0\uc11c \uacb0\uc815 \uac00\ub2a5 |\n| **\ubaa8\ub2c8\ud130\ub9c1** | \uac80\ud1a0 \ud544\uc694 | \ubc30\ud3ec \uc804\ub7b5\uc774 \uc815\ud574\uc9c4 \ud6c4\uc5d0 \uacb0\uc815\ud574\ub3c4 \ub428 |\n\n---\n\n## \uc5b4\ub514\uc11c\ubd80\ud130 \ud480\uc5b4\uc57c \ud558\ub098\n\n5\uac1c\uc758 \ubbf8\uacb0\uc815 \uc0ac\ud56d \uc911\uc5d0\uc11c **\ub370\uc774\ud130\ubca0\uc774\uc2a4 \uc120\ud0dd**\uc774 \uac00\uc7a5 \uba3c\uc800\uc785\ub2c8\ub2e4. API \uad6c\uc870(REST vs GraphQL)\ub3c4 DB \ud2b9\uc131\uc5d0 \ub530\ub77c \ubc29\ud5a5\uc774 \ub2ec\ub77c\uc9c8 \uc218 \uc788\uace0, \ub370\uc774\ud130 \ubaa8\ub378\ub9c1 \uc790\uccb4\uac00 \ud504\ub85c\uc81d\ud2b8\uc758 \uae30\ubc18\uc774 \ub418\uae30 \ub54c\ubb38\uc774\uc5d0\uc694.\n\n\uadf8 \ub2e4\uc74c\uc740 **API \uad6c\uc870**\ub97c \uc815\ud558\uba74 \ud504\ub860\ud2b8\uc5d4\ub4dc(React) \ucabd \uac1c\ubc1c\uc744 \ubc14\ub85c \uc2dc\uc791\ud560 \uc218 \uc788\ub294 \uc0c1\ud0dc\uac00 \ub429\ub2c8\ub2e4.\n\n\ub098\uba38\uc9c0 3\uac1c(CI/CD, \ubc30\ud3ec \uc804\ub7b5, \ubaa8\ub2c8\ud130\ub9c1)\ub294 \uac1c\ubc1c\uc774 \uc9c4\ud589\ub418\uba74\uc11c \uc815\ud574\ub3c4 \ub418\ub294 \ud56d\ubaa9\ub4e4\uc774\uc5d0\uc694. \uc9c0\uae08 \ub2f9\uc7a5 \ub9c9\ud788\uc9c0\ub294 \uc54a\uc2b5\ub2c8\ub2e4.\n\n**DB \uc120\ud0dd\ubd80\ud130 \uac19\uc774 \uc815\ub9ac\ud574\ubcfc\uae4c\uc694?** PostgreSQL\uacfc MongoDB \uc0ac\uc774\uc5d0\uc11c \uace0\ubbfc\ud558\ub294 \ud3ec\uc778\ud2b8\uac00 \ubb54\uc9c0 \uc54c\ub824\uc8fc\uc2dc\uba74 \ud310\ub2e8\uc5d0 \ub3c4\uc6c0\uc774 \ub420 \ub9cc\ud55c \uae30\uc900\uc744 \uc815\ub9ac\ud574\ub4dc\ub9b4\uac8c\uc694.\n\n---\n\n\uc774\uac78 \uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ub0b4\ubd80 \ub3c4\uad6c \uac1c\ubc1c \ud504\ub85c\uc81d\ud2b8\uc758 \uae30\uc220 \uc2a4\ud0dd\uacfc \uc544\ud0a4\ud14d\ucc98 \uacb0\uc815 \uc0ac\ud56d\uc744 \uc815\ub9ac\ud558\uace0, \uacb0\uc815\ub41c \uac83\uacfc \ubbf8\uacb0\uc815 \uc0ac\ud56d\uc744 \uba85\ud655\ud788 \uad6c\ubd84\ud55c\ub2e4.\n\n# Elements\n- UserAuth [type: architecture]\n- Database [type: data]\n- Frontend [type: architecture]\n- DeployStrategy [type: process]\n- APIStructure [type: architecture]\n- Monitoring [type: process]\n- CICD [type: process]\n\n# Relations\n- Frontend \u2192depends-on\u2192 APIStructure\n- APIStructure \u2192depends-on\u2192 Database\n- UserAuth \u2192communicates-with\u2192 APIStructure\n- DeployStrategy \u2192depends-on\u2192 CICD\n- Monitoring \u2192depends-on\u2192 DeployStrategy\n\n# Decided\n- \uc0ac\uc6a9\uc790 \uc778\uc99d: OAuth \ubc29\uc2dd \ucc44\ud0dd (\ud300 \ud569\uc758)\n- \ud504\ub860\ud2b8\uc5d4\ub4dc: React \ud655\uc815 (\ud300 \ud569\uc758)\n\n# Undecided\n- \ub370\uc774\ud130\ubca0\uc774\uc2a4: [PostgreSQL | MongoDB] (Related elements: Database, APIStructure)\n- API \uad6c\uc870: [REST | GraphQL] (Related elements: APIStructure, Frontend, UserAuth)\n- \ubc30\ud3ec \uc804\ub7b5: [\ubbf8\uc815 \u2014 \uc544\uc9c1 \ub17c\uc758 \uc2dc\uc791 \uc804] (Related elements: DeployStrategy, CICD)\n- \ubaa8\ub2c8\ud130\ub9c1: [\ubbf8\uc815 \u2014 \uac80\ud1a0 \ud544\uc694] (Related elements: Monitoring, DeployStrategy)\n- CI/CD \ud30c\uc774\ud504\ub77c\uc778: [\ubbf8\uc815 \u2014 \uc815\ud574\uc57c \ud568] (Related elements: CICD, DeployStrategy)\n\n# Active Discussion\n- \uc804\uccb4 \uae30\uc220 \uc2a4\ud0dd \ud604\ud669 \uc815\ub9ac \ubc0f \uc758\uc0ac\uacb0\uc815 \uc0c1\ud0dc \ud30c\uc545\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 1\n"}], "eval-2-decision-cleanup-with_skill": [{"name": "response.md", "type": "text", "content": "\ub9d0\uc500\ud558\uc2e0 \ub0b4\uc6a9 \uc815\ub9ac\ud574\ubd24\uc2b5\ub2c8\ub2e4. \uc9c0\uae08 7\uac1c \ud56d\ubaa9\uc774 \ud14c\uc774\ube14 \uc704\uc5d0 \uc62c\ub77c\uc640 \uc788\ub294\ub370, \uc0c1\ud0dc\ubcc4\ub85c \ub098\ub204\uba74 \uc774\ub807\uc2b5\ub2c8\ub2e4:\n\n---\n\n**\ud655\uc815\ub41c \uac83 (2\uac74)**\n\n| \ud56d\ubaa9 | \uacb0\uc815 |\n|------|------|\n| \uc0ac\uc6a9\uc790 \uc778\uc99d | OAuth |\n| \ud504\ub860\ud2b8\uc5d4\ub4dc | React |\n\n\uc774 \ub450 \uac1c\ub294 \ud655\uc815\uc774\ub2c8\uae4c \ub354 \uc774\uc0c1 \uc5d0\ub108\uc9c0 \uc4f8 \ud544\uc694 \uc5c6\uc2b5\ub2c8\ub2e4.\n\n---\n\n**\uc120\ud0dd\uc9c0\uac00 \uc788\uace0 \uacb0\uc815\uc774 \ud544\uc694\ud55c \uac83 (2\uac74)**\n\n| \ud56d\ubaa9 | \ud6c4\ubcf4 |\n|------|------|\n| \ub370\uc774\ud130\ubca0\uc774\uc2a4 | PostgreSQL vs MongoDB |\n| API \uad6c\uc870 | REST vs GraphQL |\n\n---\n\n**\uc544\uc9c1 \ub17c\uc758 \uc790\uccb4\uac00 \uc2dc\uc791\ub418\uc9c0 \uc54a\uc740 \uac83 (3\uac74)**\n\n| \ud56d\ubaa9 | \uc0c1\ud0dc |\n|------|------|\n| \ubc30\ud3ec \uc804\ub7b5 | \ub17c\uc758 \uc804 |\n| \ubaa8\ub2c8\ud130\ub9c1 | \ub17c\uc758 \uc804 |\n| CI/CD \ud30c\uc774\ud504\ub77c\uc778 | \ub17c\uc758 \uc804 |\n\n---\n\n\ubbf8\uacb0\uc815 \ud56d\ubaa9\uc774 5\uac1c\uc785\ub2c8\ub2e4. \ud55c\uaebc\ubc88\uc5d0 \ub2e4 \uc7a1\uc73c\uba74 \ub610 \ud750\ub824\uc9c0\ub2c8\uae4c, \uc758\uc874 \uad00\uacc4\ub97c \ubcf4\uace0 \uc21c\uc11c\ub97c \uc81c\uc548\ub4dc\ub9ac\uba74:\n\n**DB \uc120\ud0dd\uc744 \uba3c\uc800 \ud558\ub294 \uac8c \uc88b\uaca0\uc2b5\ub2c8\ub2e4.** \uc774\uc720\ub294 API \uad6c\uc870(REST vs GraphQL) \uacb0\uc815\uc774 DB \ud2b9\uc131\uc5d0 \uc601\ud5a5\uc744 \ubc1b\uae30 \ub54c\ubb38\uc785\ub2c8\ub2e4. MongoDB\ucc98\ub7fc \ubb38\uc11c \uae30\ubc18\uc774\uba74 GraphQL\uacfc \uad81\ud569\uc774 \uc798 \ub9de\ub294 \uba74\uc774 \uc788\uace0, PostgreSQL\uc774\uba74 REST\ub85c\ub3c4 \ucda9\ubd84\ud788 \uae54\ub054\ud558\uac8c \uac08 \uc218 \uc788\uac70\ub4e0\uc694. DB\uac00 \uc815\ud574\uc9c0\uba74 API \uad6c\uc870\ub3c4 \ud6e8\uc52c \ud310\ub2e8\ud558\uae30 \uc26c\uc6cc\uc9d1\ub2c8\ub2e4.\n\n\ubc30\ud3ec/\ubaa8\ub2c8\ud130\ub9c1/CI/CD\ub294 \uc774 \ub450 \uac1c\uac00 \uc815\ub9ac\ub41c \ub4a4\uc5d0 \uc7a1\uc544\ub3c4 \ub2a6\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4 -- \uac1c\ubc1c \ucd08\uae30\uc5d0\ub294 \ucf54\uc5b4 \uc2a4\ud0dd\ubd80\ud130 \ud655\uc815\ud558\ub294 \uac8c \uc6b0\uc120\uc774\ub2c8\uae4c\uc694.\n\n\uba87 \uac00\uc9c0 \ud655\uc778\ud558\uace0 \uc2f6\uc740 \uac8c \uc788\uc2b5\ub2c8\ub2e4:\n\n- DB \uc120\ud0dd\uc5d0\uc11c \ud300\uc774 \uace0\ubbfc\ud558\ub294 \ud575\uc2ec \uae30\uc900\uc774 \ubb54\uac00\uc694? \uc608\ub97c \ub4e4\uc5b4, \ub370\uc774\ud130 \uad6c\uc870\uac00 \uc790\uc8fc \ubc14\ub014 \uac83 \uac19\uc544\uc11c MongoDB\ub97c \uace0\ub824\ud558\ub294 \uac74\uc9c0, \uc544\ub2c8\uba74 \ud2b8\ub79c\uc7ad\uc158\uc774\ub098 \uad00\uacc4\ud615 \ucffc\ub9ac\uac00 \uc911\uc694\ud574\uc11c PostgreSQL \ucabd\uc774 \ub04c\ub9ac\ub294 \uac74\uc9c0 -- \uc774 \ub9e5\ub77d\uc744 \uc54c\uba74 \uc815\ub9ac\uac00 \ud6e8\uc52c \uc218\uc6d4\ud569\ub2c8\ub2e4.\n\n\uc774\uac78 \uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ub0b4\ubd80 \ub3c4\uad6c \uac1c\ubc1c \ud504\ub85c\uc81d\ud2b8\uc758 \uae30\uc220 \uc2a4\ud0dd\uacfc \uc544\ud0a4\ud14d\ucc98 \uacb0\uc815 \uc0ac\ud56d\uc744 \uc815\ub9ac\ud558\uace0, \uacb0\uc815\ub41c \uac83\uacfc \ubbf8\uacb0\uc815 \uc0ac\ud56d\uc744 \uba85\ud655\ud788 \uad6c\ubd84\ud55c\ub2e4.\n\n# Elements\n- \uc0ac\uc6a9\uc790\uc778\uc99d [type: architecture]\n- \ub370\uc774\ud130\ubca0\uc774\uc2a4 [type: data]\n- \ud504\ub860\ud2b8\uc5d4\ub4dc [type: architecture]\n- \ubc30\ud3ec\uc804\ub7b5 [type: process]\n- API\uad6c\uc870 [type: architecture]\n- \ubaa8\ub2c8\ud130\ub9c1 [type: process]\n- CI/CD\ud30c\uc774\ud504\ub77c\uc778 [type: process]\n\n# Relations\n- \ud504\ub860\ud2b8\uc5d4\ub4dc \u2192communicates-with\u2192 API\uad6c\uc870\n- API\uad6c\uc870 \u2192depends-on\u2192 \ub370\uc774\ud130\ubca0\uc774\uc2a4\n- \uc0ac\uc6a9\uc790\uc778\uc99d \u2192depends-on\u2192 API\uad6c\uc870\n- \ubc30\ud3ec\uc804\ub7b5 \u2192depends-on\u2192 CI/CD\ud30c\uc774\ud504\ub77c\uc778\n- \ubaa8\ub2c8\ud130\ub9c1 \u2192depends-on\u2192 \ubc30\ud3ec\uc804\ub7b5\n\n# Decided\n- \uc0ac\uc6a9\uc790\uc778\uc99d: OAuth \ubc29\uc2dd \ucc44\ud0dd (\ud300 \ud569\uc758)\n- \ud504\ub860\ud2b8\uc5d4\ub4dc: React \ud655\uc815 (\ud300 \ud569\uc758)\n\n# Undecided\n- \ub370\uc774\ud130\ubca0\uc774\uc2a4: [PostgreSQL | MongoDB] (Related elements: API\uad6c\uc870, \uc0ac\uc6a9\uc790\uc778\uc99d)\n- API\uad6c\uc870: [REST | GraphQL] (Related elements: \ud504\ub860\ud2b8\uc5d4\ub4dc, \ub370\uc774\ud130\ubca0\uc774\uc2a4, \uc0ac\uc6a9\uc790\uc778\uc99d)\n- \ubc30\ud3ec\uc804\ub7b5: \uc544\uc9c1 \ub17c\uc758 \uc2dc\uc791 \uc548 \ud568 (Related elements: CI/CD\ud30c\uc774\ud504\ub77c\uc778, \ubaa8\ub2c8\ud130\ub9c1)\n- \ubaa8\ub2c8\ud130\ub9c1: \uc544\uc9c1 \uad6c\uccb4\uc801 \ub17c\uc758 \uc5c6\uc74c (Related elements: \ubc30\ud3ec\uc804\ub7b5)\n- CI/CD\ud30c\uc774\ud504\ub77c\uc778: \uc544\uc9c1 \uad6c\uccb4\uc801 \ub17c\uc758 \uc5c6\uc74c (Related elements: \ubc30\ud3ec\uc804\ub7b5)\n\n# Active Discussion\n- \uae30\uc220 \uc2a4\ud0dd \uacb0\uc815 \uc0ac\ud56d \uc804\uccb4 \uc815\ub9ac\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 1\n"}], "eval-3-feature-overload-old_skill": [{"name": "response.md", "type": "text", "content": "\uc88b\uc740 \uae30\ud68d\uc774\uc5d0\uc694. \uae30\ub2a5 \ubaa9\ub85d\uc774 \ub9ce\uc740\ub370, \ud55c \ubc88\uc5d0 \ub2e4 \uc0dd\uac01\ud558\uba74 \uc624\ud788\ub824 \uc544\ubb34\uac83\ub3c4 \ubabb \uc815\ud558\uac8c \ub418\ub2c8\uae4c \uad6c\uc870\ub97c \uc7a1\uc544\ubcfc\uac8c\uc694.\n\n\ub9d0\uc500\ud558\uc2e0 9\uac00\uc9c0 \uae30\ub2a5\uc744 \uc758\uc874 \uad00\uacc4 \uae30\uc900\uc73c\ub85c \uc815\ub9ac\ud558\uba74 \ud06c\uac8c \uc138 \uce35\uc73c\ub85c \ub098\ub269\ub2c8\ub2e4:\n\n**1\uce35 \u2014 \uc571\uc758 \uc874\uc7ac \uc774\uc720 (\uc774\uac8c \uc5c6\uc73c\uba74 \ud53c\ud2b8\ub2c8\uc2a4 \uc571\uc774 \uc544\ub2d8)**\n- **\uc6b4\ub3d9 \uae30\ub85d** \u2014 \ubaa8\ub4e0 \ub2e4\ub978 \uae30\ub2a5\uc774 \uc774 \ub370\uc774\ud130\uc5d0 \uc758\uc874\ud569\ub2c8\ub2e4\n- **\uc2dd\ub2e8 \uad00\ub9ac** \u2014 \uc6b4\ub3d9\uacfc \ud568\uaed8 \ud53c\ud2b8\ub2c8\uc2a4 \uc571\uc758 \ud575\uc2ec \uac00\uce58\n\n**2\uce35 \u2014 \ud575\uc2ec \uc704\uc5d0 \uc313\uc774\ub294 \ud655\uc7a5 \uae30\ub2a5**\n- \uc18c\uc15c, \ucc4c\ub9b0\uc9c0, AI \ucf54\uce6d, \uc6e8\uc5b4\ub7ec\ube14 \uc5f0\ub3d9\n\n**3\uce35 \u2014 \uc778\ud504\ub77c/\ube44\uc988\ub2c8\uc2a4 \uc694\uad6c\uc0ac\ud56d**\n- \uacb0\uc81c, \uc624\ud504\ub77c\uc778 \ubaa8\ub4dc, \ub2e4\uad6d\uc5b4\n\n\uc9c0\uae08 \ub2f9\uc7a5 \uacb0\uc815\ud574\uc57c \ud560 \uac83\uc740 \ud558\ub098\uc785\ub2c8\ub2e4: **MVP\uc5d0 1\uce35\ub9cc \ub123\uc744 \uac74\uc9c0, 2\uce35 \uc77c\ubd80\uae4c\uc9c0 \ub123\uc744 \uac74\uc9c0.** \uc774\uac8c \uc815\ud574\uc838\uc57c \ud50c\ub7ab\ud3fc, \uae30\uc220 \uc2a4\ud0dd, \uc77c\uc815\uc774 \ub530\ub77c\uc11c \uacb0\uc815\ub429\ub2c8\ub2e4.\n\n2\uce35\uacfc 3\uce35\uc758 \ub098\uba38\uc9c0 \ud56d\ubaa9\ub4e4(\uc18c\uc15c, AI \ucf54\uce6d, \uacb0\uc81c, \ub2e4\uad6d\uc5b4 \ub4f1 6\uac00\uc9c0)\uc740 \uc9c0\uae08 \uacb0\uc815 \uc548 \ud574\ub3c4 \ub429\ub2c8\ub2e4. MVP \ubc94\uc704\uac00 \uc815\ud574\uc9c4 \ud6c4\uc5d0 \ud558\ub098\uc529 \ubd99\uc5ec\uac00\uba74 \ub418\ub294 \uac83\ub4e4\uc774\uc5d0\uc694.\n\n**\uc81c \ucd94\ucc9c:** 1\uce35(\uc6b4\ub3d9 \uae30\ub85d + \uc2dd\ub2e8 \uad00\ub9ac)\uc73c\ub85c MVP\ub97c \uc2dc\uc791\ud558\uace0, 2\uce35\uc5d0\uc11c \ud558\ub098\ub9cc \uace8\ub77c\uc11c \ucc28\ubcc4\ud654 \ud3ec\uc778\ud2b8\ub85c \ucd94\uac00\ud558\ub294 \uac70\uc608\uc694. \uc608\ub97c \ub4e4\uc5b4 \"\uc6b4\ub3d9 \uae30\ub85d + \uc2dd\ub2e8 + \ucc4c\ub9b0\uc9c0\"\uba74 \uc18c\uc15c \ubc14\uc774\ub7f4 \ubc29\ud5a5, \"\uc6b4\ub3d9 \uae30\ub85d + \uc2dd\ub2e8 + AI \ucf54\uce6d\"\uc774\uba74 \ud37c\uc2a4\ub110 \ud2b8\ub808\uc774\ub2dd \ubc29\ud5a5\uc774 \ub429\ub2c8\ub2e4.\n\n\uc5b4\ub5a4 \ubc29\ud5a5\uc774 \ub354 \ub04c\ub9ac\uc138\uc694? \uc544\ub2c8\uba74 MVP \ubc94\uc704\ub97c \uc7a1\uae30 \uc804\uc5d0 \ud0c0\uac9f \uc0ac\uc6a9\uc790\uce35\ubd80\ud130 \uc774\uc57c\uae30\ud558\uace0 \uc2f6\uc73c\uc2dc\uba74 \uadf8\uac83\ub3c4 \uc88b\uc2b5\ub2c8\ub2e4.\n\n\uc774 \uad6c\uc870\ub97c \uc2dc\uac01\uc801\uc73c\ub85c \uc815\ub9ac\ud55c \ub300\uc2dc\ubcf4\ub4dc\ub098 \ub9c8\uc778\ub4dc\ub9f5\uc73c\ub85c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ud53c\ud2b8\ub2c8\uc2a4 \ud2b8\ub798\ud0b9 \ubaa8\ubc14\uc77c \uc571 \uae30\ud68d \u2014 \uc6b4\ub3d9 \uae30\ub85d, \uc2dd\ub2e8 \uad00\ub9ac, \uc18c\uc15c, \ucc4c\ub9b0\uc9c0, AI \ucf54\uce6d, \uc6e8\uc5b4\ub7ec\ube14 \uc5f0\ub3d9, \uacb0\uc81c, \uc624\ud504\ub77c\uc778 \ubaa8\ub4dc, \ub2e4\uad6d\uc5b4 \uc9c0\uc6d0 \ud3ec\ud568. \uc6b0\uc120\uc21c\uc704\uc640 \uc2dc\uc791\uc810\uc744 \ucc3e\uc544\uc57c \ud568.\n\n# Elements\n- ExerciseTracking [type: feature] \u2014 \uc6b4\ub3d9 \uae30\ub85d (\ud575\uc2ec)\n- DietManagement [type: feature] \u2014 \uc2dd\ub2e8 \uad00\ub9ac (\ud575\uc2ec)\n- SocialFeatures [type: feature] \u2014 \uc18c\uc15c \uae30\ub2a5\n- Challenges [type: feature] \u2014 \ucc4c\ub9b0\uc9c0 \uc2dc\uc2a4\ud15c\n- CoachingAI [type: feature] \u2014 AI \ucf54\uce6d\n- WearableIntegration [type: feature] \u2014 \uc6e8\uc5b4\ub7ec\ube14 \uc5f0\ub3d9\n- Payments [type: feature] \u2014 \uacb0\uc81c \uc2dc\uc2a4\ud15c\n- OfflineMode [type: constraint] \u2014 \uc624\ud504\ub77c\uc778 \ubaa8\ub4dc \uc9c0\uc6d0\n- Multilingual [type: constraint] \u2014 \ub2e4\uad6d\uc5b4 \uc9c0\uc6d0\n- MVPScope [type: decision] \u2014 MVP\uc5d0 \ud3ec\ud568\ud560 \uae30\ub2a5 \ubc94\uc704\n- Platform [type: decision] \u2014 \ud50c\ub7ab\ud3fc \uc120\ud0dd (iOS/Android/\ud06c\ub85c\uc2a4\ud50c\ub7ab\ud3fc)\n- TechStack [type: decision] \u2014 \uae30\uc220 \uc2a4\ud0dd\n\n# Relations\n- ExerciseTracking \u2192core-of\u2192 MVPScope\n- DietManagement \u2192core-of\u2192 MVPScope\n- SocialFeatures \u2192depends-on\u2192 ExerciseTracking\n- Challenges \u2192depends-on\u2192 SocialFeatures\n- CoachingAI \u2192depends-on\u2192 ExerciseTracking\n- CoachingAI \u2192depends-on\u2192 DietManagement\n- WearableIntegration \u2192depends-on\u2192 ExerciseTracking\n- Payments \u2192depends-on\u2192 Challenges\n- OfflineMode \u2192constrains\u2192 TechStack\n- Multilingual \u2192constrains\u2192 TechStack\n\n# Decided\n(\uc5c6\uc74c)\n\n# Undecided\n- MVP \ubc94\uc704: [\uc804\uccb4 \uae30\ub2a5 | \ud575\uc2ec\ub9cc | \ub2e8\uacc4\ubcc4 \ucd9c\uc2dc] (Related: MVPScope, \ubaa8\ub4e0 feature)\n- \ud50c\ub7ab\ud3fc: [iOS | Android | \ud06c\ub85c\uc2a4\ud50c\ub7ab\ud3fc] (Related: Platform, TechStack)\n- \uae30\uc220 \uc2a4\ud0dd: [React Native | Flutter | Swift+Kotlin | ...] (Related: TechStack, OfflineMode)\n- \uc218\uc775 \ubaa8\ub378: [\uad6c\ub3c5 | \uc778\uc571\uacb0\uc81c | \ud504\ub9ac\ubbf8\uc5c4 | \uad11\uace0] (Related: Payments)\n- \ud0c0\uac9f \uc0ac\uc6a9\uc790: [\ucd08\ubcf4\uc790 | \uc911\uae09\uc790 | \uc804\ubb38\uac00 | \uc804\uccb4] (Related: \ubaa8\ub4e0 feature)\n- \ucd9c\uc2dc \uc2dc\uc7a5: [\uad6d\ub0b4 | \uae00\ub85c\ubc8c] (Related: Multilingual)\n\n# Active Discussion\n- \uc804\uccb4 \uae30\ub2a5 \ubc94\uc704\uc640 \uc6b0\uc120\uc21c\uc704 \uc124\uc815\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 1\n"}], "eval-3-feature-overload-with_skill": [{"name": "response.md", "type": "text", "content": "\ud53c\ud2b8\ub2c8\uc2a4 \ud2b8\ub798\ud0b9 \uc571, \uaf64 \uc57c\uc2ec\ucc2c \ud504\ub85c\uc81d\ud2b8\ub124\uc694. \ub9d0\uc500\ud558\uc2e0 \uae30\ub2a5\ub4e4\uc744 \uc815\ub9ac\ud558\uba74 \ubc8c\uc368 9\uac00\uc9c0\uac00 \ub098\uc635\ub2c8\ub2e4 -- \uc6b4\ub3d9 \uae30\ub85d, \uc2dd\ub2e8 \uad00\ub9ac, \uc18c\uc15c, \ucc4c\ub9b0\uc9c0, \ucf54\uce6d AI, \uc6e8\uc5b4\ub7ec\ube14 \uc5f0\ub3d9, \uacb0\uc81c, \uc624\ud504\ub77c\uc778 \ubaa8\ub4dc, \ub2e4\uad6d\uc5b4. \ubb50\ubd80\ud130 \ud574\uc57c \ud560\uc9c0 \ubaa8\ub974\uaca0\ub2e4\ub294 \uac10\uac01\uc774 \uc815\ud655\ud788 \ub9de\ub294 \uac70\uc608\uc694. \ud55c\uaebc\ubc88\uc5d0 9\uac1c\ub97c \ub193\uace0 \ubcf4\uba74 \ub204\uad6c\ub4e0 \ub9c9\ud799\ub2c8\ub2e4.\n\n\ubcf8\uaca9\uc801\uc73c\ub85c \uc815\ub9ac\ud558\uae30 \uc804\uc5d0, \uba87 \uac00\uc9c0 \uba3c\uc800 \uc54c\uba74 \uc88b\uaca0\uc2b5\ub2c8\ub2e4.\n\n**\uc774 \uc571\uc744 \uc4f8 \uc0ac\ub78c\uc774 \ub204\uad6c\uc778\uc9c0** \uadf8\ub9bc\uc774 \uc788\ub098\uc694? \uc608\ub97c \ub4e4\uc5b4 \uc6b4\ub3d9\uc744 \ub9c9 \uc2dc\uc791\ud558\ub294 \ucd08\ubcf4\uc790\uc778\uc9c0, \uc774\ubbf8 \ub8e8\ud2f4\uc774 \uc788\ub294 \uc911\uae09\uc790\uc778\uc9c0\uc5d0 \ub530\ub77c \ud575\uc2ec \uae30\ub2a5\uc774 \uc644\uc804\ud788 \ub2ec\ub77c\uc9d1\ub2c8\ub2e4. \ucd08\ubcf4\uc790\ub77c\uba74 \ucf54\uce6d AI\uac00 1\uc21c\uc704\uc77c \uc218 \uc788\uace0, \uc911\uae09\uc790\ub77c\uba74 \uc6b4\ub3d9 \uae30\ub85d + \uc6e8\uc5b4\ub7ec\ube14 \uc5f0\ub3d9\uc774 \uba3c\uc800\uaca0\uc8e0.\n\n\uc774\uac83\ub9cc \uc7a1\ud788\uba74 9\uac1c \uae30\ub2a5\uc744 \"\ucc98\uc74c\uc5d0 \ubc18\ub4dc\uc2dc \uc788\uc5b4\uc57c \ud558\ub294 \uac83\" / \"\uc788\uc73c\uba74 \uc88b\uc9c0\ub9cc \ub098\uc911\uc5d0 \ud574\ub3c4 \ub418\ub294 \uac83\" / \"\ud6e8\uc52c \ub4a4\uc5d0 \ud574\ub3c4 \ub418\ub294 \uac83\" -- \uc774 \uc138 \ubc14\uad6c\ub2c8\ub85c \ub098\ub20c \uc218 \uc788\uc2b5\ub2c8\ub2e4. \uc9c0\uae08 \ub2e8\uacc4\uc5d0\uc11c \uac00\uc7a5 \uac15\ub825\ud55c \ud55c \uc218\ub294 \uc774 \ubd84\ub958\ub97c \uba3c\uc800 \ud558\ub294 \uac70\uc608\uc694.\n\n\ud639\uc2dc \ud0c0\uac9f \uc0ac\uc6a9\uc790\uc5d0 \ub300\ud574 \uc0dd\uac01\ud574 \ub454 \uac8c \uc788\ub098\uc694? \uc544\ub2c8\uba74 \uc774\ubbf8 \uacbd\uc7c1 \uc571\uc744 \uc870\uc0ac\ud574 \ubcf4\uc168\ub294\uc9c0\ub3c4 \uad81\uae08\ud569\ub2c8\ub2e4.\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ud53c\ud2b8\ub2c8\uc2a4 \ud2b8\ub798\ud0b9 \ubaa8\ubc14\uc77c \uc571 \uae30\ud68d \u2014 \uc6b4\ub3d9 \uae30\ub85d, \uc2dd\ub2e8 \uad00\ub9ac, \uc18c\uc15c \uae30\ub2a5, \ucc4c\ub9b0\uc9c0, \ucf54\uce6d AI, \uc6e8\uc5b4\ub7ec\ube14 \uc5f0\ub3d9, \uacb0\uc81c, \uc624\ud504\ub77c\uc778 \ubaa8\ub4dc, \ub2e4\uad6d\uc5b4 \uc9c0\uc6d0\n\n# Elements\n- \uc6b4\ub3d9\uae30\ub85d [type: feature]\n- \uc2dd\ub2e8\uad00\ub9ac [type: feature]\n- \uc18c\uc15c\uae30\ub2a5 [type: feature]\n- \ucc4c\ub9b0\uc9c0 [type: feature]\n- \ucf54\uce6dAI [type: feature]\n- \uc6e8\uc5b4\ub7ec\ube14\uc5f0\ub3d9 [type: feature]\n- \uacb0\uc81c [type: feature]\n- \uc624\ud504\ub77c\uc778\ubaa8\ub4dc [type: constraint]\n- \ub2e4\uad6d\uc5b4\uc9c0\uc6d0 [type: constraint]\n\n# Relations\n- \ucc4c\ub9b0\uc9c0 \u2192depends-on\u2192 \uc18c\uc15c\uae30\ub2a5\n- \ucf54\uce6dAI \u2192depends-on\u2192 \uc6b4\ub3d9\uae30\ub85d\n- \ucf54\uce6dAI \u2192depends-on\u2192 \uc2dd\ub2e8\uad00\ub9ac\n- \uc6e8\uc5b4\ub7ec\ube14\uc5f0\ub3d9 \u2192communicates-with\u2192 \uc6b4\ub3d9\uae30\ub85d\n- \uacb0\uc81c \u2192depends-on\u2192 (\ubbf8\uc815: \uc5b4\ub5a4 \uae30\ub2a5\uc774 \uc720\ub8cc\uc778\uc9c0)\n\n# Decided\n(\uc5c6\uc74c)\n\n# Undecided\n- MVP \ubc94\uc704: [9\uac1c \uae30\ub2a5 \uc911 \uc5b4\ub514\uae4c\uc9c0\uac00 1\ucc28 \ucd9c\uc2dc?] (\uc804\uccb4 \uae30\ub2a5 \ubaa9\ub85d \uad00\ub828)\n- \ud0c0\uac9f \uc0ac\uc6a9\uc790: [\ucd08\ubcf4\uc790 | \uc911\uae09\uc790 | \uc804\ubb38\uac00 | \uc804\uccb4] (\uc571 \ubc29\ud5a5\uc131 \uacb0\uc815\uc5d0 \uc601\ud5a5)\n- \ud50c\ub7ab\ud3fc: [iOS | Android | \ub458 \ub2e4 | \ud06c\ub85c\uc2a4\ud50c\ub7ab\ud3fc] (\uae30\uc220 \uc2a4\ud0dd \uacb0\uc815\uc5d0 \uc601\ud5a5)\n- \uc218\uc775 \ubaa8\ub378: [\uad6c\ub3c5 | \ud504\ub9ac\ubbf8\uc5c4 | \uad11\uace0 | \ud63c\ud569] (\uacb0\uc81c \uae30\ub2a5 \ubc94\uc704\uc5d0 \uc601\ud5a5)\n- \uae30\uc220 \uc2a4\ud0dd: [\ub124\uc774\ud2f0\ube0c | React Native | Flutter | \uae30\ud0c0] (\uc624\ud504\ub77c\uc778/\uc6e8\uc5b4\ub7ec\ube14 \uad6c\ud604\uc5d0 \uc601\ud5a5)\n\n# Active Discussion\n- \uc804\uccb4 \uae30\ub2a5 \ubaa9\ub85d \ub098\uc5f4 \uc644\ub8cc, \uc6b0\uc120\uc21c\uc704 \ubbf8\uc815\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 1\n"}], "eval-4-progressive-complexity-old_skill": [{"name": "response.md", "type": "text", "content": "\uc88b\uc544\uc694, 3\ubc88\uc758 \ub300\ud654\uc5d0\uc11c \ub098\uc628 \uac78 \uc815\ub9ac\ud574\ubcfc\uac8c\uc694.\n\n---\n\n**\uacb0\uc815\ub41c \uac83\ub4e4**\n\n- \ud0c0\uac9f: \uc18c\uaddc\ubaa8 \uacf5\uc608\uac00(\ud310\ub9e4\uc790), \uc57d 100\uba85 \uaddc\ubaa8\ub85c \uc2dc\uc791\n- \uae30\uc220 \uc2a4\ud0dd: Next.js (\ud504\ub860\ud2b8 + \ubc31\uc5d4\ub4dc)\n- \uacb0\uc81c: \ud1a0\uc2a4\ud398\uc774\uba3c\uce20 \uc5f0\ub3d9\n- MVP \ucd9c\ubc1c\uc810: \uc0c1\ud488 \ub4f1\ub85d + \uacb0\uc81c\n\n\uc774 4\uac00\uc9c0\ub294 \ud655\uc815\uc774\uc5d0\uc694. \uc5ec\uae30\uc5d0 \ub300\ud574\uc11c\ub294 \ub354 \uace0\ubbfc\ud560 \ud544\uc694 \uc5c6\uc5b4\uc694.\n\n---\n\n**\ubcf4\ub958\ub41c \uac83 (1\uac74)**\n\n- DB \uc120\ud0dd (PostgreSQL vs MongoDB) \u2014 \"\ub098\uc911\uc5d0 \uc0dd\uac01\ud574\ubcfc\uac8c\"\ub85c \ubcf4\ub958\ud588\ub294\ub370, \uc0c1\ud488 \ub4f1\ub85d\uacfc \uacb0\uc81c \uae30\ub2a5\uc744 \ub9cc\ub4e4\ub824\uba74 DB\uac00 \uba3c\uc800 \uc815\ud574\uc838\uc57c \ud574\uc694. \uc774\uac74 \ub098\uc911\uc774 \uc544\ub2c8\ub77c **MVP \uc2dc\uc791 \uc804\uc5d0 \uacb0\uc815\uc774 \ud544\uc694\ud55c \ud56d\ubaa9**\uc774\uc5d0\uc694.\n\n---\n\n**\uc5b8\uae09\uc740 \ub410\uc9c0\ub9cc \uc544\uc9c1 \uc544\ubb34\uac83\ub3c4 \uc815\ud574\uc9c0\uc9c0 \uc54a\uc740 \uac83\ub4e4 (7\uac74)**\n\n\ud310\ub9e4\uc790 \ub300\uc2dc\ubcf4\ub4dc, \ub9ac\ubdf0 \uc2dc\uc2a4\ud15c, \uac80\uc0c9 \uae30\ub2a5, \uc7ac\uace0 \uad00\ub9ac, \ubc30\uc1a1 \ucd94\uc801, \ucfe0\ud3f0/\ud560\uc778, \uc815\uc0b0 \uc2dc\uc2a4\ud15c \u2014 \uc804\ubd80 \"\ud544\uc694\ud558\ub2e4\"\uae4c\uc9c0\ub9cc \uc774\uc57c\uae30\ub410\uace0, \ubc94\uc704\ub3c4 \uc6b0\uc120\uc21c\uc704\ub3c4 \uc815\ud574\uc9c4 \uac8c \uc5c6\uc5b4\uc694.\n\n7\uac1c\ub97c \ud55c\uaebc\ubc88\uc5d0 \ub17c\uc758\ud558\uba74 \uc544\ubb34\uac83\ub3c4 \uacb0\uc815\uc774 \uc548 \ub420 \uac70\uc608\uc694. \uc81c\uc548\ud558\uc790\uba74:\n\n1. **\uba3c\uc800 MVP \ubc94\uc704\ub97c \uc815\ud558\uae30** \u2014 \uc774 7\uac1c \uc911 \uccab \ucd9c\uc2dc\uc5d0 \ubc18\ub4dc\uc2dc \uc788\uc5b4\uc57c \ud558\ub294 \uac8c \ubb54\uc9c0\n2. **\uadf8 \ub2e4\uc74c \ubcf4\ub958\ub41c DB \uacb0\uc815\ud558\uae30** \u2014 MVP \ubc94\uc704\uac00 \uc815\ud574\uc838\uc57c \ub370\uc774\ud130 \uad6c\uc870\uac00 \ubcf4\uc774\uace0, \uadf8\ub798\uc57c DB\ub97c \uace0\ub97c \uc218 \uc788\uc73c\ub2c8\uae4c\n3. **\ub098\uba38\uc9c0\ub294 MVP \uc774\ud6c4\ub85c \ud30c\ud0b9** \u2014 \uc78a\uc5b4\ubc84\ub9ac\ub294 \uac8c \uc544\ub2c8\ub77c \uc758\ub3c4\uc801\uc73c\ub85c \ubbf8\ub904\ub450\ub294 \uac70\n\n\uc5b4\ub5a4 \uae30\ub2a5\uc774 MVP\uc5d0 \uaf2d \ub4e4\uc5b4\uac00\uc57c \ud55c\ub2e4\uace0 \uc0dd\uac01\ud574\uc694? \ud558\ub098\uc529 \uc774\uc57c\uae30\ud574\ubd10\uc694.\n\n---\n\n\uc774\uac78 \ud55c\ub208\uc5d0 \ubcfc \uc218 \uc788\uac8c \uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\uc218\uc81c \uacf5\uc608\ud488 \uc804\ubb38 \uc774\ucee4\uba38\uc2a4 \ud50c\ub7ab\ud3fc \uad6c\ucd95. \uc0c1\ud488 \ub4f1\ub85d\uacfc \uacb0\uc81c \uae30\ub2a5\ubd80\ud130 \uc2dc\uc791.\n\n# Elements\n- EcommercePlatform [type: architecture]\n- ProductRegistration [type: feature]\n- PaymentSystem [type: feature]\n- SellerDashboard [type: feature]\n- ReviewSystem [type: feature]\n- SearchFunction [type: feature]\n- InventoryManagement [type: feature]\n- ShippingTracking [type: feature]\n- CouponDiscount [type: feature]\n- SettlementSystem [type: feature]\n- NextJS [type: architecture]\n- TossPayments [type: constraint]\n- Database [type: architecture]\n\n# Relations\n- EcommercePlatform \u2192contains\u2192 ProductRegistration\n- EcommercePlatform \u2192contains\u2192 PaymentSystem\n- EcommercePlatform \u2192contains\u2192 SellerDashboard\n- EcommercePlatform \u2192contains\u2192 ReviewSystem\n- EcommercePlatform \u2192contains\u2192 SearchFunction\n- EcommercePlatform \u2192contains\u2192 InventoryManagement\n- EcommercePlatform \u2192contains\u2192 ShippingTracking\n- EcommercePlatform \u2192contains\u2192 CouponDiscount\n- EcommercePlatform \u2192contains\u2192 SettlementSystem\n- PaymentSystem \u2192depends-on\u2192 TossPayments\n- PaymentSystem \u2192depends-on\u2192 Database\n- ProductRegistration \u2192depends-on\u2192 Database\n- SellerDashboard \u2192depends-on\u2192 ProductRegistration\n- SellerDashboard \u2192depends-on\u2192 InventoryManagement\n- ReviewSystem \u2192depends-on\u2192 ProductRegistration\n- ShippingTracking \u2192depends-on\u2192 PaymentSystem\n- SettlementSystem \u2192depends-on\u2192 PaymentSystem\n- CouponDiscount \u2192depends-on\u2192 PaymentSystem\n- InventoryManagement \u2192depends-on\u2192 ProductRegistration\n\n# Decided\n- \ud0c0\uac9f \uc0ac\uc6a9\uc790: \uc18c\uaddc\ubaa8 \uacf5\uc608\uac00(\ud310\ub9e4\uc790) \uc57d 100\uba85 \uaddc\ubaa8\ub85c \uc2dc\uc791 (\uc0ac\uc6a9\uc790 \uc9c1\uc811 \uba85\uc2dc)\n- \ud504\ub860\ud2b8/\ubc31\uc5d4\ub4dc \ud504\ub808\uc784\uc6cc\ud06c: Next.js (\uc0ac\uc6a9\uc790 \uc120\ud0dd)\n- \uacb0\uc81c \uc2dc\uc2a4\ud15c: \ud1a0\uc2a4\ud398\uc774\uba3c\uce20 \uc5f0\ub3d9 (\uc0ac\uc6a9\uc790 \uc120\ud0dd)\n- MVP \uc2dc\uc791 \uae30\ub2a5: \uc0c1\ud488 \ub4f1\ub85d + \uacb0\uc81c (\uc0ac\uc6a9\uc790 \uba85\uc2dc)\n\n# Undecided\n- DB \uc120\ud0dd: [PostgreSQL | MongoDB] (\uc0ac\uc6a9\uc790\uac00 \"\ub098\uc911\uc5d0 \uc0dd\uac01\ud574\ubcfc\uac8c\"\ub85c \ubcf4\ub958)\n- \ud310\ub9e4\uc790 \ub300\uc2dc\ubcf4\ub4dc \ubc94\uc704: [\ubbf8\uc815] (\uc5b8\uae09\ub9cc \ub428, \uad6c\uccb4\uc801 \ub17c\uc758 \uc5c6\uc74c)\n- \ub9ac\ubdf0 \uc2dc\uc2a4\ud15c \uc124\uacc4: [\ubbf8\uc815] (\uc5b8\uae09\ub9cc \ub428)\n- \uac80\uc0c9 \uae30\ub2a5 \ubc94\uc704: [\ubbf8\uc815] (\uc5b8\uae09\ub9cc \ub428)\n- \uc7ac\uace0 \uad00\ub9ac \ubc29\uc2dd: [\ubbf8\uc815] (\uc0ac\uc6a9\uc790\uac00 \"\uc5b4\ub5bb\uac8c \ud558\uc9c0?\"\ub85c \uc9c8\ubb38)\n- \ubc30\uc1a1 \ucd94\uc801 \ubc29\uc2dd: [\ubbf8\uc815] (\uc5b8\uae09\ub9cc \ub428)\n- \ucfe0\ud3f0/\ud560\uc778 \uc2dc\uc2a4\ud15c: [\ubbf8\uc815] (\uc5b8\uae09\ub9cc \ub428)\n- \uc815\uc0b0 \uc2dc\uc2a4\ud15c \uc124\uacc4: [\ubbf8\uc815] (\uc5b8\uae09\ub9cc \ub428)\n\n# Active Discussion\n- \uae30\ub2a5 \ubc94\uc704 \uc815\uc758 \ubc0f MVP \uc6b0\uc120\uc21c\uc704 \uacb0\uc815 \ud544\uc694\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 4\n"}], "eval-4-progressive-complexity-with_skill": [{"name": "response.md", "type": "text", "content": "\uc88b\uc544\uc694, 4\ud134 \ub3d9\uc548 \ub098\uc628 \uac83\ub4e4 \uc815\ub9ac\ud569\ub2c8\ub2e4.\n\n## \ud655\uc815\ub41c \uac83 (3\uac1c)\n\n| \ud56d\ubaa9 | \uacb0\uc815 | \uadfc\uac70 |\n|------|------|------|\n| \ud0c0\uac9f | \uc18c\uaddc\ubaa8 \uacf5\uc608\uac00 ~100\uba85\uc73c\ub85c \uc2dc\uc791 | \uc9c1\uc811 \uc9c0\uc815 |\n| \ud504\ub860\ud2b8/\ubc31\uc5d4\ub4dc | Next.js | \uc9c1\uc811 \uc120\ud0dd |\n| \uacb0\uc81c | \ud1a0\uc2a4\ud398\uc774\uba3c\uce20 \uc5f0\ub3d9 | \uc9c1\uc811 \uc120\ud0dd |\n\n## \ubcf4\ub958\ub41c \uac83 (1\uac1c)\n\n- **DB \uc120\ud0dd (PostgreSQL vs MongoDB)** -- \"\ub098\uc911\uc5d0 \uc0dd\uac01\ud574\ubcfc\uac8c\"\ub85c \ubcf4\ub958\ud568. \ub2e8, \uc774 \uacb0\uc815\uc774 \uc0c1\ud488 \ub4f1\ub85d \uae30\ub2a5\uc758 \ub370\uc774\ud130 \ubaa8\ub378\uc5d0 \uc9c1\uc811 \uc601\ud5a5\uc744 \uc8fc\uae30 \ub54c\ubb38\uc5d0, \uac1c\ubc1c \ucc29\uc218 \uc804\uc5d0\ub294 \uc815\ud574\uc57c \ud569\ub2c8\ub2e4.\n\n## \uc544\uc9c1 \uacb0\uc815\uc774 \ud544\uc694\ud55c \uac83 (1\uac1c, \ud070 \uac83)\n\n- **MVP \ubc94\uc704** -- Turn 3\uc5d0\uc11c 7\uac1c \uae30\ub2a5\uc774 \ud55c\uaebc\ubc88\uc5d0 \ub098\uc654\uc2b5\ub2c8\ub2e4:\n  1. \ud310\ub9e4\uc790 \ub300\uc2dc\ubcf4\ub4dc\n  2. \ub9ac\ubdf0 \uc2dc\uc2a4\ud15c\n  3. \uac80\uc0c9 \uae30\ub2a5\n  4. \uc7ac\uace0 \uad00\ub9ac\n  5. \ubc30\uc1a1 \ucd94\uc801\n  6. \ucfe0\ud3f0/\ud560\uc778\n  7. \uc815\uc0b0 \uc2dc\uc2a4\ud15c\n\n  \uc774 7\uac1c \uac01\uac01\uc758 \uc0c1\uc138 \uc2a4\ud399\uc740 \uc544\uc9c1 \ub17c\uc758\ud558\uc9c0 \uc54a\uc558\uace0, \uc774 \uc911 \ubb58 MVP\uc5d0 \ub123\uace0 \ubb58 \ub4a4\ub85c \ubbf8\ub8f0\uc9c0\ub3c4 \uc815\ud574\uc9c0\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4.\n\n---\n\n\uc194\uc9c1\ud788 \ub9d0\ud558\uba74, \uc9c0\uae08 \uc5f4\ub824 \uc788\ub294 \ubb38\uc774 \ub108\ubb34 \ub9ce\uc2b5\ub2c8\ub2e4. 7\uac1c \uae30\ub2a5 + DB \uc120\ud0dd\uae4c\uc9c0 8\uac1c\uac00 \ubbf8\uacb0\uc815 \uc0c1\ud0dc\uc608\uc694.\n\n**\uc81c\uc548:** \ud55c \uac00\uc9c0\uc529 \uac00\uc8e0. \uac00\uc7a5 \uba3c\uc800 \uc815\ud560 \uac83\uc740 MVP \ubc94\uc704\uc785\ub2c8\ub2e4. 7\uac1c \uae30\ub2a5 \uc911\uc5d0\uc11c \"\uc774\uac83 \uc5c6\uc73c\uba74 \ub7f0\uce6d \ubabb \ud55c\ub2e4\"\ub294 \uac83\uacfc \"\uc788\uc73c\uba74 \uc88b\uc9c0\ub9cc \ub098\uc911\uc5d0 \ucd94\uac00\ud574\ub3c4 \ub41c\ub2e4\"\ub97c \ub098\ub220\uc57c \ub2e4\uc74c \ub2e8\uacc4\ub85c \uac08 \uc218 \uc788\uc5b4\uc694.\n\n\ucc98\uc74c\uc5d0 \ub9d0\ud55c \"\uc0c1\ud488 \ub4f1\ub85d + \uacb0\uc81c\"\uac00 \ud575\uc2ec\uc774\uc5c8\ub294\ub370, \uac70\uae30\uc5d0 \uaf2d \ubd99\uc5b4\uc57c \ud558\ub294 \uac8c \ubb50\ub77c\uace0 \uc0dd\uac01\ud558\uc138\uc694?\n\n---\n\n\uc774 \ud604\ud669\uc744 \uc0c1\ud0dc \ub300\uc2dc\ubcf4\ub4dc\ub85c \uc2dc\uac01\ud654\ud574\uc11c \ubcf4\uc5ec\ub4dc\ub9b4\uae4c\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\uc218\uc81c \uacf5\uc608\ud488 \uc804\ubb38 \uc774\ucee4\uba38\uc2a4 \ud50c\ub7ab\ud3fc \uad6c\ucd95. \uc18c\uaddc\ubaa8 \uacf5\uc608\uac00(\ud310\ub9e4\uc790) \ub300\uc0c1, \uc0c1\ud488 \ub4f1\ub85d\uacfc \uacb0\uc81c \uae30\ub2a5\ubd80\ud130 \uc2dc\uc791.\n\n# Elements\n- EcommercePlatform [type: architecture]\n- ProductRegistration [type: feature]\n- PaymentSystem [type: feature]\n- TossPayments [type: constraint]\n- NextJS [type: architecture]\n- Database [type: architecture]\n- SellerDashboard [type: feature]\n- ReviewSystem [type: feature]\n- SearchFunction [type: feature]\n- InventoryManagement [type: feature]\n- ShippingTracking [type: feature]\n- CouponDiscount [type: feature]\n- SettlementSystem [type: feature]\n\n# Relations\n- EcommercePlatform \u2192contains\u2192 ProductRegistration\n- EcommercePlatform \u2192contains\u2192 PaymentSystem\n- PaymentSystem \u2192depends-on\u2192 TossPayments\n- EcommercePlatform \u2192depends-on\u2192 NextJS\n- EcommercePlatform \u2192depends-on\u2192 Database\n- SellerDashboard \u2192depends-on\u2192 InventoryManagement\n- SellerDashboard \u2192depends-on\u2192 SettlementSystem\n- ShippingTracking \u2192depends-on\u2192 PaymentSystem\n- SettlementSystem \u2192depends-on\u2192 PaymentSystem\n- CouponDiscount \u2192depends-on\u2192 PaymentSystem\n- ReviewSystem \u2192depends-on\u2192 ProductRegistration\n- SearchFunction \u2192depends-on\u2192 ProductRegistration\n\n# Decided\n- \ud0c0\uac9f \uc0ac\uc6a9\uc790: \uc18c\uaddc\ubaa8 \uacf5\uc608\uac00 ~100\uba85\uc73c\ub85c \uc2dc\uc791 (\uc0ac\uc6a9\uc790 \uc9c0\uc815)\n- \ud504\ub860\ud2b8\uc5d4\ub4dc/\ubc31\uc5d4\ub4dc: Next.js (\uc0ac\uc6a9\uc790 \uc120\ud0dd)\n- \uacb0\uc81c \uc5f0\ub3d9: \ud1a0\uc2a4\ud398\uc774\uba3c\uce20 (\uc0ac\uc6a9\uc790 \uc120\ud0dd)\n\n# Undecided\n- DB \uc120\ud0dd: PostgreSQL | MongoDB (\uc0ac\uc6a9\uc790\uac00 \"\ub098\uc911\uc5d0 \uc0dd\uac01\ud574\ubcfc\uac8c\"\ub85c \ubcf4\ub958)\n- MVP \ubc94\uc704: 7\uac1c \uae30\ub2a5 \uc911 \uc6b0\uc120\uc21c\uc704 \ubbf8\uc815 (Related: SellerDashboard, ReviewSystem, SearchFunction, InventoryManagement, ShippingTracking, CouponDiscount, SettlementSystem)\n- \ud310\ub9e4\uc790 \ub300\uc2dc\ubcf4\ub4dc \uc0c1\uc138 \uae30\ub2a5: \ubbf8\uc815 (Related: SellerDashboard)\n- \ub9ac\ubdf0 \uc2dc\uc2a4\ud15c \uad6c\uc870: \ubbf8\uc815 (Related: ReviewSystem)\n- \uac80\uc0c9 \uae30\ub2a5 \ubc94\uc704: \ubbf8\uc815 (Related: SearchFunction)\n- \uc7ac\uace0 \uad00\ub9ac \ubc29\uc2dd: \ubbf8\uc815 (Related: InventoryManagement)\n- \ubc30\uc1a1 \ucd94\uc801 \uc5f0\ub3d9 \ubc29\uc2dd: \ubbf8\uc815 (Related: ShippingTracking)\n\n# Active Discussion\n- \uc804\uccb4 \ud604\ud669 \uc815\ub9ac \uc694\uccad (\uc0ac\uc6a9\uc790: \"\ubb50\uac00 \uacb0\uc815\ub41c \uac70\uc57c? \uc880 \uc815\ub9ac\ud574\uc918\")\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 4\n"}], "eval-5-agency-return-old_skill": [{"name": "response.md", "type": "text", "content": "\uc7a0\uae50, \uc81c\uac00 \ud55c \ubc88\uc5d0 \ub108\ubb34 \ub9ce\uc740 \uac78 \uc3df\uc544\ub0c8\ub124\uc694. \ud55c \ubc1c \ubb3c\ub7ec\uc11c \ubcfc\uac8c\uc694.\n\n\uc9c0\uae08\uae4c\uc9c0 \ud655\uc2e4\ud788 \uc815\ud574\uc9c4 \uac74 \uc774\uac70\uc608\uc694:\n- **\uc5d0\ub514\ud130**: Monaco\n- **\ucf54\ub4dc \uc2e4\ud589**: Docker \ucee8\ud14c\uc774\ub108\n- **\uc778\ud504\ub77c**: AWS ECS Fargate\n- **\ud504\ub860\ud2b8\uc5d4\ub4dc**: React + WebSocket\n\n\ub098\uba38\uc9c0 \u2014 DB \uad6c\uc131, \uc778\uc99d \ubc29\uc2dd, \uacb0\uc81c \ubaa8\ub378, \uacfc\uc815 \uad6c\uc870, \uc790\ub3d9 \ucc44\uc810 \u2014 \uc774\uac74 \uc544\uc9c1 \uc5f4\ub824\uc788\ub294 \uc0c1\ud0dc\uace0, \ud55c\uaebc\ubc88\uc5d0 \ub2e4 \uc815\ud560 \ud544\uc694 \uc5c6\uc5b4\uc694.\n\n\uc9c0\uae08 \uc5b4\ub5bb\uac8c \ud558\uace0 \uc2f6\uc73c\uc138\uc694?\n\n**(A)** \uac00\uc7a5 \uad81\uae08\ud558\uac70\ub098 \uba3c\uc800 \uc815\ud558\uace0 \uc2f6\uc740 \ubd80\ubd84 \ud558\ub098\ub97c \uace8\ub77c\uc11c \uae4a\uc774 \ud30c\uae30\n**(B)** \uc9c0\uae08\uae4c\uc9c0 \uc815\ud55c \uac83\ub4e4\ub9cc \uac00\uc9c0\uace0 \uac04\ub2e8\ud55c MVP \ubc94\uc704\ub97c \uc7a1\uae30\n**(C)** \uc544\uc608 \ub2e4\ub978 \uad00\uc810 \u2014 \uc608\ub97c \ub4e4\uc5b4 \ud559\uc0dd \uc785\uc7a5\uc5d0\uc11c\uc758 \uccab \ud559\uc2b5 \uacbd\ud5d8 \ud750\ub984\ubd80\ud130 \uc124\uacc4\ud558\uae30\n\n\uc5b4\ub5a4 \uac8c \ub04c\ub9ac\uc138\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ube44\uc804\uacf5\uc790\ub97c \uc704\ud55c \ube0c\ub77c\uc6b0\uc800 \uae30\ubc18 \uc628\ub77c\uc778 \ucf54\ub529 \uad50\uc721 \ud50c\ub7ab\ud3fc \uad6c\ucd95 (\ud30c\uc774\uc36c \uae30\ucd08 \uacfc\uc815\ubd80\ud130 \uc2dc\uc791, \ub2e4\uc911 \uc5b8\uc5b4 \ud655\uc7a5 \uc608\uc815)\n\n# Elements\n- CodeEditor [type: component] \u2014 Monaco Editor\n- CodeExecutionEnv [type: architecture] \u2014 Docker \ucee8\ud14c\uc774\ub108 \uae30\ubc18 \ucf54\ub4dc \uc2e4\ud589\n- CourseMgmt [type: feature] \u2014 \ucee4\ub9ac\ud058\ub7fc/\uacfc\uc815 \uad00\ub9ac\n- AutoGrading [type: feature] \u2014 \uc790\ub3d9 \ucc44\uc810 \uc2dc\uc2a4\ud15c\n- Frontend [type: architecture] \u2014 React + Monaco + WebSocket\n- Backend [type: architecture] \u2014 \uacfc\uc815 \uad00\ub9ac API, \ucf54\ub4dc \uc2e4\ud589 \uc11c\ube44\uc2a4\n- Infra [type: architecture] \u2014 AWS ECS Fargate\n- Database [type: data] \u2014 DB \uad6c\uc131\n- Auth [type: feature] \u2014 \uc778\uc99d \uc2dc\uc2a4\ud15c\n- Payment [type: feature] \u2014 \uacb0\uc81c \uc2dc\uc2a4\ud15c\n- CourseStructure [type: concept] \u2014 \uacfc\uc815 \uad6c\uc870 (\ubaa8\ub4c8\uc2dd/\ud504\ub85c\uc81d\ud2b8/\ud63c\ud569)\n\n# Relations\n- CodeEditor \u2192communicates-with\u2192 Backend\n- Backend \u2192depends-on\u2192 CodeExecutionEnv\n- CodeExecutionEnv \u2192depends-on\u2192 Infra\n- AutoGrading \u2192depends-on\u2192 CodeExecutionEnv\n- CourseMgmt \u2192depends-on\u2192 Database\n- Auth \u2192depends-on\u2192 Database\n- Payment \u2192depends-on\u2192 Auth\n\n# Decided\n- CodeEditor: Monaco Editor (\uc790\ub3d9\uc644\uc131 \ub4f1 \uae30\ub2a5\uc774 \ud48d\ubd80)\n- CodeExecutionEnv: Docker \ucee8\ud14c\uc774\ub108 (\ub2e4\uc911 \uc5b8\uc5b4 \ud655\uc7a5 \uac00\ub2a5\uc131)\n- Infra: AWS ECS Fargate (\uc18c\uaddc\ubaa8 \ud300\uc5d0 \uc801\ud569 \u2014 \ud300 \uaddc\ubaa8 \ubbf8\ud655\uc778\uc774\ub098 \uc0ac\uc6a9\uc790\uac00 \ub3d9\uc758)\n- Frontend: React + Monaco Editor + WebSocket\n\n# Undecided\n- CourseStructure: [\ubaa8\ub4c8\uc2dd | \ud504\ub85c\uc81d\ud2b8 \uae30\ubc18 | \ud63c\ud569\ud615] (Related: CourseMgmt)\n- Database: [PostgreSQL+DynamoDB+Redis \uad6c\uc131] (Related: CourseMgmt, Auth) \u2014 \uc81c\uc548\ub428, \ud655\uc778 \ubd88\uba85\ud655\n- Auth: [\uc18c\uc15c \ub85c\uadf8\uc778 | \uc790\uccb4 \uc774\uba54\uc77c | \ub458 \ub2e4] (Related: Auth)\n- Payment: [\uad6c\ub3c5\uc81c | \uacfc\uc815\ubcc4 \uad6c\ub9e4 | \ubb34\ub8cc \uccb4\ud5d8 | \ud658\ubd88 \uc815\ucc45] (Related: Payment)\n- AutoGrading: [\ud14c\uc2a4\ud2b8 \ucf00\uc774\uc2a4 \uae30\ubc18, \ucf54\ub4dc \uc2a4\ud0c0\uc77c \uac80\uc0ac, \uc2e4\ud589 \uc81c\ud55c] \u2014 \uc138\ubd80 \uc124\uacc4 \ubbf8\uc815\n- TeamSize: \ud300 \uaddc\ubaa8 \ubbf8\ud655\uc778 (ECS \uc120\ud0dd \uadfc\uac70\uc640 \uc5f0\uad00)\n\n# Active Discussion\n- \uc0ac\uc6a9\uc790\uac00 \"\ub124\"\ub85c\ub9cc \uc751\ub2f5 \u2014 \ubb34\uc5c7\uc5d0 \ub3d9\uc758\ud558\ub294\uc9c0 \ubd88\uba85\ud655 (DB? \uc778\uc99d? \uacb0\uc81c? \uc804\ubd80?)\n- \uc0ac\uc6a9\uc790 \uc5d0\uc774\uc804\uc2dc \uc800\ud558 \uac10\uc9c0: Turn 3\ubd80\ud130 \uc9e7\uc740 \uc218\ub3d9\uc801 \uc751\ub2f5 \ud328\ud134\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 5\n"}], "eval-5-agency-return-with_skill": [{"name": "response.md", "type": "text", "content": "\uc7a0\uae50, \uc81c\uac00 \ud55c \ubc88\uc5d0 \ub108\ubb34 \ub9ce\uc774 \ub358\uc9c4 \uac83 \uac19\uc544\uc694. DB, \uc778\uc99d, \uacb0\uc81c\uae4c\uc9c0 \ud55c\uaebc\ubc88\uc5d0 \ubb3c\uc5b4\ubd24\ub294\ub370 \u2014 \uc544\uc9c1 \uadf8 \ub2e8\uacc4\uac00 \uc544\ub2d0 \uc218\ub3c4 \uc788\uac70\ub4e0\uc694.\n\n\uc9c0\uae08\uae4c\uc9c0 \ud655\uc2e4\ud788 \uc815\ud574\uc9c4 \uac74 \uc774\uac70\uc608\uc694:\n- **Monaco \uc5d0\ub514\ud130 + Docker \ucee8\ud14c\uc774\ub108 + ECS Fargate** \u2014 \uae30\uc220 \uc2a4\ud0dd\uc758 \ud070 \ubf08\ub300\ub294 \uc7a1\ud614\uc5b4\uc694\n- **\ube44\uc804\uacf5\uc790 \ub300\uc0c1 \ud30c\uc774\uc36c \uae30\ucd08 \uacfc\uc815** \u2014 \ubc29\ud5a5\ub3c4 \uba85\ud655\ud558\uace0\uc694\n\n\uc544\uc9c1 \uc5f4\ub824 \uc788\ub294 \uac8c 7\uac1c \uc815\ub3c4 \ub418\ub294\ub370, \ud55c\uaebc\ubc88\uc5d0 \ub2e4 \uc815\ud560 \ud544\uc694\ub294 \uc5c6\uc5b4\uc694.\n\n\uc9c0\uae08 \uac00\uc7a5 \uad81\uae08\ud55c \uac8c \ubb54\uac00\uc694? \uc608\ub97c \ub4e4\uba74:\n- **(A)** \ud559\uc0dd\uc774 \uc2e4\uc81c\ub85c \uacbd\ud5d8\ud558\ub294 \ud750\ub984 \u2014 \uac00\uc785\ud558\uace0, \uacfc\uc815 \uace0\ub974\uace0, \ucf54\ub4dc \uce58\uace0, \ucc44\uc810\ubc1b\ub294 \uacfc\uc815\uc744 \uad6c\uccb4\ud654\ud558\uae30\n- **(B)** \uae30\uc220\uc801\uc73c\ub85c \uc81c\uc77c \uba3c\uc800 \ub9cc\ub4e4\uc5b4\uc57c \ud560 \uac83 \u2014 MVP\uc5d0 \ubb58 \ub123\uace0 \ubb58 \ube84\uc9c0 \uc815\ud558\uae30\n- **(C)** \uc544\ub2c8\uba74 \uc81c\uac00 \ub108\ubb34 \uc55e\uc11c\ub098\uac04 \ubd80\ubd84\uc774 \uc788\uc73c\uba74 \uac70\uae30\ubd80\ud130 \ub2e4\uc2dc \uc598\uae30\ud558\uae30\n\n\uc5b4\ub514\uc11c\ubd80\ud130 \uac00\uace0 \uc2f6\uc73c\uc138\uc694?\n"}, {"name": "state.md", "type": "text", "content": "# Goal\n\ube44\uc804\uacf5\uc790 \ub300\uc0c1 \uc628\ub77c\uc778 \ucf54\ub529 \uad50\uc721 \ud50c\ub7ab\ud3fc \uad6c\ucd95 (\ud30c\uc774\uc36c \uae30\ucd08\ubd80\ud130, \ube0c\ub77c\uc6b0\uc800\uc5d0\uc11c \ucf54\ub4dc \uc2e4\ud589)\n\n# Elements\n- CodeEditor [type: component] \u2014 Monaco Editor \uc120\ud0dd\ub428\n- CodeExecutionEnv [type: architecture] \u2014 Docker \ucee8\ud14c\uc774\ub108 \uae30\ubc18\n- CourseMgmt [type: feature] \u2014 \ucee4\ub9ac\ud058\ub7fc \uad6c\uc870, \uc9c4\ub3c4 \ucd94\uc801\n- AutoGrading [type: feature] \u2014 \ucf54\ub4dc \uc81c\ucd9c + \uc790\ub3d9 \ucc44\uc810\n- Frontend [type: architecture] \u2014 React + Monaco + WebSocket\n- Backend [type: architecture] \u2014 \uacfc\uc815 \uad00\ub9ac API, \ucf54\ub4dc \uc2e4\ud589 \uc11c\ube44\uc2a4\n- Infra [type: architecture] \u2014 AWS ECS Fargate\n- DB [type: data] \u2014 PostgreSQL, DynamoDB/S3, Redis \uc81c\uc548\ub428\n- Auth [type: feature] \u2014 \uc18c\uc15c/\uc790\uccb4 \uc774\uba54\uc77c \ubbf8\uacb0\uc815\n- Payment [type: feature] \u2014 \uad6c\ub3c5\uc81c/\uacfc\uc815\ubcc4 \ubbf8\uacb0\uc815\n\n# Relations\n- Frontend \u2192depends-on\u2192 CodeEditor\n- Frontend \u2192communicates-with\u2192 Backend\n- Backend \u2192depends-on\u2192 CodeExecutionEnv\n- CodeExecutionEnv \u2192depends-on\u2192 Infra\n- AutoGrading \u2192depends-on\u2192 CodeExecutionEnv\n- CourseMgmt \u2192contains\u2192 AutoGrading\n- Backend \u2192depends-on\u2192 DB\n- Auth \u2192depends-on\u2192 DB\n\n# Decided\n- \ucf54\ub4dc \uc5d0\ub514\ud130: Monaco Editor (\uc790\ub3d9\uc644\uc131 \uc6b0\uc218)\n- \ucf54\ub4dc \uc2e4\ud589 \ud658\uacbd: Docker \ucee8\ud14c\uc774\ub108 (\ub2e4\uc911 \uc5b8\uc5b4 \ud655\uc7a5 \uace0\ub824)\n- \uc778\ud504\ub77c: AWS ECS Fargate (\uc18c\uaddc\ubaa8 \ud300 \uc801\ud569 \u2014 \ub2e8, \ud300 \uaddc\ubaa8 \ud655\uc778 \uc548 \ub428)\n- \ub300\uc0c1 \uc0ac\uc6a9\uc790: \ube44\uc804\uacf5\uc790 \uc785\ubb38\uc790\n- \uccab \uacfc\uc815: \ud30c\uc774\uc36c \uae30\ucd08\n\n# Undecided\n- \uacfc\uc815 \uad6c\uc870: \ubaa8\ub4c8\uc2dd | \ud504\ub85c\uc81d\ud2b8 \uae30\ubc18 | \ud63c\ud569\ud615 (Related: CourseMgmt)\n- DB \uc120\ud0dd: PostgreSQL+DynamoDB+Redis \uc870\ud569 \ud655\uc815 \uc5ec\ubd80 (Related: DB, Backend)\n- \uc778\uc99d \ubc29\uc2dd: \uc18c\uc15c \ub85c\uadf8\uc778 | \uc790\uccb4 \uc774\uba54\uc77c | \ub458 \ub2e4 (Related: Auth)\n- \uacb0\uc81c \ubaa8\ub378: \uad6c\ub3c5\uc81c | \uacfc\uc815\ubcc4 \uad6c\ub9e4 (Related: Payment)\n- \ud300 \uaddc\ubaa8: \ubbf8\ud655\uc778 (Related: Infra)\n- \uc790\ub3d9 \ucc44\uc810 \uc124\uacc4: \ud14c\uc2a4\ud2b8 \ucf00\uc774\uc2a4/\ucf54\ub4dc \uc2a4\ud0c0\uc77c/\ub9ac\uc18c\uc2a4 \uc81c\ud55c \uc138\ubd80 \uc0ac\ud56d (Related: AutoGrading)\n- \ucee8\ud14c\uc774\ub108 \ubcf4\uc548 \uc815\ucc45: \uaca9\ub9ac, \uc2dc\uac04 \uc81c\ud55c \uc138\ubd80 \uc0ac\ud56d (Related: CodeExecutionEnv)\n\n# Active Discussion\n- Turn 4\uc5d0\uc11c \uc5ec\ub7ec \uc8fc\uc81c \ub3d9\uc2dc \uc81c\uc2dc\ub428 (DB, \uc778\uc99d, \uacb0\uc81c) \u2014 \uc0ac\uc6a9\uc790\uac00 \"\ub124\"\ub85c\ub9cc \uc751\ub2f5\n- Agency Return \uac1c\uc785 \ud544\uc694: Turn 3\ubd80\ud130 \uc751\ub2f5\uc774 \uc810\uc810 \uc9e7\uc544\uc9c0\uace0 \uc218\ub3d9\uc801\n\n# Meta\n- Created: 2026-03-30\n- Last sync: 2026-03-30 00:00\n- Conversation turns since last sync: 5\n"}]}, "benchmark": {"metadata": {"skill_name": "compass", "iteration": 4, "timestamp": "2026-03-30T13:00:00Z", "configurations": ["with_skill", "old_skill"], "notes": "Iteration 4: Fixed First Turn Behavior with conditional logic (rich context \u2192 structure immediately, vague \u2192 explore first). All 6 evals now pass 100% for both versions. Focus narrowing eval (eval-6) successfully ran this iteration."}, "runs": [{"eval_id": 1, "eval_name": "saas-planning", "configuration": "with_skill", "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5}, "timing": {"total_tokens": 22190, "duration_ms": 76527}}, {"eval_id": 1, "eval_name": "saas-planning", "configuration": "old_skill", "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5}, "timing": {"total_tokens": 18380, "duration_ms": 67938}}, {"eval_id": 2, "eval_name": "decision-cleanup", "configuration": "with_skill", "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5}, "timing": {"total_tokens": 19184, "duration_ms": 59192}}, {"eval_id": 2, "eval_name": "decision-cleanup", "configuration": "old_skill", "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5}, "timing": {"total_tokens": 18219, "duration_ms": 59970}}, {"eval_id": 3, "eval_name": "feature-overload", "configuration": "with_skill", "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5}, "timing": {"total_tokens": 20040, "duration_ms": 79169}}, {"eval_id": 3, "eval_name": "feature-overload", "configuration": "old_skill", "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5}, "timing": {"total_tokens": 18476, "duration_ms": 71533}}, {"eval_id": 4, "eval_name": "progressive-complexity", "configuration": "with_skill", "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6}, "timing": {"total_tokens": 20287, "duration_ms": 64051}}, {"eval_id": 4, "eval_name": "progressive-complexity", "configuration": "old_skill", "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6}, "timing": {"total_tokens": 19588, "duration_ms": 72293}}, {"eval_id": 5, "eval_name": "agency-return", "configuration": "with_skill", "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5}, "timing": {"total_tokens": 20142, "duration_ms": 62759}}, {"eval_id": 5, "eval_name": "agency-return", "configuration": "old_skill", "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5}, "timing": {"total_tokens": 19002, "duration_ms": 57733}}, {"eval_id": 6, "eval_name": "focus-narrowing", "configuration": "with_skill", "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5}, "timing": {"total_tokens": 19353, "duration_ms": 49600}}, {"eval_id": 6, "eval_name": "focus-narrowing", "configuration": "old_skill", "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5}, "timing": {"total_tokens": 18729, "duration_ms": 61460}}], "run_summary": {"with_skill": {"pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0}, "total_tokens": {"mean": 20199, "stddev": 985, "min": 19184, "max": 22190}, "duration_ms": {"mean": 65216, "stddev": 10105, "min": 49600, "max": 79169}}, "old_skill": {"pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0}, "total_tokens": {"mean": 18732, "stddev": 456, "min": 18219, "max": 19588}, "duration_ms": {"mean": 65154, "stddev": 5899, "min": 57733, "max": 72293}}, "delta": {"pass_rate": 0.0, "total_tokens": 1467, "duration_ms": 62}}, "analyst_notes": ["\uc591 \ubc84\uc804 \ubaa8\ub450 100% pass rate. \uc815\ub7c9\uc801\uc73c\ub85c \ub3d9\ub4f1\ud558\ub098 \uc9c8\uc801 \ucc28\uc774\uac00 \uc874\uc7ac", "\uac1c\uc120 \uc2a4\ud0ac\uc758 \ud575\uc2ec \uc9c8\uc801 \uac15\uc810: (1) First Turn Behavior \uc870\uac74\ubd80 \ub85c\uc9c1\uc73c\ub85c \ub9e5\ub77d\uc5d0 \ub9de\ub294 \uc751\ub2f5, (2) Engagement Tracking\uc73c\ub85c \uc218\ub3d9\uc801 \uc751\ub2f5 \uac10\uc9c0 \uac15\ud654, (3) Assumption Transparency\ub85c \ucd94\ub860\ub41c \uad00\uacc4\ub97c \ud655\uc778 \uc9c8\ubb38\uc73c\ub85c \uc804\ud658", "eval-1: \uac1c\uc120 \uc2a4\ud0ac\uc774 '\uac00\uc7a5 \uba3c\uc800 \ud574\uacb0\ud558\uace0 \uc2f6\uc740 \ubb38\uc81c' \ud504\ub808\uc774\ubc0d\uc73c\ub85c \uc0ac\uc6a9\uc790 \uc6b0\uc120\uc21c\uc704\ub97c \ub04c\uc5b4\ub0c4. old_skill\uc740 '\ud1b5\ud569 vs \ud55c \uc601\uc5ed' \uc774\ubd84\ubc95\uc73c\ub85c \uc811\uadfc \u2014 \ub458 \ub2e4 \uc720\ud6a8\ud558\uc9c0\ub9cc \uac1c\uc120 \uc2a4\ud0ac\uc774 \uc0ac\uc6a9\uc790 \uad00\uc810\uc5d0 \ub354 \uac00\uae4c\uc6c0", "eval-3: \ub450 \ubc84\uc804 \ubaa8\ub450 3\uce35 \uad6c\uc870 \uc81c\uc2dc. \uac1c\uc120 \uc2a4\ud0ac\uc774 \uc758\uc874\uc131 \uc124\uba85\uc774 \ub354 \uc790\uc5f0\uc2a4\ub7ec\uc6c0 ('\ucf54\uce6d AI\ub3c4, \ucc4c\ub9b0\uc9c0\ub3c4 \uc804\ubd80 \uc6b4\ub3d9 \uae30\ub85d \ub370\uc774\ud130\uc5d0 \uc758\uc874')", "eval-5 (agency return): \ub450 \ubc84\uc804 \uac70\uc758 \ub3d9\uc77c. old_skill\uc5d0\ub3c4 \uc774\ubbf8 agency return \uc9c0\uce68\uc774 \uc798 \uc791\ub3d9\ud558\uace0 \uc788\uc5c8\uc74c", "eval-6 (focus narrowing): \uac1c\uc120 \uc2a4\ud0ac\uc774 \uac01 \uc2a4\ub808\ub4dc \uc0c1\ud0dc\ub97c \ub354 \uc138\ubc00\ud558\uac8c \ud45c\uc2dc ('\uc544\uc774\ub514\uc5b4 \ub2e8\uacc4', '\uc678\ubd80 \ud655\uc778 \ud544\uc694' vs old_skill\uc758 '\ud0d0\uc0c9 \ub2e8\uacc4' \uc77c\uad04 \uc801\uc6a9)", "\ud1a0\ud070 \uc0ac\uc6a9\ub7c9: \uac1c\uc120 \uc2a4\ud0ac\uc774 \ud3c9\uade0 ~1,500 \ud1a0\ud070 \ub354 \uc0ac\uc6a9 (20.2K vs 18.7K). \ucd94\uac00 \uc9c0\uce68(First Turn, Engagement Tracking, Assumption Transparency)\uc744 \uc77d\ub294 \ube44\uc6a9", "\uc751\ub2f5 \uc2dc\uac04: \ud1b5\uacc4\uc801\uc73c\ub85c \uc720\uc758\ubbf8\ud55c \ucc28\uc774 \uc5c6\uc74c (\u00b162ms)"]}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

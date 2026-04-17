@@ -1,0 +1,31 @@
+{
+  "eval_id": 3,
+  "run_type": "with_skill",
+  "expectations": [
+    {
+      "text": "Information limiting: Does NOT list all 9 features in detail",
+      "passed": true,
+      "evidence": "Lists 9 items by name only, then immediately groups into 3 categories (핵심/확장/인프라) with brief descriptions. Does not analyze each feature individually."
+    },
+    {
+      "text": "Focus narrowing: Explicitly asks user to choose focus area",
+      "passed": true,
+      "evidence": "Asks '이 앱의 핵심 가치가 뭔가요?' with 3 bounded options (A/B/C). Classic focus narrowing intervention."
+    },
+    {
+      "text": "Must-have vs nice-to-have: Separates core from extensions",
+      "passed": true,
+      "evidence": "Explicitly separates: 핵심 기능 (운동 기록, 식단), 확장 기능 (AI, 웨어러블, 소셜), 인프라 (결제, 오프라인, 다국어)."
+    },
+    {
+      "text": "State file created with features categorized",
+      "passed": true,
+      "evidence": "state.md created with all 9 features as elements, categorized by type, with dependency relations."
+    },
+    {
+      "text": "Agency preservation: Gives user choice rather than deciding for them",
+      "passed": true,
+      "evidence": "Presents A/B/C choice about core value, explicitly says 'MVP 범위와 기능 우선순위가 자연스럽게 따라옵니다' after user decides. Does NOT prescribe a phased plan."
+    }
+  ]
+}

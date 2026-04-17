@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "eval_name": "viz-conceptmap",
+  "prompt": "나는 SaaS 제품을 만들려고 해. 대상은 프리랜서 디자이너들이고, 포트폴리오 관리 + 클라이언트 소통 + 견적서 발행을 통합하는 플랫폼이야. 핵심 영역 간 관계와 의존성을 컨셉트맵으로 보여줘.",
+  "assertions": [
+    {"text": "HTML file generated: conceptmap.html exists in outputs", "type": "file_check"},
+    {"text": "No content clipping: All nodes and labels fully visible without horizontal scroll", "type": "qualitative"},
+    {"text": "Edge label deduplication: Same relation type not individually labeled on every edge", "type": "qualitative"},
+    {"text": "No node overlap: Sub-nodes within groups do not visually overlap each other", "type": "qualitative"},
+    {"text": "Domain grouping: Related concepts grouped inside visual regions with labels", "type": "qualitative"},
+    {"text": "SVG viewBox: Uses dynamic viewBox with preserveAspectRatio, not hardcoded dimensions", "type": "qualitative"}
+  ]
+}

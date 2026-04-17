@@ -1,0 +1,10 @@
+{
+  "expectations": [
+    {"text": "결정됨/미결정/미논의 항목이 명확히 분류됨", "passed": true, "evidence": "확정 2건, 미결정 5건으로 분류. 긴급도 컬럼으로 '지금 결정 필요' vs '나중' 구분"},
+    {"text": "상태 대시보드 시각화 제안이 포함됨", "passed": true, "evidence": "'상태 대시보드로 시각화해서 보여드릴까요?'"},
+    {"text": "상태 파일(.compass/state.md)이 생성됨", "passed": true, "evidence": "state.md 파일이 outputs/에 존재"},
+    {"text": "미결정 항목에 대한 우선순위 또는 의존성 기반 순서 제안", "passed": true, "evidence": "DB → API → CI/CD → 배포 → 모니터링 순서 제안, 의존성 근거 설명"},
+    {"text": "결정된 항목(OAuth, React)이 정확히 식별됨", "passed": true, "evidence": "표에서 OAuth, React 확정으로 정확히 식별"}
+  ],
+  "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}
+}

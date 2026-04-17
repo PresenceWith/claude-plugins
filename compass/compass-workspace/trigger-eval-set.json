@@ -1,0 +1,82 @@
+[
+  {
+    "query": "우리 회사에서 사내 피트니스 앱을 만들려고 하는데, 기능이 너무 많아서 뭐부터 해야할지 모르겠어. 운동 기록, 식단 관리, 소셜 기능, 웨어러블 연동, 챌린지 시스템, 관리자 대시보드까지 다 하고 싶은데 팀이 3명이야. MVP를 어떻게 잡아야 할까?",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm planning a new e-commerce platform and I need to decide between Next.js vs Remix for frontend, PostgreSQL vs MongoDB for database, Stripe vs Toss Payments for billing, and whether to go monolith or microservices. We also need to figure out the MVP feature set — product listing, cart, checkout, user accounts, reviews, wishlist, admin panel. Can you help me think through all these decisions?",
+    "should_trigger": true
+  },
+  {
+    "query": "지금까지 논의한 거 정리해줘. 뭐가 결정된 거고 뭐가 아직 안 된 건지 한눈에 보고 싶어",
+    "should_trigger": true
+  },
+  {
+    "query": "ok so we've been going back and forth on this for a while now, can you show me a mindmap of everything we've discussed? I think there are like 4-5 major threads going on and I keep losing track of which decisions we've already made vs what's still open",
+    "should_trigger": true
+  },
+  {
+    "query": "우리 팀 Q3 OKR을 세워야 하는데, 목표가 너무 많아. 사용자 성장, 수익화, 기술 부채 해소, 신규 기능 3개, 인프라 마이그레이션... 이걸 다 한 분기에 할 수는 없으니까 우선순위를 어떻게 잡아야 할지 같이 정리하자",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm building a course platform and right now we're stuck on the architecture. Should auth be its own microservice or part of the main app? Where does video processing happen — Lambda, dedicated worker, or third-party? And the content model is getting complicated with courses > modules > lessons > quizzes > assignments. Can you help me visualize the dependencies and figure out what to build first?",
+    "should_trigger": true
+  },
+  {
+    "query": "이 프로젝트 진행 상황을 타임라인으로 보여줄 수 있어? 지금 Phase 1은 거의 끝났고, Phase 2에서 결정해야 할 것들이 많은데 뭐가 블로커인지 파악이 안 돼",
+    "should_trigger": true
+  },
+  {
+    "query": "we've got like 8 different feature ideas floating around from the last brainstorm and honestly I can't remember which ones we agreed were must-haves vs nice-to-haves. Some of them depend on each other too. Can you help me organize this mess and figure out what the critical path actually is?",
+    "should_trigger": true
+  },
+  {
+    "query": "React vs Vue vs Svelte, 우리 상황에서 뭐가 맞을지 비교 좀 해줘. 팀 경험, 커뮤니티, 성능, 러닝커브, 채용 시장 다 고려해서. 그리고 상태관리도 같이 골라야 해 — Redux, Zustand, Pinia, 아니면 서버 컴포넌트로 갈지",
+    "should_trigger": true
+  },
+  {
+    "query": "where are we on this project? I feel like we've discussed a million things but I don't know what's actually been decided. Can you give me a status dashboard or something?",
+    "should_trigger": true
+  },
+  {
+    "query": "이 Python 함수에서 TypeError가 나는데 고쳐줘. def calculate_total(items): return sum(item.price for item in items) 인데 items가 None일 때 에러남",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you add a dark mode toggle to my React component? Here's the current code in src/components/Header.tsx, I just need a button that switches between light and dark themes using the existing ThemeContext",
+    "should_trigger": false
+  },
+  {
+    "query": "내 .env 파일에 DATABASE_URL 설정하는 법 알려줘. PostgreSQL이고 로컬에서 돌리고 있어. 포트는 5432, 비번은 password123이야",
+    "should_trigger": false
+  },
+  {
+    "query": "explain how async/await works in JavaScript. I keep getting confused about Promise chaining vs async functions and when to use which. Like what happens when I do await fetch() inside a try/catch?",
+    "should_trigger": false
+  },
+  {
+    "query": "git에서 실수로 main에 직접 커밋했는데 되돌리고 싶어. 마지막 3개 커밋을 새 브랜치로 옮기고 main은 원래대로 돌려놔줘",
+    "should_trigger": false
+  },
+  {
+    "query": "write me a Dockerfile for a Node.js 20 app that uses pnpm, runs on port 3000, and needs to copy both package.json and pnpm-lock.yaml before installing deps. Multi-stage build preferred",
+    "should_trigger": false
+  },
+  {
+    "query": "우리 API 응답 시간이 느린데, /api/users 엔드포인트가 2초나 걸려. N+1 쿼리 문제인 것 같은데 Prisma에서 include로 eager loading 하는 방법 알려줘",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to set up CI/CD for my project using GitHub Actions. The workflow should run tests on PR, build on merge to main, and deploy to Vercel. Here's my current package.json scripts section",
+    "should_trigger": false
+  },
+  {
+    "query": "이 CSV 파일 읽어서 매출 데이터 그래프로 그려줘. matplotlib 써서 월별 매출 추이 라인 차트 하나만 만들면 돼. 파일은 data/sales_2024.csv에 있어",
+    "should_trigger": false
+  },
+  {
+    "query": "can you review this PR? it's just a small refactor of the auth middleware, moved some validation logic into a separate helper function. about 50 lines changed, no new features. here's the diff",
+    "should_trigger": false
+  }
+]

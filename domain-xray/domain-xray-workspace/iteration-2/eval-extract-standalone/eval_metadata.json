@@ -1,0 +1,39 @@
+{
+  "eval_id": 4,
+  "eval_name": "eval-extract-standalone",
+  "prompt": "I'm transitioning into product management from engineering and need to extract the tacit knowledge that PM experts have",
+  "assertions": [
+    {
+      "name": "template-structure-intact",
+      "type": "contains_all",
+      "description": "Output contains all fixed template sections and 4 axes",
+      "targets": ["[Context]", "[Task]", "[Output Constraint]", "Practical Terminology and Jargon", "Hidden Preconditions", "Beginner's Traps", "Rules of Thumb"]
+    },
+    {
+      "name": "domain-enriched",
+      "type": "qualitative",
+      "description": "DOMAIN goes beyond 'product management' to include sub-areas like discovery, strategy, roadmapping, stakeholder management, etc."
+    },
+    {
+      "name": "goal-enriched",
+      "type": "qualitative",
+      "description": "GOAL reflects career transition context — mentions engineering background as bridge, urgency of starting new role"
+    },
+    {
+      "name": "depth-over-volume",
+      "type": "qualitative",
+      "description": "Output Constraint uses 'Depth Over Volume' approach, not 'Absolute Maximum'"
+    },
+    {
+      "name": "no-template-mutation",
+      "type": "contains_exact",
+      "description": "Fixed template text preserved verbatim",
+      "targets": ["You are a top-tier expert who has spent 20+ years in this domain", "Curse of Knowledge"]
+    },
+    {
+      "name": "file-saved",
+      "type": "file_exists",
+      "description": "A domain-extract-*.md file is saved"
+    }
+  ]
+}

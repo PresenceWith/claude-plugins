@@ -1,0 +1,6 @@
+{
+  "name": "git-worktree",
+  "version": "0.1.0",
+  "description": "Git worktree management skills: merge worktrees with structured commits, verify implementations, and maintain verification skills",
+  "claude_plugin": true
+}

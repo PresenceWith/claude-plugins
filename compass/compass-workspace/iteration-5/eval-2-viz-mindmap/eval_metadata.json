@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "eval_name": "viz-mindmap",
+  "prompt": "모바일 앱을 기획하고 있어. 피트니스 트래킹인데, 운동 기록, 식단 관리, 소셜 기능, 챌린지, 코칭 AI, 웨어러블 연동까지 생각 중이야. 그리고 결제도 필요하고 오프라인 모드도 지원해야 하고 다국어도. 마인드맵으로 보여줘.",
+  "assertions": [
+    {"text": "HTML file generated: mindmap.html exists in outputs", "type": "file_check"},
+    {"text": "Connector visibility: Lines connecting nodes to center are clearly visible against dark background (not #2a2a4a or near-background)", "type": "qualitative"},
+    {"text": "Cross-branch relationships: Inter-node dependencies shown as visual lines on the map, not just text descriptions", "type": "qualitative"},
+    {"text": "Category color coding: Different branches use distinct colors with a legend", "type": "qualitative"},
+    {"text": "Central node present: Goal/project name at center with radial branch layout", "type": "qualitative"},
+    {"text": "CJK text rendering: Korean text fits within node boundaries without clipping", "type": "qualitative"}
+  ]
+}

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Mindmap</title>
+  <style>
+    /* Dark theme base */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 24px; }
+    .meta { color: #666; font-size: 11px; margin-top: 24px; text-align: right; }
+
+    .decided { color: #4ade80; }
+    .active { color: #facc15; }
+    .undecided { color: #888; }
+
+    .viz-container {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      background: #1a1a2e;
+      border-radius: 10px;
+      border: 1px solid #2a2a4a;
+      font-size: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+    .legend-line-dashed {
+      width: 30px;
+      height: 0;
+      border-top: 2px dashed #ffffff50;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: fixed;
+      background: #1a1a2e;
+      border: 1px solid #3a3a5a;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #e2e8f0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 100;
+      max-width: 280px;
+      line-height: 1.5;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .tooltip.visible { opacity: 1; }
+  </style>
+</head>
+<body>
+  <h1>Planning Compass — Mindmap</h1>
+  <p class="subtitle">피트니스 트래킹 모바일 앱 — 전체 기능 구조 탐색</p>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:#6366f1"></div> 운동 기록</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#f472b6"></div> 식단 관리</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#facc15"></div> 소셜 기능</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#fb923c"></div> 챌린지</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#4ade80"></div> AI 코칭</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#22d3ee"></div> 웨어러블 연동</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#a78bfa"></div> 결제 시스템</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#64748b"></div> 오프라인 모드</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#94a3b8"></div> 다국어 지원</div>
+    <div class="legend-item"><div class="legend-line-dashed"></div> 크로스 연결</div>
+  </div>
+
+  <div class="viz-container">
+    <svg id="mindmap" width="100%" preserveAspectRatio="xMidYMid meet">
+      <!-- SVG content rendered by JS -->
+    </svg>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <div class="meta">
+    Last updated: 2026-03-30 · Planning Compass
+  </div>
+
+  <script>
+    // ===== DATA =====
+    // 9 branches distributed evenly around 360 degrees (40 deg each)
+    const categories = [
+      { id: 'workout',   label: '운동 기록',    color: '#6366f1', angle: 0   },
+      { id: 'diet',      label: '식단 관리',    color: '#f472b6', angle: 40  },
+      { id: 'social',    label: '소셜 기능',    color: '#facc15', angle: 80  },
+      { id: 'challenge', label: '챌린지',       color: '#fb923c', angle: 120 },
+      { id: 'ai',        label: '코칭 AI',      color: '#4ade80', angle: 160 },
+      { id: 'wearable',  label: '웨어러블 연동', color: '#22d3ee', angle: 200 },
+      { id: 'payment',   label: '결제 시스템',  color: '#a78bfa', angle: 240 },
+      { id: 'offline',   label: '오프라인 모드', color: '#64748b', angle: 280 },
+      { id: 'i18n',      label: '다국어 지원',  color: '#94a3b8', angle: 320 },
+    ];
+
+    const details = {
+      workout:   ['운동 루틴 관리', '세트/반복 트래킹', 'GPS 러닝 트래킹'],
+      diet:      ['칼로리 계산', '식단 사진 인식', '영양소 분석'],
+      social:    ['친구 피드', '그룹 운동', '응원/댓글'],
+      challenge: ['주간/월간 챌린지', '리더보드', '보상 시스템'],
+      ai:        ['운동 추천', '식단 추천', '진행 분석'],
+      wearable:  ['Apple Watch', 'Galaxy Watch', 'Fitbit/Garmin'],
+      payment:   ['구독 결제', '인앱 구매', '무료 티어'],
+      offline:   ['로컬 데이터 캐싱', '동기화 큐'],
+      i18n:      ['i18n 프레임워크', 'RTL 지원'],
+    };
+
+    const tooltipData = {
+      workout:   '운동 기록: 사용자 운동 데이터의 핵심 허브.\n웨어러블과 실시간 연동, AI 코칭의 주요 데이터 소스.',
+      diet:      '식단 관리: 칼로리 및 영양소 추적.\nAI 코칭이 식단 데이터를 분석하여 추천 제공.',
+      social:    '소셜 기능: 사용자 간 동기부여 및 커뮤니티.\n챌린지의 기반 플랫폼.',
+      challenge: '챌린지: 소셜 기능 위에서 동작하는 경쟁/협력 시스템.\n보상은 결제 시스템과 연결.',
+      ai:        'AI 코칭: 운동+식단 데이터 기반 개인화 추천.\n핵심 차별화 요소.',
+      wearable:  '웨어러블 연동: 실시간 심박수, 걸음수, GPS.\n운동 기록으로 자동 전달.',
+      payment:   '결제 시스템: 수익 모델의 핵심.\n구독/인앱/무료 티어 구조 미결정.',
+      offline:   '오프라인 모드: 네트워크 없이도\n운동 기록 및 기본 기능 사용 가능.',
+      i18n:      '다국어 지원: 글로벌 확장의 기반.\nUI, 운동명, 음식 DB 전반에 영향.',
+    };
+
+    // Cross-branch relationships (rendered as dashed lines ON the map)
+    const crossLinks = [
+      { from: 'workout',   to: 'wearable',  label: '실시간 데이터' },
+      { from: 'ai',        to: 'workout',   label: '데이터 의존' },
+      { from: 'ai',        to: 'diet',      label: '데이터 의존' },
+      { from: 'challenge', to: 'social',    label: '플랫폼 기반' },
+      { from: 'challenge', to: 'payment',   label: '보상 연결' },
+      { from: 'offline',   to: 'workout',   label: '로컬 기록' },
+      { from: 'i18n',      to: 'social',    label: 'UI 현지화' },
+      { from: 'i18n',      to: 'payment',   label: '결제 현지화' },
+    ];
+
+    // ===== LAYOUT CONSTANTS =====
+    const CX = 550, CY = 450;
+    const CORE_RADIUS = 210;
+    const DETAIL_RADIUS = 370;
+    const CENTER_R = 55;
+
+    const corePositions = {};
+    const detailPositions = {};
+
+    function toRad(deg) { return deg * Math.PI / 180; }
+
+    function getPos(angleDeg, radius) {
+      return {
+        x: CX + Math.cos(toRad(angleDeg)) * radius,
+        y: CY + Math.sin(toRad(angleDeg)) * radius,
+      };
+    }
+
+    // ===== SVG HELPERS =====
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+
+    function svgEl(tag, attrs) {
+      const el = document.createElementNS(SVG_NS, tag);
+      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+      return el;
+    }
+
+    function addText(parent, x, y, text, opts = {}) {
+      const el = svgEl('text', {
+        x, y,
+        'text-anchor': opts.anchor || 'middle',
+        'dominant-baseline': opts.baseline || 'central',
+        'font-size': opts.size || '13',
+        'font-weight': opts.weight || 'normal',
+        fill: opts.fill || '#e2e8f0',
+        'font-family': "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      });
+      el.textContent = text;
+      parent.appendChild(el);
+      return el;
+    }
+
+    // Quadratic Bezier with perpendicular control point offset
+    function qBezier(sx, sy, tx, ty, curvature) {
+      const mx = (sx + tx) / 2;
+      const my = (sy + ty) / 2;
+      const dx = tx - sx;
+      const dy = ty - sy;
+      const len = Math.sqrt(dx * dx + dy * dy) || 1;
+      const nx = -dy / len;   // perpendicular
+      const ny =  dx / len;
+      const cpx = mx + nx * curvature;
+      const cpy = my + ny * curvature;
+      // midpoint of curve (approx at t=0.5)
+      const labX = 0.25 * sx + 0.5 * cpx + 0.25 * tx;
+      const labY = 0.25 * sy + 0.5 * cpy + 0.25 * ty;
+      return {
+        d: `M ${sx} ${sy} Q ${cpx} ${cpy} ${tx} ${ty}`,
+        labX, labY,
+      };
+    }
+
+    // ===== RENDER =====
+    const svg = document.getElementById('mindmap');
+
+    (function render() {
+      // --- Defs: glow filters ---
+      const defs = svgEl('defs', {});
+
+      // Generic glow for center
+      const cf = svgEl('filter', { id: 'glowCenter', x: '-50%', y: '-50%', width: '200%', height: '200%' });
+      cf.appendChild(svgEl('feGaussianBlur', { stdDeviation: '8', result: 'b' }));
+      const cm = svgEl('feMerge', {});
+      cm.appendChild(svgEl('feMergeNode', { in: 'b' }));
+      cm.appendChild(svgEl('feMergeNode', { in: 'SourceGraphic' }));
+      cf.appendChild(cm);
+      defs.appendChild(cf);
+
+      // Per-category glow
+      categories.forEach(cat => {
+        const f = svgEl('filter', { id: `glow-${cat.id}`, x: '-50%', y: '-50%', width: '200%', height: '200%' });
+        f.appendChild(svgEl('feGaussianBlur', { stdDeviation: '4', result: 'b' }));
+        f.appendChild(svgEl('feFlood', { 'flood-color': cat.color, 'flood-opacity': '0.35', result: 'c' }));
+        f.appendChild(svgEl('feComposite', { in: 'c', in2: 'b', operator: 'in', result: 'g' }));
+        const m = svgEl('feMerge', {});
+        m.appendChild(svgEl('feMergeNode', { in: 'g' }));
+        m.appendChild(svgEl('feMergeNode', { in: 'SourceGraphic' }));
+        f.appendChild(m);
+        defs.appendChild(f);
+      });
+
+      svg.appendChild(defs);
+
+      // --- Layers (draw order matters) ---
+      const layerLines   = svgEl('g', { id: 'layer-lines' });
+      const layerCross   = svgEl('g', { id: 'layer-cross' });
+      const layerNodes   = svgEl('g', { id: 'layer-nodes' });
+      svg.appendChild(layerLines);
+      svg.appendChild(layerCross);
+      svg.appendChild(layerNodes);
+
+      // --- Center node ---
+      const cg = svgEl('g', { 'data-tooltip': '피트니스 트래킹 모바일 앱 — 전체 기능 기획' });
+      cg.appendChild(svgEl('circle', {
+        cx: CX, cy: CY, r: CENTER_R,
+        fill: '#1a1a2e', stroke: '#e2e8f0', 'stroke-width': '2.5',
+        filter: 'url(#glowCenter)',
+      }));
+      addText(cg, CX, CY - 11, '피트니스', { size: '15', weight: 'bold', fill: '#fff' });
+      addText(cg, CX, CY + 11, '트래킹 앱', { size: '15', weight: 'bold', fill: '#fff' });
+      layerNodes.appendChild(cg);
+
+      // --- Branches ---
+      categories.forEach((cat, ci) => {
+        const pos = getPos(cat.angle, CORE_RADIUS);
+        corePositions[cat.id] = pos;
+
+        // Core connector: center -> core node (quadratic Bezier, category color at 60% opacity)
+        const curvSign = (ci % 2 === 0) ? 1 : -1;
+        const curvAmount = 18 + (ci % 3) * 8;
+        const { d: coreD } = qBezier(CX, CY, pos.x, pos.y, curvSign * curvAmount);
+
+        layerLines.appendChild(svgEl('path', {
+          d: coreD,
+          stroke: cat.color + '99',   // ~60% opacity
+          'stroke-width': '2.5',
+          fill: 'none',
+        }));
+
+        // Core node pill
+        const ng = svgEl('g', {
+          class: 'core-node',
+          'data-tooltip': tooltipData[cat.id] || cat.label,
+          style: 'cursor:pointer',
+        });
+
+        const tw = Math.max(cat.label.length * 13 + 32, 110);
+        const th = 38;
+
+        ng.appendChild(svgEl('rect', {
+          x: pos.x - tw / 2, y: pos.y - th / 2,
+          width: tw, height: th,
+          rx: 19, ry: 19,
+          fill: '#1a1a2e',
+          stroke: cat.color,
+          'stroke-width': '2.5',
+          filter: `url(#glow-${cat.id})`,
+        }));
+        addText(ng, pos.x, pos.y, cat.label, { size: '13', weight: 'bold', fill: cat.color });
+        layerNodes.appendChild(ng);
+
+        // --- Detail nodes ---
+        const items = details[cat.id] || [];
+        const n = items.length;
+        // Angular spread: keep detail nodes within +/- 16 deg of parent
+        const spreadTotal = Math.min(n * 14, 32);
+
+        items.forEach((item, di) => {
+          const offset = n === 1 ? 0 : (di / (n - 1) - 0.5) * spreadTotal * 2;
+          const da = cat.angle + offset;
+          const dp = getPos(da, DETAIL_RADIUS);
+
+          if (!detailPositions[cat.id]) detailPositions[cat.id] = [];
+          detailPositions[cat.id].push({ ...dp, label: item });
+
+          // Detail connector: dashed Bezier, category color ~67%
+          const dcurv = ((di % 2 === 0) ? 1 : -1) * 10;
+          const { d: dd } = qBezier(pos.x, pos.y, dp.x, dp.y, dcurv);
+
+          layerLines.appendChild(svgEl('path', {
+            d: dd,
+            stroke: cat.color + 'AA',
+            'stroke-width': '1.5',
+            'stroke-dasharray': '4 4',
+            fill: 'none',
+          }));
+
+          // Detail node
+          const dg = svgEl('g', {
+            class: 'detail-node',
+            'data-tooltip': `${cat.label} > ${item}`,
+            style: 'cursor:pointer',
+          });
+
+          const dtw = Math.max(item.length * 10 + 24, 80);
+          const dth = 28;
+
+          dg.appendChild(svgEl('rect', {
+            x: dp.x - dtw / 2, y: dp.y - dth / 2,
+            width: dtw, height: dth,
+            rx: 14, ry: 14,
+            fill: '#12121f',
+            stroke: cat.color + '77',
+            'stroke-width': '1',
+            'stroke-dasharray': '4 3',
+          }));
+          addText(dg, dp.x, dp.y, item, { size: '11', fill: '#b0b8d0' });
+          layerNodes.appendChild(dg);
+        });
+      });
+
+      // --- Cross-branch relationship lines (visual dashed lines on the map) ---
+      crossLinks.forEach((link, li) => {
+        const fp = corePositions[link.from];
+        const tp = corePositions[link.to];
+        if (!fp || !tp) return;
+
+        // Alternate curvature direction and magnitude for separation
+        const sign = (li % 2 === 0) ? 1 : -1;
+        const mag = 35 + (li % 4) * 12;
+        const { d: cld, labX, labY } = qBezier(fp.x, fp.y, tp.x, tp.y, sign * mag);
+
+        layerCross.appendChild(svgEl('path', {
+          d: cld,
+          stroke: '#ffffff50',       // neutral white at ~31%
+          'stroke-width': '1.2',
+          'stroke-dasharray': '6 4',
+          fill: 'none',
+        }));
+
+        // Label pill at curve midpoint
+        const lt = link.label;
+        const lw = lt.length * 9 + 16;
+        layerCross.appendChild(svgEl('rect', {
+          x: labX - lw / 2, y: labY - 10,
+          width: lw, height: 20,
+          rx: 10,
+          fill: '#0f0f1aEE',
+          stroke: '#ffffff25',
+          'stroke-width': '0.5',
+        }));
+        addText(layerCross, labX, labY, lt, { size: '9', fill: '#ffffffAA' });
+      });
+
+      // --- Compute viewBox from actual content bounds ---
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      const all = [{ x: CX, y: CY }];
+      Object.values(corePositions).forEach(p => all.push(p));
+      Object.values(detailPositions).forEach(arr => arr.forEach(p => all.push(p)));
+
+      all.forEach(p => {
+        // account for node widths
+        minX = Math.min(minX, p.x - 100);
+        minY = Math.min(minY, p.y - 30);
+        maxX = Math.max(maxX, p.x + 100);
+        maxY = Math.max(maxY, p.y + 30);
+      });
+
+      const pad = 60;
+      svg.setAttribute('viewBox',
+        `${minX - pad} ${minY - pad} ${maxX - minX + pad * 2} ${maxY - minY + pad * 2}`);
+    })();
+
+    // ===== TOOLTIP =====
+    const tooltip = document.getElementById('tooltip');
+
+    document.querySelectorAll('[data-tooltip]').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        tooltip.textContent = el.getAttribute('data-tooltip');
+        tooltip.classList.add('visible');
+      });
+      el.addEventListener('mousemove', (e) => {
+        tooltip.style.left = (e.clientX + 16) + 'px';
+        tooltip.style.top  = (e.clientY + 16) + 'px';
+      });
+      el.addEventListener('mouseleave', () => {
+        tooltip.classList.remove('visible');
+      });
+    });
+  </script>
+</body>
+</html>

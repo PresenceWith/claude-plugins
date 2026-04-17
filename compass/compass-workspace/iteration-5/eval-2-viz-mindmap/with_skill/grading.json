@@ -1,0 +1,79 @@
+{
+  "expectations": [
+    {
+      "text": "HTML file generated: mindmap.html exists in outputs",
+      "passed": true,
+      "evidence": "mindmap.html exists in outputs/ at 17,484 bytes with a complete HTML document containing CSS, SVG, and JavaScript."
+    },
+    {
+      "text": "Connector visibility: Lines connecting nodes to center are clearly visible against dark background (not #2a2a4a or near-background)",
+      "passed": true,
+      "evidence": "Background is #0f0f1a. Center-to-branch connectors use stroke=\"${branch.color}aa\" with stroke-width=\"2.5\". Branch colors are bright saturated hues (#6366f1, #3b82f6, #06b6d4, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899) at ~67% alpha — all high-contrast against the dark background. None are #2a2a4a or near-background."
+    },
+    {
+      "text": "Cross-branch relationships: Inter-node dependencies shown as visual lines on the map, not just text descriptions",
+      "passed": true,
+      "evidence": "crossLinks array defines 6 inter-branch relationships (e.g., 운동 기록→웨어러블 연동, 식단 관리→코칭 AI). Lines 343-365 render these as SVG <path> quadratic Bezier curves with stroke=\"#94a3b8\" stroke-dasharray=\"5 4\" between nodes in different branches, with small text labels at the midpoint. These are genuine SVG lines on the map, not just textual descriptions."
+    },
+    {
+      "text": "Category color coding: Different branches use distinct colors with a legend",
+      "passed": true,
+      "evidence": "8 branches have 8 distinct colors: indigo (#6366f1), blue (#3b82f6), cyan (#06b6d4), emerald (#10b981), amber (#f59e0b), red (#ef4444), violet (#8b5cf6), pink (#ec4899). An HTML legend div (lines 110-120) shows colored dots with Korean category labels for each branch, plus a dashed-line indicator for cross-branch relationships."
+    },
+    {
+      "text": "Central node present: Goal/project name at center with radial branch layout",
+      "passed": true,
+      "evidence": "Central node at (CX=600, CY=600) rendered as an SVG circle r=52 with two text lines: '피트니스' and '트래킹 앱' (Fitness Tracking App). Branch nodes are arranged radially at baseRadius=220 with 45-degree spacing (360/8), and child nodes at childRadius=360. This is a clear center-out radial layout."
+    },
+    {
+      "text": "CJK text rendering: Korean text fits within node boundaries without clipping",
+      "passed": true,
+      "evidence": "The textWidth() function (lines 272-280) detects CJK characters via charCode > 0x2E80 and allocates fontSize*0.65 per CJK glyph (vs 0.42 for Latin). A 40px padding is added. This computed width is used for rect widths of both core nodes (line 374: textWidth(branch.label, 13)) and detail nodes (line 393: textWidth(child.label, 11)). This CJK-aware sizing ensures Korean text fits within node boundaries."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "claims": [
+    {
+      "claim": "The mindmap has 8 feature branches with 22 child nodes",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Counted 8 branches in the branches array. Children: 3+3+3+3+3+3+2+2 = 22 child nodes."
+    },
+    {
+      "claim": "6 cross-branch relationships are visualized",
+      "type": "factual",
+      "verified": true,
+      "evidence": "crossLinks array contains exactly 6 entries: 운동 기록→웨어러블 연동, 운동 기록→코칭 AI, 식단 관리→코칭 AI, 챌린지→소셜 기능, 결제 시스템→코칭 AI, 인프라→운동 기록."
+    },
+    {
+      "claim": "4 undecided items are listed (기술 스택, 수익 모델, AI 모델, MVP 범위)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The undecided-panel HTML (lines 158-166) lists exactly 4 items matching the state.md Undecided section."
+    },
+    {
+      "claim": "Tooltips provide additional context on hover",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Each node group has a data-tooltip attribute with Korean descriptions. JavaScript (lines 417-430) implements mouseenter/mousemove/mouseleave handlers that show a tooltip div."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "CJK text rendering: Korean text fits within node boundaries without clipping",
+        "reason": "The textWidth() heuristic allocates 0.65em per CJK glyph, but actual font rendering varies by platform and font. A stronger assertion would render the HTML in a browser and verify no text overflows its rect. The current check confirms the code attempts CJK-aware sizing, but doesn't prove it works pixel-perfectly in all environments."
+      },
+      {
+        "assertion": "Cross-branch relationships: Inter-node dependencies shown as visual lines on the map, not just text descriptions",
+        "reason": "The assertion passes because SVG path elements exist, but doesn't verify the lines are actually visible — the cross-links use stroke-opacity=\"0.55\" with #94a3b8 on a #0f0f1a background, which may be subtle. Consider also checking that the number of cross-links matches the relations in state.md (state.md has 12 relations, only 6 appear as cross-links — this is reasonable since some are parent-child, but no assertion catches if cross-links are incomplete)."
+      }
+    ],
+    "overall": "Assertions are well-targeted and cover structure, styling, and CJK handling. Consider adding a browser-based visual regression check for the strongest guarantee on rendering quality."
+  }
+}

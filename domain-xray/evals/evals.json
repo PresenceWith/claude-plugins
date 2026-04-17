@@ -1,0 +1,230 @@
+{
+  "skill_name": "domain-xray",
+  "evals": [
+    {
+      "id": 0,
+      "name": "orient-cross-domain-communication",
+      "skill": "domain-orient",
+      "prompt": "데이터 엔지니어링을 배우고 싶어요. 저는 백엔드 개발자로 3년 정도 일했고 Python이랑 SQL은 어느 정도 쓸 줄 아는데, 데이터 파이프라인이나 ETL 같은 건 전혀 모릅니다. 회사에서 데이터팀이랑 협업할 일이 생겨서 기본은 알아야 할 것 같아요.",
+      "expected_output": "context-spec frontmatter가 포함된 orient map 생성. purpose가 '데이터팀 협업/소통'으로 캡처됨. 백엔드/Python/SQL이 anchor points로 활용. 체크포인트 후 저장.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "context-spec-frontmatter",
+          "type": "qualitative",
+          "description": "생성된 orient map 파일에 YAML frontmatter가 포함되어야 함: domain, purpose, success_criteria, current_state, target_state, priority_areas, anchor_points 필드"
+        },
+        {
+          "name": "purpose-captured-correctly",
+          "type": "qualitative",
+          "description": "purpose가 단순 '학습'이 아니라 '데이터팀과의 협업/소통'으로 구체적으로 캡처되어야 함"
+        },
+        {
+          "name": "current-target-gap",
+          "type": "qualitative",
+          "description": "current_state(백엔드 3년, Python/SQL)와 target_state(데이터팀 협업 가능)가 구분되어 캡처되어야 함"
+        },
+        {
+          "name": "anchor-points-used",
+          "type": "qualitative",
+          "description": "백엔드 개발, Python, SQL 경험이 앵커 포인트로 명시적 연결되어야 함"
+        },
+        {
+          "name": "gap-section-personalized",
+          "type": "qualitative",
+          "description": "'What Experts Know' 대신 개인화된 'Gap Between Here and There' 섹션이 있어야 함 — 이 사용자의 current→target 갭에 특화된 내용"
+        },
+        {
+          "name": "file-saved",
+          "type": "file_exists",
+          "description": "domain-orient-*.md 파일이 저장되어야 함"
+        },
+        {
+          "name": "checkpoint-presented",
+          "type": "qualitative",
+          "description": "맵 생성 후 저장 전에 체크포인트를 제시해야 함"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "orient-leadership-purpose",
+      "skill": "domain-orient",
+      "prompt": "MLOps 팀 리더를 맡게 됐습니다. 저는 데이터 사이언티스트로 8년 일했고 모델 개발은 잘 하는데, 인프라 쪽은 MLflow 써본 것 말고는 경험이 없어요. 팀의 기술 방향을 정하고 아키텍처 결정을 내려야 하는데, 어디서부터 시작해야 할지 모르겠습니다.",
+      "expected_output": "purpose가 '팀 리딩/아키텍처 의사결정'으로 캡처됨. current_state가 '시니어 DS, 인프라 경험 부족'으로 정확히 반영. target_state가 실무 수행이 아닌 의사결정 수준. 맵이 리더십 관점에 맞게 구성.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "leadership-purpose",
+          "type": "qualitative",
+          "description": "purpose가 '실무 수행'이 아니라 '팀 리딩/기술 방향 설정/아키텍처 의사결정'으로 캡처되어야 함"
+        },
+        {
+          "name": "not-beginner-framing",
+          "type": "qualitative",
+          "description": "맵이 '초보자를 위한 입문'이 아닌 '경험 있는 전문가의 새로운 역할 전환'으로 프레이밍되어야 함"
+        },
+        {
+          "name": "ds-experience-as-anchor",
+          "type": "qualitative",
+          "description": "8년 DS 경험, 모델 개발 전문성이 앵커 포인트로 활용되어야 함 — 특히 '인프라 사용자로서의 경험'이 리더십에 유리한 점으로 연결"
+        },
+        {
+          "name": "target-state-is-decision-level",
+          "type": "qualitative",
+          "description": "target_state가 실행 수준('MLOps를 할 수 있다')이 아닌 판단 수준('아키텍처 결정을 내릴 수 있다')이어야 함"
+        },
+        {
+          "name": "context-spec-complete",
+          "type": "qualitative",
+          "description": "YAML frontmatter에 domain, purpose, success_criteria, current_state, target_state, priority_areas, anchor_points가 모두 포함"
+        },
+        {
+          "name": "file-saved",
+          "type": "file_exists",
+          "description": "domain-orient-*.md 파일이 저장되어야 함"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "extract-communication-axes",
+      "skill": "domain-extract",
+      "prompt": "오리엔트 맵 기반으로 추출 프롬프트를 만들어주세요.",
+      "expected_output": "orient map의 context-spec에서 purpose='소통/협업'을 읽고 Cross-Domain Communication 축 세트를 선택. 기존 고정 'Beginner's Traps' 대신 'Vocabulary in Context', 'Unstated Assumptions' 등이 포함된 프롬프트 생성.",
+      "files": ["fixtures/domain-orient-data-engineering-v2.md"],
+      "assertions": [
+        {
+          "name": "orient-frontmatter-read",
+          "type": "qualitative",
+          "description": "orient map의 YAML frontmatter에서 purpose, current_state, target_state를 파싱하여 사용해야 함"
+        },
+        {
+          "name": "purpose-driven-axes",
+          "type": "qualitative",
+          "description": "고정된 'Beginner's Traps/Rules of Thumb' 대신, purpose(소통/협업)에 맞는 축을 사용해야 함 — Vocabulary in Context, Unstated Assumptions, Question Patterns, Translation Points 등"
+        },
+        {
+          "name": "no-complete-beginner-framing",
+          "type": "qualitative",
+          "description": "프롬프트 [Context]에 'I am a complete beginner with absolutely no knowledge'가 아닌, current_state 기반의 구체적 상황 설명이 있어야 함"
+        },
+        {
+          "name": "level-calibration-present",
+          "type": "qualitative",
+          "description": "[Output Constraint]에 Level Calibration이 포함되어야 함 — 이미 아는 것(Python, SQL, 백엔드)은 스킵하라는 지시"
+        },
+        {
+          "name": "file-saved",
+          "type": "file_exists",
+          "description": "domain-extract-*.md 파일이 저장되어야 함"
+        },
+        {
+          "name": "knowledge-execution-offered",
+          "type": "qualitative",
+          "description": "저장 후 /domain-knowledge 자동 실행 제안이 있어야 함"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "extract-leadership-axes",
+      "skill": "domain-extract",
+      "prompt": "추출 프롬프트를 생성해주세요.",
+      "expected_output": "orient map의 purpose='팀 리딩/의사결정'을 읽고 Leadership & Management 축 세트를 선택. Decision Frameworks, Delegation Judgment, Risk Signals, Communication Frames가 포함.",
+      "files": ["fixtures/domain-orient-ml-ops-leadership.md"],
+      "assertions": [
+        {
+          "name": "leadership-axes-selected",
+          "type": "qualitative",
+          "description": "Leadership & Management 축이 선택되어야 함 — Decision Frameworks, Delegation Judgment, Risk Signals, Communication Frames 또는 이에 준하는 리더십 관점 축"
+        },
+        {
+          "name": "current-state-reflected",
+          "type": "qualitative",
+          "description": "프롬프트에 '8년차 데이터 사이언티스트, 모델 개발 전문' 수준이 반영되어야 함 — 기본 ML 개념 설명 불필요"
+        },
+        {
+          "name": "target-is-strategic",
+          "type": "qualitative",
+          "description": "프롬프트가 '실무 수행법'이 아닌 '의사결정/평가/방향 설정'에 필요한 지식을 요청해야 함"
+        },
+        {
+          "name": "file-saved",
+          "type": "file_exists",
+          "description": "domain-extract-*.md 파일이 저장되어야 함"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "prime-zpd-calibration",
+      "skill": "domain-prime",
+      "prompt": "/domain-prime",
+      "expected_output": "orient map의 current_state(백엔드 3년)와 target_state(데이터팀 협업)를 읽고, 그 갭에 맞는 난이도의 질문 생성. '초보 실수'가 아닌 '백엔드 개발자 관점에서 자연스러운 가정 vs 데이터 엔지니어 관점'의 차이를 프로빙.",
+      "files": ["fixtures/domain-orient-data-engineering-v2.md"],
+      "assertions": [
+        {
+          "name": "context-spec-used",
+          "type": "qualitative",
+          "description": "orient map frontmatter에서 current_state, target_state를 읽어 난이도 캘리브레이션에 사용해야 함"
+        },
+        {
+          "name": "no-generic-beginner-framing",
+          "type": "qualitative",
+          "description": "'초보자가 흔히 하는 실수'가 아닌 '백엔드 개발자의 관점에서 자연스러운 가정'을 기반으로 질문해야 함"
+        },
+        {
+          "name": "layer1-validates-background",
+          "type": "qualitative",
+          "description": "Layer 1(추론 표면화)에서 학습자의 배경(백엔드 경험)에서 그 가정이 왜 합리적인지 인정해야 함"
+        },
+        {
+          "name": "three-layer-feedback",
+          "type": "qualitative",
+          "description": "각 답변 후 3단계 피드백이 있어야 함: 추론 표면화 → 관점 전환 → 열린 질문"
+        },
+        {
+          "name": "no-file-created",
+          "type": "qualitative",
+          "description": "파일을 생성하지 않아야 함"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "verify-purpose-based-scenarios",
+      "skill": "domain-verify",
+      "prompt": "/domain-verify",
+      "expected_output": "success_criteria('데이터팀 미팅에서 제안을 이해하고 질문할 수 있는 상태')에 맞는 시나리오 생성. '초보 사고 vs 전문가 사고'가 아닌 '이 목적을 달성할 수 있는가'를 테스트. 갭 분석에 Purpose Readiness 섹션 포함.",
+      "files": ["fixtures/domain-orient-data-engineering-v2.md", "fixtures/domain-extract-data-engineering.md"],
+      "assertions": [
+        {
+          "name": "purpose-aligned-scenarios",
+          "type": "qualitative",
+          "description": "시나리오가 success_criteria(데이터팀 소통/협업)에 맞아야 함 — 예: 데이터팀 미팅 상황, 기술 제안 평가, 크로스팀 논의 등"
+        },
+        {
+          "name": "not-beginner-wrong-answers",
+          "type": "qualitative",
+          "description": "오답 선지가 '초보 사고방식'이 아닌 '백엔드 개발자 관점에서 자연스러운 판단'이어야 함"
+        },
+        {
+          "name": "purpose-readiness-in-gap-analysis",
+          "type": "qualitative",
+          "description": "갭 분석에 Purpose Readiness 섹션이 있어야 함 — success_criteria 대비 Ready/Developing/Gap 평가"
+        },
+        {
+          "name": "feedback-validates-current-state",
+          "type": "qualitative",
+          "description": "오답 피드백에서 '백엔드 관점에서 이 선택이 합리적인 이유'를 먼저 인정한 후 '데이터 엔지니어링에서는 다르게 보는 이유'를 설명해야 함"
+        },
+        {
+          "name": "file-saved",
+          "type": "file_exists",
+          "description": "domain-verify-*.md 파일이 저장되어야 함"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-korean-urgent",
+  "configuration": "without_skill",
+  "expectations": [
+    {
+      "text": "template-structure-intact",
+      "passed": false,
+      "evidence": "Creates custom 7-part structure (Foundational Mental Model, Vocabulary, Tacit Knowledge, System Architecture, First Meeting Questions, Red Flags, 48-Hour Quick Reference). Does not use standardized template."
+    },
+    {
+      "text": "scm-domain-breadth",
+      "passed": true,
+      "evidence": "Covers SCM broadly: inventory/demand terms, warehousing/fulfillment, transportation/logistics, planning/execution, integration architecture, master data entities."
+    },
+    {
+      "text": "urgency-in-goal",
+      "passed": true,
+      "evidence": "Includes 48-hour quick reference section, first meeting questions, credibility-earning strategies. Directly addresses the urgency."
+    },
+    {
+      "text": "output-in-english",
+      "passed": true,
+      "evidence": "Output is in English."
+    },
+    {
+      "text": "file-saved",
+      "passed": true,
+      "evidence": "File exists at outputs/learning-prompt.md"
+    },
+    {
+      "text": "no-template-mutation",
+      "passed": false,
+      "evidence": "N/A — baseline does not use the template."
+    }
+  ]
+}

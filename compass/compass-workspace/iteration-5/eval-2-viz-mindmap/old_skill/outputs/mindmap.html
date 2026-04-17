@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Mindmap</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 24px; }
+    .meta { color: #666; font-size: 11px; margin-top: 24px; text-align: right; }
+
+    .decided { color: #4ade80; }
+    .active { color: #facc15; }
+    .undecided { color: #888; }
+
+    .mindmap-container {
+      width: 100%;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    svg {
+      display: block;
+      margin: 0 auto;
+    }
+
+    .node {
+      cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+    .node:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
+
+    .tooltip {
+      position: fixed;
+      background: #1a1a2e;
+      border: 1px solid #4a4a6a;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #e2e8f0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 100;
+      max-width: 250px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .tooltip.visible { opacity: 1; }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      background: #1a1a2e;
+      border-radius: 10px;
+      border: 1px solid #2a2a4a;
+      font-size: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <h1>Planning Compass — Mindmap</h1>
+  <p class="subtitle">피트니스 트래킹 앱 기획 — 전체 기능 구조 탐색</p>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div> 운동/트래킹</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f472b6"></div> 식단/영양</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fb923c"></div> 소셜</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#facc15"></div> 챌린지</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div> AI 코칭</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#22d3ee"></div> 웨어러블</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div> 결제</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div> 인프라</div>
+    <div class="legend-item" style="margin-left:auto;"><span style="border-bottom:2px dashed #94a3b880;padding-bottom:1px;">---</span> 크로스 링크</div>
+  </div>
+
+  <div class="mindmap-container">
+    <svg id="mindmap-svg" width="100%" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <div class="meta">
+    Last updated: 2026-03-30 · Planning Compass
+  </div>
+
+<script>
+(function() {
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+
+  // ─── Data ───
+  const categories = [
+    {
+      name: '운동 기록',
+      color: '#6366f1',
+      type: 'feature',
+      children: [
+        { name: '운동 로그', type: 'component' },
+        { name: '운동 통계', type: 'component' }
+      ]
+    },
+    {
+      name: '식단 관리',
+      color: '#f472b6',
+      type: 'feature',
+      children: [
+        { name: '칼로리 추적', type: 'component' },
+        { name: '식단 플래너', type: 'component' },
+        { name: '영양 DB', type: 'component' }
+      ]
+    },
+    {
+      name: '소셜 기능',
+      color: '#fb923c',
+      type: 'feature',
+      children: [
+        { name: '친구 시스템', type: 'component' },
+        { name: '활동 피드', type: 'component' },
+        { name: '그룹 운동', type: 'component' }
+      ]
+    },
+    {
+      name: '챌린지',
+      color: '#facc15',
+      type: 'feature',
+      children: [
+        { name: '일일 챌린지', type: 'component' },
+        { name: '주간 챌린지', type: 'component' },
+        { name: '리더보드', type: 'component' }
+      ]
+    },
+    {
+      name: '코칭 AI',
+      color: '#4ade80',
+      type: 'feature',
+      children: [
+        { name: 'AI 자세 체크', type: 'component' },
+        { name: '맞춤 플랜', type: 'component' },
+        { name: '진행 분석', type: 'component' }
+      ]
+    },
+    {
+      name: '웨어러블 연동',
+      color: '#22d3ee',
+      type: 'feature',
+      children: [
+        { name: 'HealthKit', type: 'component' },
+        { name: 'Google Fit', type: 'component' },
+        { name: '스마트워치', type: 'component' }
+      ]
+    },
+    {
+      name: '결제',
+      color: '#a78bfa',
+      type: 'feature',
+      children: [
+        { name: '구독', type: 'component' },
+        { name: '인앱 구매', type: 'component' }
+      ]
+    },
+    {
+      name: '오프라인 모드',
+      color: '#94a3b8',
+      type: 'constraint',
+      children: [
+        { name: '로컬 저장소', type: 'component' },
+        { name: '동기화 엔진', type: 'component' }
+      ]
+    },
+    {
+      name: '다국어',
+      color: '#94a3b8',
+      type: 'constraint',
+      children: [
+        { name: 'i18n 프레임워크', type: 'component' }
+      ]
+    }
+  ];
+
+  // Cross-branch relationships
+  const crossLinks = [
+    { from: '코칭 AI', to: '운동 기록', label: '데이터 의존' },
+    { from: '코칭 AI', to: '식단 관리', label: '데이터 의존' },
+    { from: '챌린지', to: '소셜 기능', label: '연동' },
+    { from: '운동 기록', to: '웨어러블 연동', label: '데이터 수집' },
+    { from: '리더보드', to: '친구 시스템', label: '소셜 랭킹' },
+    { from: '진행 분석', to: '운동 통계', label: '분석 데이터' }
+  ];
+
+  // ─── Layout calculation ───
+  const W = 960;
+  const H = 960;
+  const CX = W / 2;
+  const CY = H / 2;
+  const CORE_RADIUS = 200;
+  const DETAIL_RADIUS = 340;
+
+  const svg = document.getElementById('mindmap-svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  // Glow filter
+  const defs = document.createElementNS(SVG_NS, 'defs');
+  defs.innerHTML = `
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="glow-center" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  `;
+  svg.appendChild(defs);
+
+  // Store node positions for cross-link drawing
+  const nodePositions = {};
+
+  // ─── Draw central node ───
+  const centerGroup = document.createElementNS(SVG_NS, 'g');
+  centerGroup.setAttribute('class', 'node');
+
+  const centerCircle = document.createElementNS(SVG_NS, 'circle');
+  centerCircle.setAttribute('cx', CX);
+  centerCircle.setAttribute('cy', CY);
+  centerCircle.setAttribute('r', 52);
+  centerCircle.setAttribute('fill', '#1a1a2e');
+  centerCircle.setAttribute('stroke', '#e2e8f0');
+  centerCircle.setAttribute('stroke-width', '2.5');
+  centerCircle.setAttribute('filter', 'url(#glow-center)');
+  centerGroup.appendChild(centerCircle);
+
+  const centerText1 = document.createElementNS(SVG_NS, 'text');
+  centerText1.setAttribute('x', CX);
+  centerText1.setAttribute('y', CY - 10);
+  centerText1.setAttribute('text-anchor', 'middle');
+  centerText1.setAttribute('fill', '#e2e8f0');
+  centerText1.setAttribute('font-size', '14');
+  centerText1.setAttribute('font-weight', 'bold');
+  centerText1.textContent = '피트니스';
+  centerGroup.appendChild(centerText1);
+
+  const centerText2 = document.createElementNS(SVG_NS, 'text');
+  centerText2.setAttribute('x', CX);
+  centerText2.setAttribute('y', CY + 10);
+  centerText2.setAttribute('text-anchor', 'middle');
+  centerText2.setAttribute('fill', '#e2e8f0');
+  centerText2.setAttribute('font-size', '14');
+  centerText2.setAttribute('font-weight', 'bold');
+  centerText2.textContent = '트래킹 앱';
+  centerGroup.appendChild(centerText2);
+
+  const centerIcon = document.createElementNS(SVG_NS, 'text');
+  centerIcon.setAttribute('x', CX);
+  centerIcon.setAttribute('y', CY + 30);
+  centerIcon.setAttribute('text-anchor', 'middle');
+  centerIcon.setAttribute('fill', '#888');
+  centerIcon.setAttribute('font-size', '10');
+  centerIcon.textContent = '모바일 앱';
+  centerGroup.appendChild(centerIcon);
+
+  svg.appendChild(centerGroup);
+
+  nodePositions['피트니스 트래킹 앱'] = { x: CX, y: CY };
+
+  // ─── Draw branches ───
+  const totalBranches = categories.length;
+  const startAngle = -Math.PI / 2; // Start from top
+
+  categories.forEach((cat, i) => {
+    const angle = startAngle + (2 * Math.PI * i) / totalBranches;
+    const coreX = CX + Math.cos(angle) * CORE_RADIUS;
+    const coreY = CY + Math.sin(angle) * CORE_RADIUS;
+
+    nodePositions[cat.name] = { x: coreX, y: coreY };
+
+    // ─── Core connector line (Bézier) ───
+    const ctrlOffsetX = Math.cos(angle + 0.15) * CORE_RADIUS * 0.5;
+    const ctrlOffsetY = Math.sin(angle + 0.15) * CORE_RADIUS * 0.5;
+    const ctrlX = CX + ctrlOffsetX;
+    const ctrlY = CY + ctrlOffsetY;
+
+    const coreLine = document.createElementNS(SVG_NS, 'path');
+    coreLine.setAttribute('d', `M ${CX} ${CY} Q ${ctrlX} ${ctrlY} ${coreX} ${coreY}`);
+    coreLine.setAttribute('stroke', cat.color + 'bb');
+    coreLine.setAttribute('stroke-width', '2.5');
+    coreLine.setAttribute('fill', 'none');
+    svg.appendChild(coreLine);
+
+    // ─── Core node ───
+    const coreGroup = document.createElementNS(SVG_NS, 'g');
+    coreGroup.setAttribute('class', 'node');
+    coreGroup.style.transformOrigin = `${coreX}px ${coreY}px`;
+
+    const isConstraint = cat.type === 'constraint';
+    const nodeW = 110;
+    const nodeH = 38;
+
+    const coreRect = document.createElementNS(SVG_NS, 'rect');
+    coreRect.setAttribute('x', coreX - nodeW / 2);
+    coreRect.setAttribute('y', coreY - nodeH / 2);
+    coreRect.setAttribute('width', nodeW);
+    coreRect.setAttribute('height', nodeH);
+    coreRect.setAttribute('rx', 12);
+    coreRect.setAttribute('fill', '#1a1a2e');
+    coreRect.setAttribute('stroke', cat.color);
+    coreRect.setAttribute('stroke-width', isConstraint ? '1.5' : '2');
+    if (isConstraint) coreRect.setAttribute('stroke-dasharray', '6 3');
+    coreRect.setAttribute('filter', 'url(#glow)');
+    coreGroup.appendChild(coreRect);
+
+    const coreText = document.createElementNS(SVG_NS, 'text');
+    coreText.setAttribute('x', coreX);
+    coreText.setAttribute('y', coreY + 5);
+    coreText.setAttribute('text-anchor', 'middle');
+    coreText.setAttribute('fill', cat.color);
+    coreText.setAttribute('font-size', '13');
+    coreText.setAttribute('font-weight', 'bold');
+    coreText.textContent = cat.name;
+    coreGroup.appendChild(coreText);
+
+    // Tooltip data
+    coreGroup.dataset.tooltip = `${cat.name} (${cat.type}) — ${cat.children.length}개 하위 항목`;
+    coreGroup.addEventListener('mouseenter', showTooltip);
+    coreGroup.addEventListener('mouseleave', hideTooltip);
+
+    svg.appendChild(coreGroup);
+
+    // ─── Detail nodes ───
+    const childCount = cat.children.length;
+    const spread = Math.min(0.4, 0.15 * childCount); // Angular spread
+
+    cat.children.forEach((child, j) => {
+      const childAngleOffset = childCount === 1 ? 0 : (j / (childCount - 1) - 0.5) * spread * 2;
+      const childAngle = angle + childAngleOffset;
+      const detailX = CX + Math.cos(childAngle) * DETAIL_RADIUS;
+      const detailY = CY + Math.sin(childAngle) * DETAIL_RADIUS;
+
+      nodePositions[child.name] = { x: detailX, y: detailY };
+
+      // Detail connector line (dashed Bézier)
+      const dCtrlX = coreX + Math.cos(childAngle) * 40;
+      const dCtrlY = coreY + Math.sin(childAngle) * 40;
+
+      const detailLine = document.createElementNS(SVG_NS, 'path');
+      detailLine.setAttribute('d', `M ${coreX} ${coreY} Q ${dCtrlX} ${dCtrlY} ${detailX} ${detailY}`);
+      detailLine.setAttribute('stroke', cat.color + '88');
+      detailLine.setAttribute('stroke-width', '1.5');
+      detailLine.setAttribute('stroke-dasharray', '4 4');
+      detailLine.setAttribute('fill', 'none');
+      svg.appendChild(detailLine);
+
+      // Detail node
+      const detailGroup = document.createElementNS(SVG_NS, 'g');
+      detailGroup.setAttribute('class', 'node');
+      detailGroup.style.transformOrigin = `${detailX}px ${detailY}px`;
+
+      const dNodeW = 95;
+      const dNodeH = 30;
+
+      const detailRect = document.createElementNS(SVG_NS, 'rect');
+      detailRect.setAttribute('x', detailX - dNodeW / 2);
+      detailRect.setAttribute('y', detailY - dNodeH / 2);
+      detailRect.setAttribute('width', dNodeW);
+      detailRect.setAttribute('height', dNodeH);
+      detailRect.setAttribute('rx', 8);
+      detailRect.setAttribute('fill', '#141425');
+      detailRect.setAttribute('stroke', cat.color + '66');
+      detailRect.setAttribute('stroke-width', '1');
+      detailRect.setAttribute('stroke-dasharray', '4 3');
+      detailGroup.appendChild(detailRect);
+
+      const detailText = document.createElementNS(SVG_NS, 'text');
+      detailText.setAttribute('x', detailX);
+      detailText.setAttribute('y', detailY + 4);
+      detailText.setAttribute('text-anchor', 'middle');
+      detailText.setAttribute('fill', cat.color + 'cc');
+      detailText.setAttribute('font-size', '11');
+      detailText.textContent = child.name;
+      detailGroup.appendChild(detailText);
+
+      detailGroup.dataset.tooltip = `${child.name} (${child.type}) — ${cat.name}의 하위 요소`;
+      detailGroup.addEventListener('mouseenter', showTooltip);
+      detailGroup.addEventListener('mouseleave', hideTooltip);
+
+      svg.appendChild(detailGroup);
+    });
+  });
+
+  // ─── Cross-branch relationships ───
+  const crossGroup = document.createElementNS(SVG_NS, 'g');
+  crossGroup.setAttribute('opacity', '0.7');
+
+  crossLinks.forEach(link => {
+    const fromPos = nodePositions[link.from];
+    const toPos = nodePositions[link.to];
+    if (!fromPos || !toPos) return;
+
+    const midX = (fromPos.x + toPos.x) / 2;
+    const midY = (fromPos.y + toPos.y) / 2;
+
+    // Offset control point perpendicular to line for curve
+    const dx = toPos.x - fromPos.x;
+    const dy = toPos.y - fromPos.y;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    const perpX = -dy / len * 30;
+    const perpY = dx / len * 30;
+    const ctrlX = midX + perpX;
+    const ctrlY = midY + perpY;
+
+    const crossLine = document.createElementNS(SVG_NS, 'path');
+    crossLine.setAttribute('d', `M ${fromPos.x} ${fromPos.y} Q ${ctrlX} ${ctrlY} ${toPos.x} ${toPos.y}`);
+    crossLine.setAttribute('stroke', '#94a3b880');
+    crossLine.setAttribute('stroke-width', '1.2');
+    crossLine.setAttribute('stroke-dasharray', '6 4');
+    crossLine.setAttribute('fill', 'none');
+    crossGroup.appendChild(crossLine);
+
+    // Label background
+    const labelBg = document.createElementNS(SVG_NS, 'rect');
+    const labelW = link.label.length * 8 + 12;
+    labelBg.setAttribute('x', midX + perpX * 0.3 - labelW / 2);
+    labelBg.setAttribute('y', midY + perpY * 0.3 - 9);
+    labelBg.setAttribute('width', labelW);
+    labelBg.setAttribute('height', 18);
+    labelBg.setAttribute('rx', 4);
+    labelBg.setAttribute('fill', '#0f0f1a');
+    labelBg.setAttribute('opacity', '0.85');
+    crossGroup.appendChild(labelBg);
+
+    // Label text
+    const labelText = document.createElementNS(SVG_NS, 'text');
+    labelText.setAttribute('x', midX + perpX * 0.3);
+    labelText.setAttribute('y', midY + perpY * 0.3 + 4);
+    labelText.setAttribute('text-anchor', 'middle');
+    labelText.setAttribute('fill', '#94a3b8');
+    labelText.setAttribute('font-size', '9');
+    labelText.textContent = link.label;
+    crossGroup.appendChild(labelText);
+  });
+
+  svg.appendChild(crossGroup);
+
+  // ─── Tooltip ───
+  const tooltipEl = document.getElementById('tooltip');
+
+  function showTooltip(e) {
+    const text = e.currentTarget.dataset.tooltip;
+    if (!text) return;
+    tooltipEl.textContent = text;
+    tooltipEl.classList.add('visible');
+    const rect = e.currentTarget.getBoundingClientRect();
+    tooltipEl.style.left = rect.left + rect.width / 2 - 60 + 'px';
+    tooltipEl.style.top = rect.top - 40 + 'px';
+  }
+
+  function hideTooltip() {
+    tooltipEl.classList.remove('visible');
+  }
+})();
+</script>
+</body>
+</html>

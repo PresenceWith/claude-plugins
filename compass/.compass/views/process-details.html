@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Compass — Process Details</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a; color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 32px; min-height: 100vh;
+    }
+    .page { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 20px; margin-bottom: 4px; text-align: center; }
+    .page-subtitle { color: #888; font-size: 13px; margin-bottom: 32px; text-align: center; }
+
+    /* Section */
+    .section { margin-bottom: 36px; }
+    .section-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 1px solid #2a2a4a;
+    }
+    .section-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .section-title { font-size: 15px; font-weight: bold; }
+    .section-desc { font-size: 11px; color: #666; margin-left: auto; }
+
+    /* Cards grid */
+    .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .full-width { grid-column: 1 / -1; }
+    @media (max-width: 700px) { .cards-grid { grid-template-columns: 1fr; } }
+
+    /* Process card */
+    .process-card {
+      background: #1a1a2e; border: 1px solid #2a2a4a;
+      border-left: 4px solid var(--accent, #4a4a7a);
+      border-radius: 10px; padding: 18px 20px;
+    }
+    .process-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 1px solid #1e1e36;
+    }
+    .process-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: bold; flex-shrink: 0;
+      background: var(--accent, #4a4a7a); color: #0f0f1a;
+    }
+    .process-name { font-size: 14px; font-weight: bold; flex: 1; }
+    .process-tag {
+      font-size: 9px; padding: 2px 8px; border-radius: 10px;
+      font-weight: bold; letter-spacing: 0.3px;
+    }
+
+    /* Internal steps */
+    .steps { padding-left: 2px; }
+    .step {
+      display: flex; gap: 12px; padding: 7px 0;
+      position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: ''; position: absolute;
+      left: 10px; top: 33px; bottom: -7px;
+      width: 1.5px; background: var(--accent-dim, #2a2a4a);
+    }
+    .step-dot {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: bold; flex-shrink: 0;
+      background: var(--accent-bg, #2a2a4a); color: var(--accent, #888);
+      z-index: 1; position: relative;
+    }
+    .step-content { flex: 1; min-width: 0; }
+    .step-title { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+    .step-desc { font-size: 11px; color: #888; margin-top: 2px; line-height: 1.5; }
+    .step-highlight {
+      display: inline-block; font-size: 10px; font-weight: bold;
+      padding: 1px 6px; border-radius: 4px; margin-top: 3px;
+    }
+
+    /* Condition box */
+    .condition-box {
+      background: #0f0f1a; border: 1px solid var(--accent-dim, #2a2a4a);
+      border-radius: 6px; padding: 10px 14px;
+      font-size: 11px; color: #888; margin-top: 10px; line-height: 1.6;
+    }
+    .condition-box strong { color: #e2e8f0; }
+    .condition-box .tag {
+      display: inline-block; font-size: 9px; font-weight: bold;
+      padding: 1px 6px; border-radius: 4px; margin-right: 4px;
+    }
+
+    /* Threshold table */
+    .threshold-table {
+      width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px;
+    }
+    .threshold-table th {
+      text-align: left; color: #666; font-weight: normal;
+      padding: 6px 8px; border-bottom: 1px solid #2a2a4a;
+    }
+    .threshold-table td {
+      padding: 7px 8px; border-bottom: 1px solid #1e1e36; color: #e2e8f0;
+    }
+    .threshold-table td:first-child { color: var(--accent, #facc15); font-weight: bold; }
+    .threshold-table td:last-child { color: #888; }
+
+    /* State schema */
+    .schema-block {
+      display: flex; gap: 8px; padding: 6px 0;
+      border-bottom: 1px solid #1e1e36;
+    }
+    .schema-block:last-child { border-bottom: none; }
+    .schema-label {
+      font-size: 12px; font-weight: bold; min-width: 110px;
+      flex-shrink: 0;
+    }
+    .schema-desc { font-size: 11px; color: #888; line-height: 1.5; }
+
+    /* Flow arrow divider */
+    .flow-divider {
+      text-align: center; padding: 8px 0;
+      color: #4a4a7a; font-size: 18px;
+    }
+
+    /* Intervention sub-card */
+    .intervention-card {
+      background: #0f0f1a; border: 1px solid #2a2a4a;
+      border-radius: 8px; padding: 12px 14px; margin-top: 8px;
+    }
+    .intervention-card h4 {
+      font-size: 12px; font-weight: bold; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .intervention-card p { font-size: 11px; color: #888; line-height: 1.5; }
+    .intervention-card .trigger {
+      font-size: 10px; padding: 2px 6px; border-radius: 4px;
+      font-weight: bold;
+    }
+
+    /* Decision tree */
+    .decision-tree { padding-left: 12px; }
+    .decision-tree .branch {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 5px 0; font-size: 12px;
+    }
+    .decision-tree .branch-q { color: #888; min-width: 140px; flex-shrink: 0; }
+    .decision-tree .branch-arrow { color: var(--accent, #6366f1); }
+    .decision-tree .branch-a { color: #e2e8f0; font-weight: 600; }
+
+    /* Type grid for visualization types */
+    .type-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px;
+    }
+    .type-item {
+      font-size: 11px; padding: 6px 10px;
+      background: #0f0f1a; border-radius: 6px;
+      border: 1px solid #2a2a4a;
+    }
+    .type-item strong { color: var(--accent, #6366f1); font-size: 10px; }
+
+    /* Meta */
+    .meta { color: #666; font-size: 11px; margin-top: 28px; text-align: right; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Planning Compass — Process Details</h1>
+  <p class="page-subtitle">파이프라인 각 프로세스의 내부 단계 상세</p>
+
+
+  <!-- ===== SECTION 1: ALWAYS ACTIVE ===== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-dot" style="background: #facc15;"></span>
+      <span class="section-title" style="color: #facc15;">항상 활성 프로세스</span>
+      <span class="section-desc">매 응답마다 자동 실행</span>
+    </div>
+
+    <div class="cards-grid">
+
+      <!-- Card 1: Background Principles -->
+      <div class="process-card full-width" style="--accent: #facc15; --accent-dim: #facc1530; --accent-bg: #facc1520;">
+        <div class="process-header">
+          <span class="process-num">1</span>
+          <span class="process-name">백그라운드 원칙 적용</span>
+          <span class="process-tag" style="background: #facc1520; color: #facc15;">항상 활성</span>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <span class="step-dot">1</span>
+            <div class="step-content">
+              <div class="step-title">정보 제한</div>
+              <div class="step-desc">응답 내 새 정보/옵션/개념 수 카운트 → <strong style="color:#facc15;">≥5개</strong>이면 상위 3~5개만 제시<br>"N개 더 있습니다 — [간단 라벨]. 자세히 볼까요?" 형태로 나머지 보류</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">2</span>
+            <div class="step-content">
+              <div class="step-title">위치 고정</div>
+              <div class="step-desc">새 요소 도입 시 → 기존 확정 사항과의 연결점 확인 → "이건 [기존 요소]와 연결되는데..." 형태로 서술<br>연결점 없는 정보는 부유(float)하지 않도록 앵커링</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">3</span>
+            <div class="step-content">
+              <div class="step-title">사전 요약</div>
+              <div class="step-desc">결정 요청 직전 → 해당 결정에 관련된 맥락을 여러 턴에서 수집 → 한곳에 정리 후 제시<br>산재된 정보를 결정 시점에 모아서 의사결정 품질 향상</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">4</span>
+            <div class="step-content">
+              <div class="step-title">필수/선택 분리</div>
+              <div class="step-desc">모든 항목에 명시적 라벨 부착:<br><span class="step-highlight" style="background: #ef444420; color: #ef4444;">지금 결정 필요</span> vs <span class="step-highlight" style="background: #6b728020; color: #6b7280;">나중에 고려</span></div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">5</span>
+            <div class="step-content">
+              <div class="step-title">참여도 추적</div>
+              <div class="step-desc">사용자 응답의 변화 패턴을 턴 단위로 모니터링: 길이 변화, 구체성 수준, 능동적 질문 빈도<br>수동적 패턴 감지 시 → "주도권 반환" 개입의 입력 데이터가 됨</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Lightweight State Tracking -->
+      <div class="process-card full-width" style="--accent: #facc15; --accent-dim: #facc1530; --accent-bg: #facc1520;">
+        <div class="process-header">
+          <span class="process-num">2</span>
+          <span class="process-name">경량 상태 추적 갱신</span>
+          <span class="process-tag" style="background: #facc1520; color: #facc15;">항상 활성</span>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <span class="step-dot">1</span>
+            <div class="step-content">
+              <div class="step-title">decided_count 갱신</div>
+              <div class="step-desc">대화에서 확정된 항목 수 추적 — 명시적 선택, 추천 승인, 암묵적 수용 포함</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">2</span>
+            <div class="step-content">
+              <div class="step-title">undecided_count 갱신</div>
+              <div class="step-desc">미결정 항목 수 추적 — 다수 옵션 제시 후 미선택, "나중에", 질문 미답변</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">3</span>
+            <div class="step-content">
+              <div class="step-title">active_topics 갱신</div>
+              <div class="step-desc">현재 병렬 진행 중인 논의 주제 수 — 주제 전환 시 +1, 주제 종결 시 -1</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">4</span>
+            <div class="step-content">
+              <div class="step-title">new_concepts 산정</div>
+              <div class="step-desc">이번 응답에서 새로 도입할 개념/정보 수 — 정보 제한 원칙과 진단 엔진의 입력</div>
+            </div>
+          </div>
+        </div>
+        <div class="condition-box" style="--accent-dim: #facc1530;">
+          파일 I/O 없음 — 내부 메모리에서만 추적. 이 카운터들이 진단 엔진의 4가지 임계값과 직접 매핑됨.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="flow-divider">&#9660;</div>
+
+
+  <!-- ===== SECTION 2: DECISION POINTS ===== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-dot" style="background: #facc15;"></span>
+      <span class="section-title" style="color: #facc15;">분기 판단</span>
+      <span class="section-desc">경로 결정을 위한 두 개의 다이아몬드</span>
+    </div>
+
+    <div class="cards-grid">
+
+      <!-- Card 3: Visualization Request? -->
+      <div class="process-card" style="--accent: #facc15; --accent-dim: #facc1530; --accent-bg: #facc1520;">
+        <div class="process-header">
+          <span class="process-num">3</span>
+          <span class="process-name">시각화 요청?</span>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <span class="step-dot">A</span>
+            <div class="step-content">
+              <div class="step-title">명시적 요청 감지</div>
+              <div class="step-desc">"보여줘", "시각화", "마인드맵", "다이어그램", "flowchart" 등 키워드</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">B</span>
+            <div class="step-content">
+              <div class="step-title">정리 요청 + 고복잡도</div>
+              <div class="step-desc">"정리해줘", "organize" → 텍스트 정리 후 시각화 제안<br>"이걸 대시보드로 보여드릴까요?"</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">C</span>
+            <div class="step-content">
+              <div class="step-title">유형 직접 지정</div>
+              <div class="step-desc">"플로우차트로 보여줘" → 진단 엔진 무시, 지정 유형 사용</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: Diagnostic Threshold? -->
+      <div class="process-card" style="--accent: #facc15; --accent-dim: #facc1530; --accent-bg: #facc1520;">
+        <div class="process-header">
+          <span class="process-num">4</span>
+          <span class="process-name">진단 임계값 초과?</span>
+        </div>
+        <table class="threshold-table">
+          <tr><th>카운터</th><th>임계값</th><th>매핑 개입</th></tr>
+          <tr><td>undecided</td><td style="color:#e2e8f0;">≥ 5</td><td>결정 정리</td></tr>
+          <tr><td>active_topics</td><td style="color:#e2e8f0;">≥ 3</td><td>초점 좁히기</td></tr>
+          <tr><td>new_concepts</td><td style="color:#e2e8f0;">≥ 5</td><td>핵심 요약</td></tr>
+          <tr><td>passive</td><td style="color:#e2e8f0;">2+ 패턴</td><td>주도권 반환</td></tr>
+        </table>
+        <div class="condition-box">
+          <strong>수동적 응답 감지 기준</strong> (2개 이상 해당 시 트리거):<br>
+          &#8226; 연속 3회 ~20자 미만 &#8226; 부연 없는 순수 동의<br>
+          &#8226; 질문/요구사항 추가 중단 &#8226; 제안 무수정 반복<br><br>
+          <em style="color: #666;">가이드라인이지 엄격한 규칙이 아님 — 사용자가 활발하면 임계값 초과해도 개입하지 않음</em>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="flow-divider">&#9660; &nbsp; 3개 경로로 분기</div>
+
+
+  <!-- ===== SECTION 3: STATE SYNC (shared) ===== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-dot" style="background: #94a3b8;"></span>
+      <span class="section-title" style="color: #94a3b8;">상태 동기화</span>
+      <span class="section-desc">시각화 경로 & 개입 경로 공통 — .compass/state.md 기록</span>
+    </div>
+
+    <div class="cards-grid">
+      <div class="process-card full-width" style="--accent: #94a3b8; --accent-dim: #94a3b830; --accent-bg: #94a3b820;">
+        <div class="process-header">
+          <span class="process-num" style="background: #94a3b8;">5</span>
+          <span class="process-name">상태 파일 작성/갱신</span>
+          <span class="process-tag" style="background: #94a3b820; color: #94a3b8;">양쪽 경로 공통</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+
+          <!-- Left: Schema sections -->
+          <div>
+            <div style="font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 10px;">파일 스키마 (6개 섹션)</div>
+            <div class="schema-block">
+              <span class="schema-label" style="color: #4ade80;"># Goal</span>
+              <span class="schema-desc">원래 목표 — 안정적 유지, 대화 진행 중 임의 수정 금지</span>
+            </div>
+            <div class="schema-block">
+              <span class="schema-label" style="color: #6366f1;"># Elements</span>
+              <span class="schema-desc">이름 붙은 개념들 + type 태그 (architecture, feature, constraint...)</span>
+            </div>
+            <div class="schema-block">
+              <span class="schema-label" style="color: #3b82f6;"># Relations</span>
+              <span class="schema-desc">요소 간 연결: depends-on, contains, precedes, communicates-with</span>
+            </div>
+            <div class="schema-block">
+              <span class="schema-label" style="color: #4ade80;"># Decided</span>
+              <span class="schema-desc">확정 항목 + 결정 내용 + 이유</span>
+            </div>
+            <div class="schema-block">
+              <span class="schema-label" style="color: #6b7280;"># Undecided</span>
+              <span class="schema-desc">미결정 항목 + 옵션 목록 + 관련 요소</span>
+            </div>
+            <div class="schema-block">
+              <span class="schema-label" style="color: #facc15;"># Active</span>
+              <span class="schema-desc">현재 논의 중인 주제 + 마지막 동기화 시간</span>
+            </div>
+          </div>
+
+          <!-- Right: Extraction rules -->
+          <div>
+            <div style="font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 10px;">추출 로직</div>
+
+            <div style="margin-bottom: 12px;">
+              <div style="font-size: 11px; font-weight: bold; color: #e2e8f0; margin-bottom: 4px;">요소 식별 (신호 강도별)</div>
+              <div style="font-size: 11px; color: #888; line-height: 1.6;">
+                <span style="color: #4ade80; font-weight: bold;">강</span> — 사용자가 직접 이름 붙임 → 즉시 등록<br>
+                <span style="color: #facc15; font-weight: bold;">중</span> — 여러 턴에 걸쳐 반복 언급 → 요소 후보<br>
+                <span style="color: #6b7280; font-weight: bold;">약</span> — 1회 언급 → 다른 요소와 연결될 때만
+              </div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <div style="font-size: 11px; font-weight: bold; color: #e2e8f0; margin-bottom: 4px;">결정 판별</div>
+              <div style="font-size: 11px; color: #888; line-height: 1.6;">
+                &#8226; 명시적 선택: "X로 하자"<br>
+                &#8226; 추천 승인: "네, 그게 맞아요"<br>
+                &#8226; 암묵적 수용: 가정 위에 추가 논의 진행
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 11px; font-weight: bold; color: #e2e8f0; margin-bottom: 4px;">가정 투명성</div>
+              <div style="font-size: 11px; color: #888; line-height: 1.6;">
+                추론된 관계는 사실이 아닌 가정으로 제시<br>
+                "이건 [X]가 [Y]에 의존한다고 보고 있는데, 맞나요?"
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="flow-divider">&#9660;</div>
+
+
+  <!-- ===== SECTION 4: VISUALIZATION PATH ===== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-dot" style="background: #6366f1;"></span>
+      <span class="section-title" style="color: #6366f1;">시각화 경로</span>
+      <span class="section-desc">시각화 요청 → Yes일 때</span>
+    </div>
+
+    <div class="cards-grid">
+
+      <!-- Card: Type Selection -->
+      <div class="process-card full-width" style="--accent: #6366f1; --accent-dim: #6366f130; --accent-bg: #6366f120;">
+        <div class="process-header">
+          <span class="process-num" style="background: #6366f1;">6</span>
+          <span class="process-name">시각화 유형 선택</span>
+        </div>
+        <div style="font-size: 11px; color: #888; margin-bottom: 10px;">상태 파일의 데이터 특성을 분석하여 10가지 유형 중 선택. 사용자 지정은 항상 우선.</div>
+
+        <div class="decision-tree" style="--accent: #6366f1;">
+          <div class="branch">
+            <span class="branch-q">요소가 계층적?</span>
+            <span class="branch-arrow">→</span>
+            <span class="branch-a">마인드맵 / 계층도</span>
+          </div>
+          <div class="branch">
+            <span class="branch-q">요소 간 관계가 복잡?</span>
+            <span class="branch-arrow">→</span>
+            <span class="branch-a">컨셉맵</span>
+          </div>
+          <div class="branch">
+            <span class="branch-q">결정/미결정 추적이 핵심?</span>
+            <span class="branch-arrow">→</span>
+            <span class="branch-a">상태 대시보드</span>
+          </div>
+          <div class="branch">
+            <span class="branch-q">순서/단계가 핵심?</span>
+            <span class="branch-arrow">→</span>
+            <span class="branch-a">플로우차트 / 타임라인</span>
+          </div>
+          <div class="branch">
+            <span class="branch-q">옵션 비교?</span>
+            <span class="branch-arrow">→</span>
+            <span class="branch-a">비교 매트릭스</span>
+          </div>
+          <div class="branch">
+            <span class="branch-q">우선순위 정리?</span>
+            <span class="branch-arrow">→</span>
+            <span class="branch-a">우선순위 매트릭스</span>
+          </div>
+          <div class="branch">
+            <span class="branch-q">상태 전이/생명주기?</span>
+            <span class="branch-arrow">→</span>
+            <span class="branch-a">상태 머신</span>
+          </div>
+          <div class="branch">
+            <span class="branch-q">영역 겹침/경계?</span>
+            <span class="branch-arrow">→</span>
+            <span class="branch-a">벤 다이어그램</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Environment Detection -->
+      <div class="process-card" style="--accent: #6366f1; --accent-dim: #6366f130; --accent-bg: #6366f120;">
+        <div class="process-header">
+          <span class="process-num" style="background: #6366f1;">7</span>
+          <span class="process-name">환경 감지 & 렌더링</span>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <span class="step-dot">1</span>
+            <div class="step-content">
+              <div class="step-title">Chrome MCP 확인</div>
+              <div class="step-desc">mcp__claude-in-chrome__* 도구 사용 가능?<br><span style="color: #4ade80;">→ Yes:</span> 새 탭에서 직접 렌더링 (서버 불필요)</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">2</span>
+            <div class="step-content">
+              <div class="step-title">라이브-리로드 서버 확인</div>
+              <div class="step-desc">이미 실행 중인 서버 있음?<br><span style="color: #4ade80;">→ Yes:</span> 감시 디렉토리에 HTML 작성</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">3</span>
+            <div class="step-content">
+              <div class="step-title">폴백</div>
+              <div class="step-desc">HTML 파일 생성 → <code style="color: #6366f1;">open</code> 명령으로 기본 브라우저에서 열기</div>
+            </div>
+          </div>
+        </div>
+        <div class="condition-box">
+          <strong>렌더링 규칙:</strong><br>
+          &#8226; SVG: viewBox를 실제 콘텐츠 경계에서 계산 + 40px 패딩<br>
+          &#8226; CJK 텍스트 너비: 문자수 &times; fontSize &times; 0.6 + 40px<br>
+          &#8226; 파일 위치: <code>.compass/views/</code> + 의미 있는 파일명
+        </div>
+      </div>
+
+      <!-- Card: Visual Validation -->
+      <div class="process-card" style="--accent: #6366f1; --accent-dim: #6366f130; --accent-bg: #6366f120;">
+        <div class="process-header">
+          <span class="process-num" style="background: #6366f1;">8</span>
+          <span class="process-name">시각적 검증</span>
+          <span class="process-tag" style="background: #6b728020; color: #6b7280;">선택적</span>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <span class="step-dot">1</span>
+            <div class="step-content">
+              <div class="step-title">스크린샷 1회 촬영</div>
+              <div class="step-desc">Chrome MCP 사용 가능할 때만 실행</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">2</span>
+            <div class="step-content">
+              <div class="step-title">3가지 결함 체크</div>
+              <div class="step-desc">
+                <span class="step-highlight" style="background: #ef444420; color: #ef4444;">텍스트 잘림/오버플로</span>
+                <span class="step-highlight" style="background: #ef444420; color: #ef4444;">커넥터 라인 불가시</span>
+                <span class="step-highlight" style="background: #ef444420; color: #ef4444;">노드 겹침/밀집</span>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-dot">3</span>
+            <div class="step-content">
+              <div class="step-title">결함 발견 시 1회 수정</div>
+              <div class="step-desc">수정 후 재렌더링 1회 → 추가 반복 없음<br>렌더링 가이드가 첫 패스에서 정확한 출력을 내도록 설계됨</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="flow-divider">&#9660;</div>
+
+
+  <!-- ===== SECTION 5: INTERVENTION PATH ===== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-dot" style="background: #f59e0b;"></span>
+      <span class="section-title" style="color: #f59e0b;">프로세스 개입 경로</span>
+      <span class="section-desc">진단 임계값 초과 → Yes일 때</span>
+    </div>
+
+    <div class="cards-grid">
+
+      <!-- Card: Intervention Type Selection -->
+      <div class="process-card full-width" style="--accent: #f59e0b; --accent-dim: #f59e0b30; --accent-bg: #f59e0b20;">
+        <div class="process-header">
+          <span class="process-num" style="background: #f59e0b;">9</span>
+          <span class="process-name">개입 유형 선택</span>
+        </div>
+
+        <div style="font-size: 11px; font-weight: bold; color: #f59e0b; margin-bottom: 8px;">핵심 개입 (4종)</div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+
+          <!-- Intervention 1: Decision Cleanup -->
+          <div class="intervention-card">
+            <h4>
+              <span class="trigger" style="background: #ef444420; color: #ef4444;">undecided ≥ 5</span>
+              결정 정리
+            </h4>
+            <p>
+              <strong style="color: #e2e8f0;">1.</strong> 미결정 항목 전체 나열<br>
+              <strong style="color: #e2e8f0;">2.</strong> 의존성 분석 — 어떤 결정이 다른 결정을 차단하는지<br>
+              <strong style="color: #e2e8f0;">3.</strong> 가장 많은 것을 해제하는 결정부터 제안<br>
+              <strong style="color: #e2e8f0;">4.</strong> 한 번에 하나만 — "N개 미결정 중 [X]부터 어떨까요?"
+            </p>
+          </div>
+
+          <!-- Intervention 2: Focus Narrowing -->
+          <div class="intervention-card">
+            <h4>
+              <span class="trigger" style="background: #f59e0b20; color: #f59e0b;">topics ≥ 3</span>
+              초점 좁히기
+            </h4>
+            <p>
+              <strong style="color: #e2e8f0;">1.</strong> 활성 스레드 명명: "(1) A, (2) B, (3) C"<br>
+              <strong style="color: #e2e8f0;">2.</strong> 각 스레드 상태 표시 (초기? 거의 결정? 차단?)<br>
+              <strong style="color: #e2e8f0;">3.</strong> 사용자에게 선택권: "어느 것부터 집중할까요?"<br>
+              <span style="color: #666; font-size: 10px;">나머지는 삭제하지 않고 명시적으로 보류</span>
+            </p>
+          </div>
+
+          <!-- Intervention 3: Core Summary -->
+          <div class="intervention-card">
+            <h4>
+              <span class="trigger" style="background: #6366f120; color: #6366f1;">concepts ≥ 5</span>
+              핵심 요약
+            </h4>
+            <p>
+              <strong style="color: #e2e8f0;">1.</strong> 가장 중요한/기초적인 2~3개 식별<br>
+              <strong style="color: #e2e8f0;">2.</strong> 해당 항목만 전체 맥락과 함께 제시<br>
+              <strong style="color: #e2e8f0;">3.</strong> 나머지 존재 언급: "[N]개 더 있습니다 — [라벨]"<br>
+              <span style="color: #666; font-size: 10px;">단순 불릿 리스트 금지 — 계층 구조가 핵심</span>
+            </p>
+          </div>
+
+          <!-- Intervention 4: Agency Return -->
+          <div class="intervention-card">
+            <h4>
+              <span class="trigger" style="background: #facc1520; color: #facc15;">passive 2+</span>
+              주도권 반환
+            </h4>
+            <p>
+              <strong style="color: #e2e8f0;">1.</strong> 새 정보/옵션/결정 제시 <span style="color: #ef4444; font-weight: bold;">즉시 중단</span><br>
+              <strong style="color: #e2e8f0;">2.</strong> 현재 상태 2~3문장 요약<br>
+              <strong style="color: #e2e8f0;">3.</strong> 구체적 선택지: "(A) 더 파기, (B) 정리 검토, (C) 전환"<br>
+              <strong style="color: #e2e8f0;">4.</strong> "제가 좀 많이 진행한 것 같은데, 뭐가 중요할까요?"
+            </p>
+          </div>
+        </div>
+
+        <div style="font-size: 11px; font-weight: bold; color: #f59e0b; margin: 14px 0 8px;">확장 개입 (4종)</div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+          <div class="intervention-card">
+            <h4 style="font-size: 11px;">맥락 소환</h4>
+            <p style="font-size: 10px;">이전 결정과 현재 논의의 연결점을 표면화<br>"이전에 [X]로 결정했는데, 여기에 연결됩니다"</p>
+          </div>
+          <div class="intervention-card">
+            <h4 style="font-size: 11px;">목표 재정렬</h4>
+            <p style="font-size: 10px;">논의가 원래 Goal에서 이탈 시 확인<br>"원래 [A]였는데 지금 [B]를 다루고 있어요"</p>
+          </div>
+          <div class="intervention-card">
+            <h4 style="font-size: 11px;">트레이드오프 명확화</h4>
+            <p style="font-size: 10px;">옵션 간 차별화 기준을 추출하여 명시적 비교 제시</p>
+          </div>
+          <div class="intervention-card">
+            <h4 style="font-size: 11px;">정체 돌파</h4>
+            <p style="font-size: 10px;">같은 주제 3회+ 재방문 시<br>관점 전환/잠정 결정/보류 제안</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Delivery -->
+      <div class="process-card full-width" style="--accent: #f59e0b; --accent-dim: #f59e0b30; --accent-bg: #f59e0b20;">
+        <div class="process-header">
+          <span class="process-num" style="background: #f59e0b;">10</span>
+          <span class="process-name">텍스트 기반 개입 실행</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="intervention-card" style="border-left: 3px solid #4ade80;">
+            <h4 style="color: #4ade80;">Light 개입</h4>
+            <p>응답에 자연스럽게 녹임<br><em style="color: #4ade80;">"지금까지 정리하면 — "</em><br><br>사용자가 개입을 의식하지 못하는 것이 이상적</p>
+          </div>
+          <div class="intervention-card" style="border-left: 3px solid #facc15;">
+            <h4 style="color: #facc15;">Heavy 개입</h4>
+            <p>명시적 체크포인트로 제시<br><em style="color: #facc15;">"여러 스레드가 쌓였습니다. 현재 상태:"</em><br><br>사용자는 "skip", "later"로 회피 가능</p>
+          </div>
+        </div>
+
+        <div class="condition-box" style="margin-top: 12px;">
+          개입 후 <strong>시각화 제안</strong>도 함께 고려: "이걸 대시보드로 시각화해서 보여드릴까요?" — 정리 요청은 시각화의 최고 가치 순간
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="flow-divider">&#9660;</div>
+
+
+  <!-- ===== SECTION 6: NORMAL PATH ===== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-dot" style="background: #6b7280;"></span>
+      <span class="section-title" style="color: #6b7280;">기본 응답 경로</span>
+      <span class="section-desc">어떤 임계값도 초과하지 않을 때</span>
+    </div>
+
+    <div class="cards-grid">
+      <div class="process-card" style="--accent: #6b7280; --accent-dim: #6b728030; --accent-bg: #6b728020;">
+        <div class="process-header">
+          <span class="process-num" style="background: #6b7280;">11</span>
+          <span class="process-name">일반 응답 생성</span>
+        </div>
+        <div style="font-size: 12px; color: #888; line-height: 1.7;">
+          별도의 개입이나 시각화 없이 응답 생성.<br>
+          단, <strong style="color: #facc15;">백그라운드 원칙 5가지는 여전히 적용</strong>됨 —<br>
+          정보 제한, 위치 고정, 사전 요약, 필수/선택 분리, 참여도 추적이 모든 응답에 내재.
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="flow-divider" style="font-size: 14px; color: #4ade80;">&#10003; &nbsp; 응답 전달</div>
+
+
+  <div class="meta">
+    Planning Compass Process Details · 2026-03-30
+  </div>
+
+</div>
+</body>
+</html>

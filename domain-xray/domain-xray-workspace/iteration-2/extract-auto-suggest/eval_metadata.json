@@ -1,0 +1,39 @@
+{
+  "eval_id": 1,
+  "eval_name": "extract-auto-suggest",
+  "prompt": "오리엔트 맵 기반으로 암묵지 추출 프롬프트를 만들어주세요.",
+  "assertions": [
+    {
+      "name": "orient-auto-detected",
+      "type": "qualitative",
+      "description": "orient.md를 자동 감지하여 읽음"
+    },
+    {
+      "name": "template-structure-intact",
+      "type": "contains_all",
+      "description": "고정 템플릿 구조 유지",
+      "targets": ["[Context]", "[Task]", "[Output Constraint]", "Practical Terminology and Jargon", "Hidden Preconditions", "Beginner's Traps", "Rules of Thumb"]
+    },
+    {
+      "name": "domain-enriched-from-orient",
+      "type": "qualitative",
+      "description": "DOMAIN이 orient 맵의 영역들을 반영하여 풍부하게 확장"
+    },
+    {
+      "name": "scope-section-present",
+      "type": "contains_all",
+      "description": "orient 우선순위 영역 기반 [Scope] 섹션 포함",
+      "targets": ["[Scope]"]
+    },
+    {
+      "name": "knowledge-execution-offered",
+      "type": "qualitative",
+      "description": "저장 후 knowledge 자동 실행 제안 (네/아니요 선택지)"
+    },
+    {
+      "name": "prompt-in-english",
+      "type": "qualitative",
+      "description": "최종 프롬프트 파일은 영어로 작성"
+    }
+  ]
+}

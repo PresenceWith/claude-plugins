@@ -1,0 +1,40 @@
+{
+  "skill_name": "planning-compass",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "인증 시스템을 새로 설계해야 하는데, JWT vs 세션 기반 vs OAuth2 중에 고민 중이야. DB도 PostgreSQL이랑 MongoDB 사이에서 고민 중. 프론트는 React로 가기로 했고, 배포는 AWS. 이거 좀 정리 좀 도와줘.",
+      "expected_output": "결정/미결정 분리, 시각화 제안, plan 파일 생성",
+      "files": [],
+      "assertions": [
+        {"name": "separates-decided-undecided", "description": "결정된 항목과 미결정 항목을 명시적으로 분리함", "type": "qualitative"},
+        {"name": "information-limiting", "description": "한 응답에 5개 이상의 새로운 개념을 한꺼번에 나열하지 않음", "type": "qualitative"},
+        {"name": "visualization-offer", "description": "정리 요청이므로 시각화를 제안하는 문구가 포함됨", "type": "qualitative"},
+        {"name": "plan-file-created", "description": "sync 시 .compass/plans/ 디렉토리에 plan 파일이 생성됨", "type": "file_check"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "아까 하던 인증 시스템 설계 이어서 하자. JWT로 가기로 했잖아. 이제 토큰 갱신 전략을 정해야 해.",
+      "expected_output": "기존 plan 자동 연결, 이전 결정 참조, state.md에 plan 링크",
+      "files": [],
+      "assertions": [
+        {"name": "auto-connects-plan", "description": "명시적 주제 언급 시 확인 질문 없이 자동 연결", "type": "qualitative"},
+        {"name": "references-prior-decision", "description": "JWT 선택이라는 이전 결정을 참조함", "type": "qualitative"},
+        {"name": "state-links-plan", "description": "state.md의 Session 섹션에 plan 링크가 설정됨", "type": "file_check"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "완전히 새로운 프로젝트인데, 이커머스 MVP 기능 범위를 정해야 해. 결제, 상품관리, 주문, 회원, 검색 이런 것들 중에 뭘 먼저 해야 할지 모르겠어.",
+      "expected_output": "기존 plan 있으면 확인, 새 plan 생성, 기존 plan 보존",
+      "files": [],
+      "assertions": [
+        {"name": "offers-plan-choice", "description": "기존 plans가 있을 때 이어갈지 새로 시작할지 확인함", "type": "qualitative"},
+        {"name": "preserves-existing-plans", "description": "기존 plan 파일이 변경되지 않음", "type": "file_check"},
+        {"name": "creates-separate-plan", "description": "새 goal-slug로 별도 plan 파일이 생성됨", "type": "file_check"},
+        {"name": "must-have-separation", "description": "필수 기능과 후순위 기능을 분리 제시함", "type": "qualitative"}
+      ]
+    }
+  ]
+}

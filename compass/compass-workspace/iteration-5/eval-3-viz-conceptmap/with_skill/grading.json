@@ -1,0 +1,87 @@
+{
+  "expectations": [
+    {
+      "text": "HTML file generated: conceptmap.html exists in outputs",
+      "passed": true,
+      "evidence": "File exists at outputs/conceptmap.html (24,228 bytes). Contains a complete HTML document with SVG concept map, CSS styling, tooltip JavaScript, legend, and insight box."
+    },
+    {
+      "text": "No content clipping: All nodes and labels fully visible without horizontal scroll",
+      "passed": true,
+      "evidence": "SVG uses viewBox='0 0 1060 780' with width='100%'. The rightmost node edges are at x~986 (계약서 관리: x=886+w=100=986, 결제 연동: x=891+w=95=986), well within the 1060 viewBox width. All node text is centered (text-anchor='middle') within rects sized to accommodate the Korean characters. The container div has overflow-x:auto but the responsive SVG scales to fit, preventing horizontal scroll."
+    },
+    {
+      "text": "Edge label deduplication: Same relation type not individually labeled on every edge",
+      "passed": true,
+      "evidence": "Relation types (워크플로우 흐름, 의존성, 지원/연결) are conveyed via a color/style legend at the top rather than labeled on each edge. Individual edges use color coding: yellow solid = workflow, red dashed = dependency, gray = support. Only three contextual workflow annotations appear ('프로필에서 유입', '소통 → 견적', '완료 작업 → 포트폴리오') which are unique descriptive labels, not repeated relation-type labels."
+    },
+    {
+      "text": "No node overlap: Sub-nodes within groups do not visually overlap each other",
+      "passed": true,
+      "evidence": "Verified all node positions within each region. Region 1: core nodes gap=16px (170→186), sub nodes gap=16px (160→176). Region 2: core gap=16px (525→541), sub gap=16px (560→576). Region 3: core gap=16px (875→891), sub gap=16px (870→886). Region 4: core gap=30px (390→420), sub gap=30px (670→700). Vertical gaps between rows are 18px (core bottom at y=122, sub top at y=140). No overlaps in any region."
+    },
+    {
+      "text": "Domain grouping: Related concepts grouped inside visual regions with labels",
+      "passed": true,
+      "evidence": "Four labeled background regions: (1) 포트폴리오 관리 at (30,40,320×230) containing 4 nodes, (2) 클라이언트 소통 at (390,40,320×230) containing 4 nodes, (3) 견적서 발행 at (750,40,280×230) containing 4 nodes, (4) 통합 플랫폼 코어 at (220,330,620×200) containing 4 nodes. Each region has a colored rect with labeled text. All child nodes fall within their parent region's bounding box. Color coding (indigo, blue, cyan, green) distinguishes domains."
+    },
+    {
+      "text": "SVG viewBox: Uses dynamic viewBox with preserveAspectRatio, not hardcoded dimensions",
+      "passed": true,
+      "evidence": "SVG element: <svg width='100%' viewBox='0 0 1060 780' preserveAspectRatio='xMidYMid meet'>. No hardcoded pixel width/height attributes. The viewBox dimensions are calculated to fit content (rightmost edge ~986 + padding = 1060, bottom region at y=530 + padding = 780). The width='100%' combined with viewBox and preserveAspectRatio='xMidYMid meet' creates a responsive SVG that scales to its container."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "claims": [
+    {
+      "claim": "The concept map represents a freelancer designer SaaS platform with portfolio, communication, and estimation domains",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The state.md goal states 'SaaS 플랫폼 구축 — 포트폴리오 관리, 클라이언트 소통, 견적서 발행을 통합'. The SVG regions match these three domains plus a core infrastructure region."
+    },
+    {
+      "claim": "All 20 elements from state.md are represented as nodes in the SVG",
+      "type": "factual",
+      "verified": false,
+      "evidence": "state.md lists 20 elements. The SVG contains 16 nodes (4 per region). The 4 top-level domain elements (포트폴리오 관리, 클라이언트 소통, 견적서 발행, 통합 플랫폼 코어) are represented as region labels rather than discrete nodes. This is a reasonable design choice but means they lack the interactive tooltip behavior of other nodes."
+    },
+    {
+      "claim": "Tooltips show detail on hover for each node",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Each node-group has a data-tooltip attribute with descriptive Korean text. JavaScript at lines 491-503 implements mouseenter/mousemove/mouseleave handlers that display a positioned tooltip div."
+    },
+    {
+      "claim": "All relations from state.md are represented as edges",
+      "type": "factual",
+      "verified": true,
+      "evidence": "state.md lists 28 relations. The SVG includes edges for contains (represented by spatial containment within regions), feeds-into/precedes (yellow workflow arrows), depends-on (red dashed arrows), supports (gray arrows), and aggregates (gray dashed arrows). All specific dependency/workflow/support/aggregates relations from state.md have corresponding SVG path elements."
+    },
+    {
+      "claim": "Node status is visually encoded via stroke-dasharray",
+      "type": "factual",
+      "verified": true,
+      "evidence": "All nodes use stroke-dasharray='6,3' indicating undecided status, consistent with state.md which says 'No decisions made yet'. The CSS defines .decided (green), .active (yellow), .undecided (gray) color classes, though these are applied to text elements, not the SVG strokes directly."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "SVG viewBox: Uses dynamic viewBox with preserveAspectRatio, not hardcoded dimensions",
+        "reason": "The distinction between 'dynamic viewBox' and 'hardcoded dimensions' is ambiguous. The viewBox values (1060x780) are statically written in the HTML — there is no JavaScript calculating them from content bounds. The real benefit is using viewBox+preserveAspectRatio+width:100% (responsive scaling) vs hardcoded pixel width/height. Consider rephrasing to 'SVG uses viewBox with preserveAspectRatio and percentage width for responsive scaling' for clarity."
+      },
+      {
+        "reason": "No assertion checks whether the relations from state.md are accurately represented — e.g., whether the correct source/target pairs are connected. An edge going from the wrong node to another would pass all current assertions. Consider adding 'Relation accuracy: edges match the source→target pairs defined in state.md'."
+      },
+      {
+        "reason": "No assertion verifies that the concept map is actually readable or meaningful at typical viewport sizes. The SVG could technically pass all assertions while being too small or too large to be useful. Consider testing at a specific viewport width."
+      }
+    ],
+    "overall": "Assertions cover structural and layout quality well. The edge deduplication and node overlap checks are genuinely discriminating. Main gap is the lack of semantic accuracy checking for edge connections."
+  }
+}

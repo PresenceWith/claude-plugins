@@ -1,0 +1,6 @@
+{
+  "name": "scaffold",
+  "version": "1.0.0",
+  "description": "Cognitive scaffolding for unfamiliar domains — triggered mid-conversation via /scaffold, delivers layered interactive onboarding with Context-First Delivery",
+  "claude_plugin": true
+}

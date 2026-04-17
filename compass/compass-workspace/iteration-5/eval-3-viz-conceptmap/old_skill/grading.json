@@ -1,0 +1,85 @@
+{
+  "expectations": [
+    {
+      "text": "HTML file generated: conceptmap.html exists in outputs",
+      "passed": true,
+      "evidence": "File exists at outputs/conceptmap.html with 450 lines of valid HTML containing SVG concept map, legend, tooltip script, and insight box."
+    },
+    {
+      "text": "No content clipping: All nodes and labels fully visible without horizontal scroll",
+      "passed": true,
+      "evidence": "SVG uses viewBox=\"0 0 960 720\" with width=\"100%\" and preserveAspectRatio=\"xMidYMid meet\", which scales the entire graphic to fit the container. All nodes are within viewBox bounds: leftmost element at x=20, rightmost region edge at x=940 (within 960), topmost text at y=54 (within 0-720), bottommost infrastructure labels at y=598 (within 720). The SVG scales down responsively rather than causing horizontal scroll."
+    },
+    {
+      "text": "Edge label deduplication: Same relation type not individually labeled on every edge",
+      "passed": true,
+      "evidence": "9 dependency edges (sub-nodes to infrastructure) have NO individual text labels -- the dependency relation type is communicated once via the legend (\"의존성 (인프라 필요)\"). Similarly, 9 containment lines have no individual labels, using the legend instead. Only the 3 workflow edges between core nodes have labels, but each is unique (\"리드 유입\", \"요구사항 전달\", \"완료 프로젝트 순환\") describing distinct flows, not repeated relation types."
+    },
+    {
+      "text": "No node overlap: Sub-nodes within groups do not visually overlap each other",
+      "passed": true,
+      "evidence": "Verified coordinates for all groups. Portfolio sub-nodes are at y=185, y=240, y=295 (each 36px tall, 19px gap between). Communication sub-nodes at same y positions with same spacing. Invoice sub-nodes likewise. Infrastructure nodes are horizontally spaced at x=140, 310, 480, 650 (widths 120-130px, 50px gaps). No overlap in any group."
+    },
+    {
+      "text": "Domain grouping: Related concepts grouped inside visual regions with labels",
+      "passed": true,
+      "evidence": "Four labeled background regions: (1) \"포트폴리오 관리\" rect x=20,y=70,290x320 contains Portfolio core + 3 sub-nodes, (2) \"클라이언트 소통\" rect x=335,y=70,290x320 contains Communication core + 3 sub-nodes, (3) \"견적서 발행\" rect x=650,y=70,290x320 contains Invoice core + 3 sub-nodes, (4) \"공유 인프라\" rect x=100,y=490,760x200 contains 4 infrastructure nodes. Each region has a colored fill, border, and centered label text."
+    },
+    {
+      "text": "SVG viewBox: Uses dynamic viewBox with preserveAspectRatio, not hardcoded dimensions",
+      "passed": true,
+      "evidence": "Line 137: <svg width=\"100%\" viewBox=\"0 0 960 720\" preserveAspectRatio=\"xMidYMid meet\">. Uses percentage-based width (not hardcoded pixel dimensions) with viewBox for coordinate system and preserveAspectRatio=\"xMidYMid meet\" for responsive scaling. No hardcoded width/height pixel attributes on the SVG element."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 0,
+    "note": "timing not captured from subagent notification"
+  },
+  "claims": [
+    {
+      "claim": "Each node shows detailed tooltip on hover",
+      "type": "process",
+      "verified": true,
+      "evidence": "All 16 node groups have data-tooltip attributes with Korean descriptions. JavaScript at lines 431-447 handles mouseenter/mousemove/mouseleave to show/hide a fixed-position tooltip div."
+    },
+    {
+      "claim": "클라이언트 DB has 4 dependency connections (highest hub)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "4 dependency paths end at ClientDB (x=715,y=540): ClientPortal, MessagingHub, QuoteGenerator, PaymentTracking. Badge shows \"4\" and label says \"연결 4개\"."
+    },
+    {
+      "claim": "파일 스토리지 has 3 dependency connections",
+      "type": "factual",
+      "verified": true,
+      "evidence": "3 dependency paths end at FileStorage (x=370,y=540): ProjectGallery, CaseStudyBuilder, FeedbackSystem. Badge shows \"3\"."
+    },
+    {
+      "claim": "All items are marked as undecided (dashed borders)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "All core nodes and sub-nodes use stroke-dasharray=\"6,3\" for dashed borders, consistent with state.md showing no decided items."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "SVG viewBox: Uses dynamic viewBox with preserveAspectRatio, not hardcoded dimensions",
+        "reason": "The viewBox itself has hardcoded dimensions (960x720) -- only the outer width is percentage-based. A stricter version of this assertion would check that the viewBox dimensions are computed from the actual node layout (truly dynamic), not just that the SVG element avoids pixel width/height attributes. As written, any SVG with viewBox + preserveAspectRatio passes, even if the coordinate space wastes large amounts of empty space or clips content."
+      },
+      {
+        "reason": "No assertion checks that the concept map accurately represents the planning state (state.md). The map could show invented nodes or miss nodes from state.md and still pass all current assertions. Consider adding: 'State fidelity: All elements from state.md appear as nodes in the SVG'."
+      },
+      {
+        "reason": "No assertion checks edge correctness -- whether the dependency and workflow edges in the SVG match the Relations section in state.md. The map has 9 dependency edges matching the 9 depends-on relations in state.md, but this is unchecked."
+      }
+    ],
+    "overall": "All 6 assertions pass convincingly. The concept map is well-structured with clean layout, proper grouping, and responsive SVG. However, the eval lacks assertions on content fidelity (do the nodes/edges match the planning state?), which is arguably the most important property of a concept map visualization."
+  }
+}
