@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
-# publish.sh — stage all changes, commit, push to origin.
+# publish.sh — auto-register new plugins, stage all changes, commit, push to origin.
 # Usage: ./publish.sh ["commit message"]
 # If no message is given, uses "update: <timestamp>".
+#
+# Auto-registration: any top-level directory containing .claude-plugin/plugin.json
+# but missing from .claude-plugin/marketplace.json is appended to the manifest
+# using its plugin.json's name + description. Idempotent: re-running does nothing
+# once a plugin is registered.
 
 set -euo pipefail
 
@@ -22,6 +27,44 @@ if ! python3 -m json.tool .claude-plugin/marketplace.json >/dev/null 2>&1; then
   echo "error: .claude-plugin/marketplace.json is not valid JSON." >&2
   exit 1
 fi
+
+# --- auto-register: append any plugin dir missing from marketplace.json ---
+python3 <<'PY'
+import json, glob
+
+MANIFEST = '.claude-plugin/marketplace.json'
+
+with open(MANIFEST) as f:
+    manifest = json.load(f)
+
+existing = {p.get('source') for p in manifest.get('plugins', [])}
+added = []
+
+for plugin_json in sorted(glob.glob('*/.claude-plugin/plugin.json')):
+    plugin_dir = plugin_json.split('/', 1)[0]
+    source = f'./{plugin_dir}'
+    if source in existing:
+        continue
+    with open(plugin_json) as f:
+        info = json.load(f)
+    name = info.get('name')
+    if not name:
+        print(f"warning: {plugin_json} has no 'name' field; skipping.")
+        continue
+    entry = {
+        'name': name,
+        'source': source,
+        'description': info.get('description', ''),
+    }
+    manifest.setdefault('plugins', []).append(entry)
+    added.append(name)
+
+if added:
+    with open(MANIFEST, 'w') as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False)
+        f.write('\n')
+    print(f"registered: {', '.join(added)}")
+PY
 
 # --- validate every per-plugin plugin.json referenced in marketplace ---
 while IFS= read -r src; do
