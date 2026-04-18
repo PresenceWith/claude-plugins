@@ -30,7 +30,7 @@ fi
 
 # --- auto-register: append any plugin dir missing from marketplace.json ---
 python3 <<'PY'
-import json, glob
+import json, glob, os
 
 MANIFEST = '.claude-plugin/marketplace.json'
 
@@ -51,18 +51,23 @@ for plugin_json in sorted(glob.glob('*/.claude-plugin/plugin.json')):
     if not name:
         print(f"warning: {plugin_json} has no 'name' field; skipping.")
         continue
-    entry = {
+    description = info.get('description')
+    if not description:
+        print(f"warning: {plugin_json} has no 'description' field; skipping.")
+        continue
+    manifest.setdefault('plugins', []).append({
         'name': name,
         'source': source,
-        'description': info.get('description', ''),
-    }
-    manifest.setdefault('plugins', []).append(entry)
+        'description': description,
+    })
     added.append(name)
 
 if added:
-    with open(MANIFEST, 'w') as f:
+    tmp = MANIFEST + '.tmp'
+    with open(tmp, 'w') as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
         f.write('\n')
+    os.replace(tmp, MANIFEST)
     print(f"registered: {', '.join(added)}")
 PY
 
