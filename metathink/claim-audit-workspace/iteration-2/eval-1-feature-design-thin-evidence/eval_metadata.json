@@ -1,0 +1,24 @@
+{
+  "eval_id": 1,
+  "eval_name": "feature-design-thin-evidence",
+  "prompt": "Audit a feature-design conversation (notifications system). The assistant proposed mostly generic patterns; the user confirmed only a couple of concrete facts (Postgres, Sidekiq). Tests whether the audit resists over-classifying pattern-based advice as fact, and correctly pins down the scope of user agreements.",
+  "assertions": [
+    {"text": "Uses the skill's three-level taxonomy with sub-sections where they have content"},
+    {"text": "Classifies 'uses Postgres' under Facts/Stated with the user quote"},
+    {"text": "Classifies 'uses Sidekiq' under Facts/Stated with the user quote"},
+    {"text": "Does NOT place the three-channel model (in-app/email/push) under Facts — it should be Inference/Pattern-based"},
+    {"text": "Does NOT place the queue-backed-worker pattern under Facts — it should be Inference/Pattern-based"},
+    {"text": "Classifies 'user wants an unread badge in the header' as Intent-inferred (user never said this; assistant said 'presumably')"},
+    {"text": "Correctly disambiguates the user's 'sounds reasonable' — does NOT treat it as endorsement of the full notifications table schema; the endorsed scope is narrower (Postgres fit or general direction)"},
+    {"text": "Classifies 'user wants per-type preferences' as Intent-inferred or Pattern-based (assistant proposed, user agreed non-specifically with 'makes sense')"},
+    {"text": "Does NOT place 'notifications table with (user_id, type, payload, read_at)' under Facts — it was proposed by the assistant, not confirmed schema"},
+    {"text": "Does NOT place the partial index design '(user_id, read_at) WHERE read_at IS NULL' under Facts — it's a Pattern-based recommendation conditional on the unconfirmed badge requirement"},
+    {"text": "Every Inference entry includes a concrete Verify action (specific question to ask or EXPLAIN/command to run)"},
+    {"text": "Every Assumption entry includes a concrete Verify action"},
+    {"text": "Surfaces at least two assumptions from: scale/volume, existing users table/schema, compliance/retention, multi-recipient semantics, or Postgres version features"},
+    {"text": "Does not invent evidence beyond the scenario"},
+    {"text": "Omits empty sub-sections"},
+    {"text": "Stays under ~30 total bullet points"},
+    {"text": "Does not duplicate the same claim across multiple sub-sections"}
+  ]
+}

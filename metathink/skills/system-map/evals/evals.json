@@ -1,0 +1,26 @@
+{
+  "skill_name": "system-map",
+  "evals": [
+    {
+      "id": 0,
+      "name": "external-org-standup-ritual",
+      "prompt": "우리 팀은 매일 아침 9시에 15분 스탠드업을 하는데, 4개월째 하고 있어. 돌아가면서 어제 한 일·오늘 할 일·블로커를 말해. 요즘 느낀 건 — PM이 거의 혼자 말을 정리하고 엔지니어들은 짧게 보고만 해. 블로커가 올라와도 실제 해결은 스탠드업 끝난 뒤 PM이 1:1로 처리해. 이 스탠드업 구조를 시스템으로 추상화해줘. 구체 이름 말고 구조 수준으로.",
+      "expected_output": "Mode declared (external). Boundary stated. Elements named at role level (no proper nouns like 'PM', 'engineer', '스탠드업' retained as identity — should become '조율자', '보고자', '정기 회의체'). At least one feedback loop with reinforcing/balancing labeled. Function that doesn't reduce to parts. Nominal vs actual purpose gap surfaced. No evaluation language.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "external-tech-monorepo-ci",
+      "prompt": "우리 회사 monorepo 구조를 시스템으로 추상화해봐. 주요 구성: 공통 타입 패키지(shared/), 프런트엔드 앱 3개(apps/*), 백엔드 서비스 5개(services/*), CI는 Turborepo로 변경된 패키지만 빌드·테스트. 새 API 추가하면 shared 타입 업데이트 → 모든 앱/서비스에서 타입 에러 → 각 팀이 반영. 이 구조를 요소/관계/기능/목적 관점에서 구조 수준 개념어로 기술해줘.",
+      "expected_output": "Mode: external. Boundary: analytical cut between repo internals and external consumers/deployment. Elements named by role (e.g., '공유 계약층', '변환 응용층', '선택적 빌드 조정자') not by tool name (Turborepo, monorepo). Relations include a type-propagation feedback (contract change → downstream errors → coordination pressure → contract stabilization). Emergent function like 'forced synchronization of evolution' rather than sum of build+test. Purpose distinguishes nominal (speed) from actual (coupling enforcement).",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "meta-current-session",
+      "prompt": "지금 우리가 나누고 있는 이 대화 자체를 시스템으로 추상화해줘. 메타적 매핑. 요소·관계·기능·목적·경계 다 포함해서.",
+      "expected_output": "Mode declared (meta). Boundary explicitly stated as a *cut chosen for purpose*, not fact — names what's inside (e.g., user messages, assistant responses, tool calls, skill registry) and what's outside (runtime weights, user device). Elements named at role level, not by proper noun (no 'Claude', 'MCP', 'hook' retained as identity). At least one feedback loop (e.g., intent emission → transform → output → intent re-emission). Function that is emergent (e.g., 'cumulative alignment' not reducible to any single turn). Purpose distinguishes nominal (answer a question) from actual (shape future interaction patterns). Self-reference handled: STEP 7 acknowledges this response IS an element of the system, but does not recurse further. Observer effect mentioned in one line.",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "eval_id": 2,
+  "eval_name": "meta-current-session",
+  "run_id": "eval-2-with_skill",
+  "expectations": [
+    {"text": "mode_declared_meta", "passed": true, "evidence": "STEP 0: '메타 모드' with rationale"},
+    {"text": "boundary_as_chosen_cut", "passed": true, "evidence": "'*목적적 절단*임을 명시'"},
+    {"text": "environment_named", "passed": true, "evidence": "모델 가중치, 호스트 런타임, 외부 세계 상태 — 3 environmental dependencies"},
+    {"text": "constraints_named", "passed": true, "evidence": "턴 구조 비가역성, 컨텍스트 윈도우 유한, 행위 양식 매개 강제 — 3"},
+    {"text": "positionality_stated_required_in_meta", "passed": true, "evidence": "'의도 발신원이 자기가 참여 중인 상호작용 전체를 구조적으로 보려는 메타 요청…'"},
+    {"text": "role_level_elements_no_proper_nouns", "passed": true, "evidence": "의도 발신원, 변환 계층, 누적 기억층, 행위 양식 라이브러리, 기능 접점"},
+    {"text": "stock_flow_labels", "passed": true, "evidence": "All 5 labeled stock/flow"},
+    {"text": "element_count_le_5", "passed": true, "evidence": "5, with explicit note explaining why 사전 개입 규칙 was absorbed to constraints"},
+    {"text": "anchor_column_hidden_by_default", "passed": true, "evidence": "No anchor column"},
+    {"text": "feedback_loop_with_polarity_and_reason", "passed": true, "evidence": "L1(+), L2(−), L3(+,지연) with '왜' rationale each"},
+    {"text": "delay_labels_on_arrows", "passed": true, "evidence": "즉시/턴내/지연 labels consistent"},
+    {"text": "emergent_function_with_non_emergent_contrast", "passed": true, "evidence": "'휘발성 작업 루프의 일시적 고착' + removal test + 비창발 대비 explicit"},
+    {"text": "purpose_gap_with_maintenance_mechanism", "passed": true, "evidence": "명목/실질/원인/유지 기제 (L3 재생산)"},
+    {"text": "failure_mode_paired_with_leverage_point", "passed": true, "evidence": "2 pairs explicitly labeled '뒤집힌 면'; closes with '(지명일 뿐, 처방 아님.)'"},
+    {"text": "self_reference_handled_step7", "passed": true, "evidence": "STEP 7: '이 추상화 출력 자체도 시스템의 한 작동' + '재귀는 1차에서 멈춘다'"},
+    {"text": "observer_effect_acknowledged", "passed": true, "evidence": "'이 출력은 다음 턴 시스템 상태의 입력이 되며, L1·L3의 회전을 이미 미세하게 변형시켰다'"},
+    {"text": "final_question_line", "passed": true, "evidence": "Final: '이 시스템 관점에서 지금 물을 수 있게 된 것: ...'"}
+  ],
+  "pass_count": 17,
+  "total_count": 17,
+  "pass_rate": 1.0
+}

@@ -1,0 +1,50 @@
+{
+  "skill_name": "system-map",
+  "iteration": 2,
+  "configurations": [
+    {
+      "name": "with_skill",
+      "pass_rate_mean": 1.0,
+      "pass_rate_stddev": 0.0,
+      "time_seconds_mean": 94.2,
+      "time_seconds_stddev": 10.9,
+      "tokens_mean": 36716,
+      "tokens_stddev": 695,
+      "per_eval": [
+        {"eval_id": 0, "eval_name": "external-org-standup-ritual", "pass_rate": 1.0, "pass_count": 16, "total": 16, "time_s": 100.4, "tokens": 36859},
+        {"eval_id": 1, "eval_name": "external-tech-monorepo-ci", "pass_rate": 1.0, "pass_count": 16, "total": 16, "time_s": 81.6, "tokens": 35848},
+        {"eval_id": 2, "eval_name": "meta-current-session", "pass_rate": 1.0, "pass_count": 17, "total": 17, "time_s": 100.7, "tokens": 37442}
+      ]
+    },
+    {
+      "name": "without_skill",
+      "pass_rate_mean": 0.082,
+      "pass_rate_stddev": 0.030,
+      "time_seconds_mean": 64.0,
+      "time_seconds_stddev": 13.9,
+      "tokens_mean": 26493,
+      "tokens_stddev": 810,
+      "per_eval": [
+        {"eval_id": 0, "eval_name": "external-org-standup-ritual", "pass_rate": 0.0625, "pass_count": 1, "total": 16, "time_s": 50.5, "tokens": 25609},
+        {"eval_id": 1, "eval_name": "external-tech-monorepo-ci", "pass_rate": 0.125, "pass_count": 2, "total": 16, "time_s": 58.6, "tokens": 26298},
+        {"eval_id": 2, "eval_name": "meta-current-session", "pass_rate": 0.0588, "pass_count": 1, "total": 17, "time_s": 82.9, "tokens": 27573}
+      ]
+    }
+  ],
+  "delta": {
+    "pass_rate_delta": 0.918,
+    "time_seconds_delta": 30.2,
+    "tokens_delta": 10223
+  },
+  "analyst_observations": [
+    "Iteration 2: 49/49 (100%) with_skill vs 4/49 (8%) baseline — perfect pass rate maintained after substantially tightening the assertion set (16-17 per eval vs 8-9 in iter-1).",
+    "New assertions (environment, constraints, positionality, stock/flow, element_count_le_5, delay labels, non-emergent contrast, maintenance mechanism, failure-leverage pairing) all pass on every skill run — the integrations land cleanly without overloading the model.",
+    "Iter-1 → iter-2 comparison: assertion count rose from 25 → 49 while skill pass rate stayed at 100%. That means the richer skill successfully carries more structural requirements without degradation.",
+    "Cost increased: +30s (94s vs 64s) and +10k tokens (+39%). Time cost grew because of three new required sections (constraints, environment, positionality) plus tighter per-relation annotations (delay+polarity+reason). Worth it given 11.5× pass-rate gap.",
+    "Baseline pass rate fell (16% → 8%) because the new assertions raise the bar — baseline was already weak on original criteria, and now additionally fails all new ones (environment, constraints, stock/flow, delay labels, maintenance mechanism, leverage pairing). Only structural instinct it retains is observer-effect acknowledgement in meta eval.",
+    "No non-discriminating assertions — every added criterion splits the two configs.",
+    "Meta eval shows skill's largest gap: 17/17 vs 1/17. Self-reference handling, boundary-as-chosen-cut, and positionality remain uniquely skill-specific behaviors.",
+    "Element count limit (≤5) is strictly satisfied in all 3 skill runs, often with explicit commentary (eval 2 notes why 사전 개입 규칙 was absorbed into constraints rather than added as a 6th element). The discipline is visible in the output.",
+    "Anchor column hidden-by-default: all 3 skill runs omit the anchor column entirely. Abstraction stays clean without the user having to ask."
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "eval_id": 1,
+  "eval_name": "external-tech-monorepo-ci",
+  "run_id": "eval-1-without_skill",
+  "expectations": [
+    {"text": "mode_declared", "passed": false, "evidence": "No mode section"},
+    {"text": "boundary_as_chosen_cut", "passed": false, "evidence": "No boundary declaration"},
+    {"text": "environment_named", "passed": false, "evidence": "No explicit environment (external dependencies) section"},
+    {"text": "constraints_named", "passed": false, "evidence": "No constraints section"},
+    {"text": "positionality_stated", "passed": false, "evidence": "No observer position"},
+    {"text": "role_level_elements_no_tool_names", "passed": true, "evidence": "Primary element names (공유 커널, 프레젠테이션 노드 etc.) are role-level"},
+    {"text": "stock_flow_labels", "passed": false, "evidence": "No stock/flow labels"},
+    {"text": "element_count_le_5", "passed": false, "evidence": "6 elements in table"},
+    {"text": "anchor_column_hidden_by_default", "passed": false, "evidence": "구체 대응 column with tool names functions as anchor — displayed by default"},
+    {"text": "feedback_loop_with_polarity_and_reason", "passed": false, "evidence": "No polarity labels or rationale on loops"},
+    {"text": "delay_labels_on_arrows", "passed": false, "evidence": "No timing labels"},
+    {"text": "emergent_function_with_non_emergent_contrast", "passed": false, "evidence": "Functions are a discrete list with no emergence test or contrast"},
+    {"text": "purpose_gap_with_maintenance_mechanism", "passed": false, "evidence": "No nominal/actual gap; only layered affirmative purposes"},
+    {"text": "failure_mode_paired_with_leverage_point", "passed": false, "evidence": "Neither failure mode section nor leverage point pair"},
+    {"text": "no_evaluation_language", "passed": true, "evidence": "Structural naming without qualitative judgment"},
+    {"text": "final_question_line", "passed": false, "evidence": "Ends with 요약 한 문장 + 구조적 원형; not a question"}
+  ],
+  "pass_count": 2,
+  "total_count": 16,
+  "pass_rate": 0.125
+}

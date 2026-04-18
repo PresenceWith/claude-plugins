@@ -1,0 +1,23 @@
+{
+  "eval_id": 0,
+  "eval_name": "bug-diagnosis-mixed-evidence",
+  "prompt": "Audit a bug-investigation conversation where the assistant read code (retry.ts:18), ran tests (pnpm test payments), saw user-reported prod metrics (5% during Black Friday), and then formed a hypothesis (thundering herd) and proposed a fix.",
+  "assertions": [
+    {"text": "Uses the skill's three-level taxonomy (Facts/Verified/Observed/Stated; Inferences/Hypothesis/Pattern-based/Intent-inferred; Assumptions)"},
+    {"text": "Classifies the retry.ts no-jitter observation under Facts/Verified and cites the file path (src/payments/retry.ts:18)"},
+    {"text": "Classifies the pnpm test result under Facts/Observed with the command as evidence"},
+    {"text": "Classifies the user's Black Friday 5% statement under Facts/Stated with a user quote"},
+    {"text": "Classifies the thundering-herd / rate-limit diagnosis as an Inference (Hypothesis or Pattern-based), NOT as a Fact"},
+    {"text": "Classifies the 'user wants fix before next weekend' claim as Intent-inferred (user never said this)"},
+    {"text": "Demotes the assistant's hedge-worded claim 'Stripe usually throttles under concurrent bursts' to Inference/Pattern-based (the hedge word 'usually' signals inference)"},
+    {"text": "Does NOT classify '4 callers, all in src/payments/' as a separate top-line fact — or if listed, classifies it under Facts/Observed (from the grep command) rather than Verified"},
+    {"text": "Every Inference entry includes a concrete Verify action that names a specific command, file, or question (not 'check the logs' or 'investigate')"},
+    {"text": "Every Assumption entry includes a concrete Verify action"},
+    {"text": "Surfaces at least one genuine Assumption about the causal chain (e.g., that the failing /api/checkout calls actually pass through retry.ts, or that a3f21 deploy timing aligns with the 5xx cluster)"},
+    {"text": "Does not invent evidence beyond the scenario (no fabricated log lines, stack traces, or file paths)"},
+    {"text": "Omits empty sub-sections — does not emit a 'Verified' or other sub-header with no content under it"},
+    {"text": "Does not include meta-claims about the audit itself (no 'the user is asking for an audit' type entries)"},
+    {"text": "Stays under ~30 total bullet points across all sections (excluding section headers)"},
+    {"text": "Does not duplicate the same claim across multiple sub-sections"}
+  ]
+}

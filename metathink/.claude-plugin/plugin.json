@@ -1,0 +1,10 @@
+{
+  "name": "metathink",
+  "version": "0.1.0",
+  "description": "Meta-cognitive instruments — tools that operate on thought itself rather than with it. Expose hidden frames, decompose observations into structural axes, surface assumptions, and reconfigure the decision space before any domain solution is attempted.",
+  "author": {
+    "name": "presence",
+    "email": "sleet0328@gmail.com"
+  },
+  "keywords": ["meta-cognition", "metacognition", "framing", "decomposition", "thinking-tools", "perspective", "reframing", "epistemic"]
+}

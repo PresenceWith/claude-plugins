@@ -1,0 +1,26 @@
+{
+  "eval_id": 0,
+  "eval_name": "external-org-standup-ritual",
+  "run_id": "eval-0-with_skill",
+  "expectations": [
+    {"text": "mode_declared", "passed": true, "evidence": "STEP 0: '외부 모드' with rationale"},
+    {"text": "boundary_as_chosen_cut", "passed": true, "evidence": "'이유: 보고와 해결이 시간적으로 분리되어 있다는 점이 구조의 핵심이므로, 둘을 잘라 보면 현상이 사라진다'"},
+    {"text": "environment_named", "passed": true, "evidence": "외부 납기·이해관계자 요구, 비대칭 권한, 공유 시간 예산 — 3개 의존 환경 명시"},
+    {"text": "constraints_named", "passed": true, "evidence": "시간 한도, 발화 균등 규약, 역할 고착 — 3개 제약"},
+    {"text": "positionality_stated", "passed": true, "evidence": "'시스템 내부 참여자이자 조율자 역할을 맡은 인물이, 구조가 의도대로 작동하는지 의심하며 요청'"},
+    {"text": "role_level_elements_no_proper_nouns", "passed": true, "evidence": "동기 보고 세션, 상태 보고 발신자, 조율·통합자, 미해결 항목 대기열, 사후 개별 해결 채널"},
+    {"text": "stock_flow_labels", "passed": true, "evidence": "Each element explicitly labeled stock or flow"},
+    {"text": "element_count_le_5", "passed": true, "evidence": "Exactly 5 elements"},
+    {"text": "anchor_column_hidden_by_default", "passed": true, "evidence": "No anchor column in element table"},
+    {"text": "feedback_loop_with_polarity_and_reason", "passed": true, "evidence": "L1 (+), L2 (−), L3 (+) all have '왜 강화/상쇄인가' rationale"},
+    {"text": "delay_labels_on_arrows", "passed": true, "evidence": "Arrows labeled 즉시/턴내/지연 throughout"},
+    {"text": "emergent_function_with_non_emergent_contrast", "passed": true, "evidence": "표면화와 해결의 시간적 탈동기화 + removal test + 비창발 대비 ('회의에서 정보 공유', 'PM이 처리'와 대비)"},
+    {"text": "purpose_gap_with_maintenance_mechanism", "passed": true, "evidence": "명목/실질/원인/유지 기제 모두 명시, L1이 간격을 매 주기 재생산"},
+    {"text": "failure_mode_paired_with_leverage_point", "passed": true, "evidence": "2 pairs — 단일 지점 붕괴↔해결 채널 귀속 재설계, 의례 의미 증발↔'해결 불가 선언' 구조화"},
+    {"text": "no_evaluation_language", "passed": true, "evidence": "Purely structural; no 비효율적/나쁜/좋은"},
+    {"text": "final_question_line", "passed": true, "evidence": "Final line: '이 시스템 관점에서 지금 물을 수 있게 된 것: ...'"}
+  ],
+  "pass_count": 16,
+  "total_count": 16,
+  "pass_rate": 1.0
+}

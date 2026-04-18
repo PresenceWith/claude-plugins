@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "Either asks OR audits one topic", "passed": true, "evidence": "Asks the user which topic to audit."},
+    {"text": "If asking, enumerates the three topics", "passed": true, "evidence": "Lines 3-5 list A (billing), B (auth), C (audit log)."},
+    {"text": "If asking, STOPS and does not also produce full audit", "passed": true, "evidence": "Output is only the question; no audit was produced."},
+    {"text": "Does NOT mash all three under shared headers", "passed": true, "evidence": "N/A — no audit produced."},
+    {"text": "If auditing one topic, no fabricated evidence for excluded topics", "passed": true, "evidence": "Vacuous — no audit produced."},
+    {"text": "If auditing one topic, chosen topic is one of the three", "passed": true, "evidence": "Vacuous — no audit produced."},
+    {"text": "No meta-claims about the audit itself", "passed": true, "evidence": "The question is operational ('which should I audit'), not meta-commentary."}
+  ]
+}

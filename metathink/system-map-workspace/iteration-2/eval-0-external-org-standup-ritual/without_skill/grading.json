@@ -1,0 +1,26 @@
+{
+  "eval_id": 0,
+  "eval_name": "external-org-standup-ritual",
+  "run_id": "eval-0-without_skill",
+  "expectations": [
+    {"text": "mode_declared", "passed": false, "evidence": "No mode declaration section"},
+    {"text": "boundary_as_chosen_cut", "passed": false, "evidence": "No boundary section at all"},
+    {"text": "environment_named", "passed": false, "evidence": "No environment (dependencies outside) named"},
+    {"text": "constraints_named", "passed": false, "evidence": "No constraints section"},
+    {"text": "positionality_stated", "passed": false, "evidence": "No observer position stated"},
+    {"text": "role_level_elements_no_proper_nouns", "passed": false, "evidence": "'PM' retained as role identity"},
+    {"text": "stock_flow_labels", "passed": false, "evidence": "No stock/flow distinction made"},
+    {"text": "element_count_le_5", "passed": false, "evidence": "No explicit bounded element list — describes structure without a typed element inventory"},
+    {"text": "anchor_column_hidden_by_default", "passed": true, "evidence": "No anchor column concept; skill's role-level frame not used but also not misused"},
+    {"text": "feedback_loop_with_polarity_and_reason", "passed": false, "evidence": "No labeled feedback loops; only topology descriptions"},
+    {"text": "delay_labels_on_arrows", "passed": false, "evidence": "No timing labels on any arrows"},
+    {"text": "emergent_function_with_non_emergent_contrast", "passed": false, "evidence": "No emergent function section; no non-emergent contrast"},
+    {"text": "purpose_gap_with_maintenance_mechanism", "passed": false, "evidence": "Surfaces 선언 vs 실현 gap but no maintenance mechanism — static snapshot only"},
+    {"text": "failure_mode_paired_with_leverage_point", "passed": false, "evidence": "Has '구조적 변곡점' (leverage-like) but no failure mode pairing"},
+    {"text": "no_evaluation_language", "passed": false, "evidence": "'Anti-pattern', 'Bottleneck', '피로' — diagnostic/evaluative language"},
+    {"text": "final_question_line", "passed": false, "evidence": "Ends with 3-axis structural prescription, not a question"}
+  ],
+  "pass_count": 1,
+  "total_count": 16,
+  "pass_rate": 0.0625
+}

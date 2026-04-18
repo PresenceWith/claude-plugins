@@ -1,0 +1,22 @@
+{
+  "eval_id": 0,
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "Uses the skill's three-level taxonomy", "passed": false, "evidence": "Uses 2-category split (Facts, Inferences/Assumptions combined) plus a Gaps section. No Verified/Observed/Stated distinction, no Hypothesis/Pattern-based/Intent-inferred distinction."},
+    {"text": "retry.ts no-jitter under Verified with citation", "passed": false, "evidence": "Line 13 states path, but not under a Verified sub-section (no sub-categorization exists)."},
+    {"text": "pnpm test under Observed with command", "passed": false, "evidence": "Line 15 mentions pnpm test as a fact, not under an Observed sub-section."},
+    {"text": "Black Friday 5% under Stated with user quote", "passed": false, "evidence": "Lines 16-17 mention it but not under a Stated sub-section."},
+    {"text": "Thundering-herd as Inference not Fact", "passed": true, "evidence": "Lines 25-26 place in Inferences."},
+    {"text": "'User wants fix before weekend' as Intent-inferred", "passed": true, "evidence": "Line 31 under assumptions/inferences."},
+    {"text": "Demotes hedged 'Stripe usually throttles' to Inference/Pattern-based", "passed": true, "evidence": "Line 25 places rate-limit story in inferences."},
+    {"text": "'4 callers' classified under Observed (grep is a command), not Verified", "passed": false, "evidence": "Line 14 just lists as 'tool output'; no sub-categorization."},
+    {"text": "Every Inference has concrete Verify (named command/file/question)", "passed": false, "evidence": "No per-item Verify actions. A 'Notable gaps' section groups verifications globally."},
+    {"text": "Every Assumption has concrete Verify", "passed": false, "evidence": "Same — no per-item Verify."},
+    {"text": "Surfaces assumption about causal chain", "passed": true, "evidence": "Line 27 surfaces the a3f21/bug causation gap; line 28 surfaces the test-suite relevance assumption."},
+    {"text": "No fabricated evidence", "passed": true, "evidence": "All claims trace to scenario."},
+    {"text": "Omits empty sub-sections", "passed": true, "evidence": "N/A — no sub-sections used, so vacuously satisfied."},
+    {"text": "No meta-claims about the audit itself", "passed": true, "evidence": "None present."},
+    {"text": "Under ~30 total bullets", "passed": true, "evidence": "Facts 7 + Inferences 8 + Gaps 5 + Summary 1 = 21 bullets."},
+    {"text": "No duplicate claims", "passed": true, "evidence": "Each claim appears once."}
+  ]
+}

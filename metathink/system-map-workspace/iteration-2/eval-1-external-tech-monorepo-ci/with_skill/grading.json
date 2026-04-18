@@ -1,0 +1,26 @@
+{
+  "eval_id": 1,
+  "eval_name": "external-tech-monorepo-ci",
+  "run_id": "eval-1-with_skill",
+  "expectations": [
+    {"text": "mode_declared", "passed": true, "evidence": "STEP 0: '외부 모드'"},
+    {"text": "boundary_as_chosen_cut", "passed": true, "evidence": "'타입 변경이 어떻게 전파·수렴하는가를 보기 위한 목적이므로, 전파 경로를 품는 최소 범위로 자름'"},
+    {"text": "environment_named", "passed": true, "evidence": "외부 API 수요, 복수 인간 팀, 버전 관리 기반 시설 — 3 dependencies"},
+    {"text": "constraints_named", "passed": true, "evidence": "단일 진실 원천 강제, 상향 수정 불가, 부분 빌드 규약 — 3 constraints"},
+    {"text": "positionality_stated", "passed": true, "evidence": "'구조 수준에서 이해하려는 내부 설계자'"},
+    {"text": "role_level_elements_no_tool_names", "passed": true, "evidence": "계약 정의층, 소비 표면, 영향권 산출 조정자 — no tool names as identity"},
+    {"text": "stock_flow_labels", "passed": true, "evidence": "All 5 elements labeled stock/flow"},
+    {"text": "element_count_le_5", "passed": true, "evidence": "5 elements"},
+    {"text": "anchor_column_hidden_by_default", "passed": true, "evidence": "No anchor column"},
+    {"text": "feedback_loop_with_polarity_and_reason", "passed": true, "evidence": "L1 (+), L2 (−), L3 (−,지연) all with '왜 … 인가' rationale"},
+    {"text": "delay_labels_on_arrows", "passed": true, "evidence": "즉시/턴내/지연 labels on each arrow"},
+    {"text": "emergent_function_with_non_emergent_contrast", "passed": true, "evidence": "'정합성 압력의 동기화된 분배' + 단순 합 대비 explicit"},
+    {"text": "purpose_gap_with_maintenance_mechanism", "passed": true, "evidence": "명목/실질/원인/유지 기제 — L1 reinforces gap each cycle"},
+    {"text": "failure_mode_paired_with_leverage_point", "passed": true, "evidence": "Requisite variety failure paired with variable-type-resolution leverage — naming point, not prescription"},
+    {"text": "no_evaluation_language", "passed": true, "evidence": "Structural only"},
+    {"text": "final_question_line", "passed": true, "evidence": "Final: '이 시스템 관점에서 지금 물을 수 있게 된 것: ...'"}
+  ],
+  "pass_count": 16,
+  "total_count": 16,
+  "pass_rate": 1.0
+}

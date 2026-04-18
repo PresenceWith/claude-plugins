@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "eval_name": "ambiguous-multi-topic-session",
+  "prompt": "Audit a session spanning three genuinely distinct topics (flaky billing test, auth middleware refactor, audit log changes). The skill's guidance is to ask which topic to audit when multiple are in play.",
+  "assertions": [
+    {"text": "Either asks the user which topic to audit before producing the audit, OR audits only one topic and explicitly names which topic it is covering"},
+    {"text": "If asking, the ask enumerates the three distinct topics (billing flaky test, auth middleware refactor, audit log / sprint 14) so the user can disambiguate without re-explaining"},
+    {"text": "If asking, the subagent STOPS and does not also produce a full audit of all three topics 'for convenience' — asking means asking"},
+    {"text": "Does NOT silently produce one undifferentiated audit that mashes all three topics together under shared Facts/Inferences headers"},
+    {"text": "If auditing one topic, does not invent evidence for the excluded topics"},
+    {"text": "If auditing one topic, the chosen topic is one of the three actually in play (not a fabricated fourth topic)"},
+    {"text": "Does not include meta-claims about the audit itself"}
+  ]
+}

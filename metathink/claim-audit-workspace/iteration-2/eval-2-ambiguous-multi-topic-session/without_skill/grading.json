@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "Either asks OR audits one topic", "passed": false, "evidence": "Neither asks nor audits one topic — produces a full audit of all three topics."},
+    {"text": "If asking, enumerates three topics", "passed": true, "evidence": "Vacuous — did not ask."},
+    {"text": "If asking, STOPS", "passed": true, "evidence": "Vacuous — did not ask."},
+    {"text": "Does NOT mash all three under shared headers", "passed": true, "evidence": "Each topic has its own numbered section with its own Facts/Inferences sub-sections, so they're not mashed. But this is weaker than the skill's guidance to ask."},
+    {"text": "No fabricated evidence for excluded topics", "passed": true, "evidence": "No fabrication."},
+    {"text": "Chosen topic is one of the three", "passed": true, "evidence": "Vacuous — audited all three."},
+    {"text": "No meta-claims about the audit itself", "passed": true, "evidence": "Scope note is operational, not meta."}
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "eval_id": 0,
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "Uses the skill's three-level taxonomy", "passed": true, "evidence": "Full structure: Facts (Verified/Observed/Stated), Inferences (Hypothesis/Pattern-based/Intent-inferred), Assumptions, Open questions."},
+    {"text": "retry.ts no-jitter under Verified with citation", "passed": true, "evidence": "Line 5 cites `src/payments/retry.ts:18`."},
+    {"text": "pnpm test under Observed with command", "passed": true, "evidence": "Line 10: 'from `pnpm test payments`'."},
+    {"text": "Black Friday 5% under Stated with user quote", "passed": true, "evidence": "Line 14 quotes user verbatim."},
+    {"text": "Thundering-herd as Inference not Fact", "passed": true, "evidence": "Line 18 under Hypothesis."},
+    {"text": "'User wants fix before weekend' as Intent-inferred", "passed": true, "evidence": "Line 30 under Intent-inferred."},
+    {"text": "Demotes hedged 'Stripe usually throttles' to Inference/Pattern-based", "passed": true, "evidence": "Line 24 explicitly calls out the 'usually' hedge and places under Pattern-based."},
+    {"text": "'4 callers in src/payments/' classified under Observed (grep is a command), not Verified", "passed": false, "evidence": "Line 6 places it under **Verified** — but the output came from a grep command, which should be Observed per the skill's definition."},
+    {"text": "Every Inference has concrete Verify (named command/file/question)", "passed": true, "evidence": "All 6 Inference entries have specific Verify actions (replay load, EXPLAIN, read diff, read other callers, ask user directly)."},
+    {"text": "Every Assumption has concrete Verify", "passed": true, "evidence": "All 4 Assumption entries have specific actions (trace request, compare lockfile/SHA, ask user, read a3f21 diff)."},
+    {"text": "Surfaces assumption about causal chain", "passed": true, "evidence": "Line 38: assumes /api/checkout actually goes through retry.ts. Line 42: assumes intermittent 500 and BF cluster are same incident."},
+    {"text": "No fabricated evidence", "passed": true, "evidence": "All citations trace to the scenario; no invented log lines or paths."},
+    {"text": "Omits empty sub-sections", "passed": true, "evidence": "All emitted sub-headers have content."},
+    {"text": "No meta-claims about the audit itself", "passed": true, "evidence": "No 'the user is asking for an audit' type entries."},
+    {"text": "Under ~30 total bullets", "passed": true, "evidence": "Facts 6 + Inferences 6 + Assumptions 4 + Open Qs 2 = 18 bullets."},
+    {"text": "No duplicate claims across sub-sections", "passed": true, "evidence": "Each claim appears once."}
+  ]
+}

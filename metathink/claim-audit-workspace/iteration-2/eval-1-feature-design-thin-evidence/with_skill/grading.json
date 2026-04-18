@@ -1,0 +1,23 @@
+{
+  "eval_id": 1,
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "Uses the skill's three-level taxonomy with sub-sections where they have content", "passed": true, "evidence": "Facts/Stated only (correctly — no Verified or Observed content), Inferences/Hypothesis/Pattern-based/Intent-inferred, Assumptions, Open questions."},
+    {"text": "'uses Postgres' under Facts/Stated with user quote", "passed": true, "evidence": "Line 5 quotes user."},
+    {"text": "'uses Sidekiq' under Facts/Stated with user quote", "passed": true, "evidence": "Line 6 quotes user."},
+    {"text": "Three-channel model NOT under Facts (should be Inference/Pattern-based)", "passed": true, "evidence": "Line 20 under Pattern-based."},
+    {"text": "Queue-backed-worker NOT under Facts (should be Inference/Pattern-based)", "passed": true, "evidence": "Line 22 under Pattern-based."},
+    {"text": "'Unread badge in header' as Intent-inferred", "passed": true, "evidence": "Line 26 under Intent-inferred."},
+    {"text": "Disambiguates 'sounds reasonable' — NOT treated as endorsement of full schema", "passed": true, "evidence": "Line 30 explicitly: \"the reply literally scoped to 'we're on Postgres so that's fine', which only endorses DB compatibility\" — nails the agreement-scope distinction."},
+    {"text": "'Per-type preferences' as Intent-inferred or Pattern-based", "passed": true, "evidence": "Line 14 under Hypothesis (proposed table is a design claim); user's agreement is treated as non-specific."},
+    {"text": "Notifications table (user_id, type, payload, read_at) NOT under Facts", "passed": true, "evidence": "Line 12 under Inferences/Hypothesis."},
+    {"text": "Partial index design NOT under Facts", "passed": true, "evidence": "Line 16 under Inferences/Hypothesis."},
+    {"text": "Every Inference has concrete Verify", "passed": true, "evidence": "All 8 inference entries have specific Verify actions (EXPLAIN ANALYZE, direct user questions with exact wording)."},
+    {"text": "Every Assumption has concrete Verify", "passed": true, "evidence": "All 4 assumption entries have specific actions (read existing schema, ask PG version, list notification types, grep for existing tables)."},
+    {"text": "Surfaces at least 2 assumptions from the listed categories", "passed": true, "evidence": "4 surfaced: existing users table, PG version, enumerable event types, existing notifications tables."},
+    {"text": "No fabricated evidence", "passed": true, "evidence": "All claims trace to scenario."},
+    {"text": "Omits empty sub-sections", "passed": true, "evidence": "Facts only shows Stated — correctly omits Verified/Observed."},
+    {"text": "Under ~30 total bullets", "passed": true, "evidence": "Facts 4 + Inferences 8 + Assumptions 4 + Open Qs 5 = 21 bullets."},
+    {"text": "No duplicate claims", "passed": true, "evidence": "Each claim appears once."}
+  ]
+}

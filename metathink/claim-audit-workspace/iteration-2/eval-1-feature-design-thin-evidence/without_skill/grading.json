@@ -1,0 +1,23 @@
+{
+  "eval_id": 1,
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "Uses the skill's three-level taxonomy with sub-sections", "passed": false, "evidence": "Uses ad-hoc 2-category split (Facts / Inferences-Assumptions) plus Unknowns. No Verified/Observed/Stated or Hypothesis/Pattern-based/Intent-inferred sub-categories."},
+    {"text": "'uses Postgres' under Facts/Stated with user quote", "passed": false, "evidence": "Line 14 states Postgres as a fact but not under a Stated sub-section."},
+    {"text": "'uses Sidekiq' under Facts/Stated with user quote", "passed": false, "evidence": "Line 15 same issue."},
+    {"text": "Three-channel model NOT under Facts", "passed": true, "evidence": "Line 34 under assumptions."},
+    {"text": "Queue-backed-worker NOT under Facts", "passed": true, "evidence": "Line 41 under assumptions."},
+    {"text": "'Unread badge' as Intent-inferred", "passed": true, "evidence": "Line 36 correctly flagged as presumption."},
+    {"text": "Disambiguates 'sounds reasonable' correctly", "passed": true, "evidence": "Line 16: 'their explicit confirmation was scoped to the Postgres point' — does the disambiguation."},
+    {"text": "'Per-type preferences' as Intent-inferred or Pattern-based", "passed": true, "evidence": "Line 37 flagged as assumption."},
+    {"text": "Notifications table NOT under Facts", "passed": false, "evidence": "Line 21 lists 'The assistant proposed a notifications table with columns user_id, type, payload, read_at' under a 'Facts > From the assistant' sub-list — conflating 'the assistant said X' with 'X is a fact about the system', which is exactly the epistemic slippage the skill is designed to prevent."},
+    {"text": "Partial index NOT under Facts", "passed": false, "evidence": "Line 23 same issue — index design listed under Facts as 'the assistant proposed'."},
+    {"text": "Every Inference has concrete Verify", "passed": false, "evidence": "No per-item Verify actions. Only a global 'recommended next step' paragraph at the bottom."},
+    {"text": "Every Assumption has concrete Verify", "passed": false, "evidence": "Same."},
+    {"text": "Surfaces at least 2 assumptions from listed categories", "passed": true, "evidence": "Scale (55), retention, multi-tenancy (60), existing code (54)."},
+    {"text": "No fabricated evidence", "passed": true, "evidence": "All trace to scenario."},
+    {"text": "Omits empty sub-sections", "passed": true, "evidence": "Vacuous — no skill sub-sections used."},
+    {"text": "Under ~30 total bullets", "passed": false, "evidence": "Facts 11 + Assumptions 14 + Unknowns 10 = 35 bullets — exceeds guidance."},
+    {"text": "No duplicate claims", "passed": true, "evidence": "Each claim appears once."}
+  ]
+}
